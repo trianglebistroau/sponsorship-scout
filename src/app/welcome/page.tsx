@@ -1,10 +1,11 @@
+'use client'
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
 import { Sparkles, TrendingUp, Award, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const Welcome = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
@@ -36,10 +37,10 @@ const Welcome = () => {
 
             <Button 
               size="lg" 
-              onClick={() => navigate('/onboarding')}
+              onClick={() => router.push('/onboarding')}
               className="bg-white text-primary hover:bg-white/90 font-semibold px-8 py-6 text-lg rounded-2xl shadow-glow transform transition-all duration-300 hover:scale-105"
             >
-              Start Your Creator Journey
+                Start Your Creator Journey
             </Button>
           </div>
 

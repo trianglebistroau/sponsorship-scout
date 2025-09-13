@@ -1,11 +1,12 @@
+'use client';
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { useNavigate } from "react-router-dom";
 import { Upload, Brain, Sparkles, CheckCircle, Camera, Mic, Palette, Heart, Trophy, Users, Lightbulb, Star, Zap, Clock, Target, Video, Gamepad2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const creatorArchetypes = {
   entertainer: { 
@@ -69,7 +70,8 @@ const Onboarding = () => {
     aiHelp: ""
   });
   const [creatorType, setCreatorType] = useState("");
-  const navigate = useNavigate();
+  const router = useRouter();
+  // const navigate = useNavigate();
 
   const totalSteps = 8;
   const progress = (step / totalSteps) * 100;
@@ -399,7 +401,7 @@ const Onboarding = () => {
       calculateCreatorType();
       setStep(8);
     } else {
-      setTimeout(() => navigate('/dashboard'), 1500);
+      setTimeout(() => router.push('/dashboard'), 1500);
     }
   };
 
