@@ -50,7 +50,7 @@ export default defineConfig([
       ],
       // "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/triple-slash-reference": "off",
-      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-require-imports": 1,
       "react/react-in-jsx-scope": "off", // Not needed in Next.js
       "react/prop-types": "off", // Using TypeScript for prop validation
       "react/no-unescaped-entities": "off",
