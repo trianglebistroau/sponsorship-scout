@@ -8,6 +8,7 @@ import { useState } from "react";
 const Welcome = () => {
   const router = useRouter();
   const [testState, setTestState] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   return (
     <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
