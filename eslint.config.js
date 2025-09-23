@@ -5,8 +5,8 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import react from "eslint-plugin-react";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
-import { defineConfig } from 'eslint/config';
-import pluginNext from '@next/eslint-plugin-next';
+import { defineConfig } from "eslint/config";
+import pluginNext from "@next/eslint-plugin-next";
 
 export default defineConfig([
   { ignores: ["dist", "src/components/ui"] },
@@ -48,7 +48,7 @@ export default defineConfig([
         "off",
         { allowConstantExport: true },
       ],
-      "@typescript-eslint/no-unused-vars": "off",
+      // "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/triple-slash-reference": "off",
       "@typescript-eslint/no-require-imports": "off",
       "react/react-in-jsx-scope": "off", // Not needed in Next.js
