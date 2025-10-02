@@ -23,7 +23,8 @@ export async function GET(request: Request) {
     console.log(`Processing request for username: ${username}`);
 
     // Step 1: Call API A to get video URLs
-    const apiAUrl = `http://localhost:8000/profile/${username}`;
+    //
+    const apiAUrl = `https://3bb7af4bcb0c.ngrok-free.app/profile/${username}`;
     
     const ProfileResponse = await fetch(apiAUrl, {
       method: 'GET',
@@ -96,8 +97,7 @@ export async function GET(request: Request) {
 
     // Step 3: Insert videos into Supabase table
     for (const video of first10Videos) {
-      const videoId = Number(video.id); // Extract video ID as number
-      const createTime = video.create_time; // Extract create_time
+      const videoId = video.id; // Extract video ID as number
 
       // Check if video already exists in the table
       const { data: existingVideo, error: selectError } = await supabase
@@ -118,15 +118,23 @@ export async function GET(request: Request) {
       }
 
       // Insert new video entry
+      const { collectCount, commentCount, diggCount, playCount, repostCount, shareCount } = video.stats;
+      const videoObj = {
+        id: videoId,
+        username: username,
+        created_at: video.create_time,
+        collectCount: collectCount,
+        commentCount: commentCount,
+        diggCount: diggCount,
+        playCount: playCount,
+        repostCount: repostCount,
+        shareCount: shareCount
+      }
       const { error: insertError } = await supabase
         .from('Video')
-        .insert([
-          {
-            id: videoId,
-            username: username, // Use the username from the request
-            created_at: createTime,
-          },
-        ]);
+        .insert(
+          videoObj,
+        );
 
       if (insertError) {
         console.error(`Error inserting video ${videoId}:`, insertError);

@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 const queryClient = new QueryClient()
-
+//We will worry about this later
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>

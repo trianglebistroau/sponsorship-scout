@@ -1,41 +1,41 @@
-"use client";
-import { Hourglass } from "@/components/Hourglass";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { Handshake, Tags, User } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+"use client"
+import { Hourglass } from "@/components/Hourglass"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Progress } from "@/components/ui/progress"
+import { Handshake, Tags, User } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 //Really need to clean this file up later
 const Onboarding = () => {
-  const [step, setStep] = useState(1);
-  const [userTikTokProfile, setUserTikTokProfile] = useState("");
-  const [userTopCreators, setUserTopCreators] = useState(["", "", ""]);
-  const [userDreamBrands, setUserDreamBrands] = useState(["", "", ""]);
+  const [step, setStep] = useState(1)
+  const [userTikTokProfile, setUserTikTokProfile] = useState("")
+  const [userTopCreators, setUserTopCreators] = useState(["", "", ""])
+  const [userDreamBrands, setUserDreamBrands] = useState(["", "", ""])
 
-  const router = useRouter();
+  const router = useRouter()
 
-  const totalSteps = 3; //3 steps shown + 1 loading step but hidden from progress bar
-  const progress = (step / totalSteps) * 100;
+  const totalSteps = 3 //3 steps shown + 1 loading step but hidden from progress bar
+  const progress = (step / totalSteps) * 100
 
   const handleVideoLinkChange = (value: string) => {
-    setUserTikTokProfile(value);
-  };
+    setUserTikTokProfile(value)
+  }
 
   const handleTopCreatorChange = (index: number, value: string) => {
-    const updatedCreators = [...userTopCreators];
-    updatedCreators[index] = value;
-    setUserTopCreators(updatedCreators);
-  };
+    const updatedCreators = [...userTopCreators]
+    updatedCreators[index] = value
+    setUserTopCreators(updatedCreators)
+  }
 
   const handleDreamBrandChange = (index: number, value: string) => {
-    const updatedBrands = [...userDreamBrands];
-    updatedBrands[index] = value;
-    setUserDreamBrands(updatedBrands);
-  };
+    const updatedBrands = [...userDreamBrands]
+    updatedBrands[index] = value
+    setUserDreamBrands(updatedBrands)
+  }
 
   const renderStep1 = () => (
     <div className="text-center animate-slideUp">
@@ -61,7 +61,7 @@ const Onboarding = () => {
         </div>
       </div>
     </div>
-  );
+  )
 
   const renderStep2 = () => (
     <div className="text-center animate-slideUp">
@@ -90,7 +90,7 @@ const Onboarding = () => {
         ))}
       </div>
     </div>
-  );
+  )
 
   const renderStep3 = () => (
     <div className="text-center animate-slideUp">
@@ -119,7 +119,7 @@ const Onboarding = () => {
         ))}
       </div>
     </div>
-  );
+  )
 
   //This is Loading Page step. Keep this
   const renderStep4 = () => (
@@ -141,15 +141,15 @@ const Onboarding = () => {
         </p>
       </div>
     </div>
-  );
+  )
 
   //will optimise with rhf + zod later
   const canProceed = () => {
-    if (step === 1) return userTikTokProfile.trim() !== "";
-    if (step === 2) return userTopCreators.some((creator) => creator.trim());
-    if (step === 3) return userDreamBrands.some((creator) => creator.trim());
-    return true;
-  };
+    if (step === 1) return userTikTokProfile.trim() !== ""
+    if (step === 2) return userTopCreators.some((creator) => creator.trim())
+    if (step === 3) return userDreamBrands.some((creator) => creator.trim())
+    return true
+  }
 
   /* 
     Handle Next Step Logic, best to do this in a separate file
@@ -159,20 +159,45 @@ const Onboarding = () => {
     Step 3: Dream Brands -> Send dream brands to server
     Step 4: Loading -> After some time, redirect to dashboard
   */
-  const handleNext = () => {
-    if (step < 3) {
-      setStep(step + 1);
+  const handleNext = async () => {
+    if (step === 1) {
+      try {
+        // Send profile link to server
+        const username = userTikTokProfile.split("@")[1] // Extract username from TikTok URL
+        console.log("Extracted username:", username)
+        const response = await fetch(
+          `/api/extract-profile?username=${username}`,
+          {
+            method: "GET",
+          }
+        )
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          console.error("Error from API:", errorData)
+          alert(`Failed to process profile: ${errorData.error}`)
+          return
+        }
+
+        console.log("Profile processed successfully")
+        setStep(step + 1)
+      } catch (error) {
+        console.error("Error during API call:", error)
+        alert("An unexpected error occurred. Please try again.")
+      }
+    } else if (step < 3) {
+      setStep(step + 1)
     } else if (step === 3) {
-      setStep(4);
+      setStep(4)
     } else {
-      router.push("/dashboard");
+      router.push("/dashboard")
     }
-  };
+  }
 
   const getStepTitle = () => {
-    const titles = ["Your Profile Link", "Creators You Love", "Dream Brands"];
-    return titles[step - 1];
-  };
+    const titles = ["Your Profile Link", "Creators You Love", "Dream Brands"]
+    return titles[step - 1]
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -220,7 +245,7 @@ const Onboarding = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Onboarding;
+export default Onboarding
