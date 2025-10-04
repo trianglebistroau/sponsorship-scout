@@ -1,18 +1,28 @@
 import { TIKTOK_BASE_URL } from "@/const/constants"
 import { supabase } from "@/utils/supabase/client"
-import { GoogleGenAI, Type } from "@google/genai"
+import {
+  GoogleGenAI,
+  createUserContent,
+  createPartFromUri,
+  Type
+} from "@google/genai"
 import { NextResponse } from "next/server"
+import { initializeAI, runWorkflow, type WorkflowInput } from "llm/workflow"
 
 export const runtime = "edge"
 
 export const maxDuration = 60
 
-export async function GET(req: Request) {
+export async function POST(req: Request) {
   //Params
-  const { searchParams } = new URL(req.url)
-  const username = searchParams.get("username")
+  const body = await req.json()
+  const username = body.username
   console.log("Username:", username)
 
+  // Initialize AI for the workflow
+  initializeAI(process.env.GEMINI_API_KEY!)
+  
+  // Initialize AI for file operations
   const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY!,
   })
@@ -38,7 +48,8 @@ export async function GET(req: Request) {
   try {
     for (const [videoId, { url: videoUrl }] of videoIdMap) {
       const videoResponse = await fetch(
-        `https://3bb7af4bcb0c.ngrok-free.app/download?video_url=${videoUrl}`,
+        // `https://3bb7af4bcb0c.ngrok-free.app/download?video_url=${videoUrl}`,
+        `http://0.0.0.0:8000/download?video_url=${videoUrl}`,
         {
           method: "GET",
           headers: {
@@ -85,44 +96,19 @@ export async function GET(req: Request) {
         throw new Error("File processing failed")
       }
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                description: { type: Type.STRING },
-                position: { type: Type.STRING },
-                time: { type: Type.NUMBER },
-              },
-              propertyOrdering: ["description", "position", "time"],
-            },
-          },
-        },
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: "Explain the content of this video?" },
-              {
-                fileData: {
-                  mimeType: fileStatus.mimeType,
-                  fileUri: fileStatus.uri,
-                },
-              },
-            ],
-          },
-        ],
-      })
+      // Run the workflow
+      const workflowInput: WorkflowInput = {
+        mimeType: fileStatus.mimeType,
+        fileUri: fileStatus.uri,
+      }
+      const result = await runWorkflow(workflowInput)
+
 
       // Clean up
       await ai.files.delete({ name: uploadResponse.name }).catch(console.warn)
       videoIdMap.set(videoId, {
         url: videoUrl,
-        response: JSON.parse(response.text),
+        response: result,
       })
     }
 
