@@ -1,13 +1,8 @@
 import { TIKTOK_BASE_URL } from "@/const/constants"
 import { supabase } from "@/utils/supabase/client"
-import {
-  GoogleGenAI,
-  createUserContent,
-  createPartFromUri,
-  Type
-} from "@google/genai"
-import { NextResponse } from "next/server"
+import { GoogleGenAI } from "@google/genai"
 import { initializeAI, runWorkflow, type WorkflowInput } from "llm/workflow"
+import { NextResponse } from "next/server"
 
 export const runtime = "edge"
 
@@ -21,7 +16,7 @@ export async function POST(req: Request) {
 
   // Initialize AI for the workflow
   initializeAI(process.env.GEMINI_API_KEY!)
-  
+
   // Initialize AI for file operations
   const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY!,
@@ -48,8 +43,7 @@ export async function POST(req: Request) {
   try {
     for (const [videoId, { url: videoUrl }] of videoIdMap) {
       const videoResponse = await fetch(
-        // `https://3bb7af4bcb0c.ngrok-free.app/download?video_url=${videoUrl}`,
-        `http://0.0.0.0:8000/download?video_url=${videoUrl}`,
+        `${process.env.BACKEND_URL}/download?video_url=${videoUrl}`,
         {
           method: "GET",
           headers: {
@@ -103,6 +97,17 @@ export async function POST(req: Request) {
       }
       const result = await runWorkflow(workflowInput)
 
+      const { data, error: updateError } = await supabase
+        .from("Video")
+        .update({ ai_processed_output: result })
+        .eq("id", videoId)
+        .select()
+
+      if (updateError) {
+        console.error(`Error updating video ${videoId}:`, updateError)
+      } else {
+        console.log(`Successfully updated video ${videoId}`)
+      }
 
       // Clean up
       await ai.files.delete({ name: uploadResponse.name }).catch(console.warn)
@@ -117,18 +122,6 @@ export async function POST(req: Request) {
     //Update Supabase with response, currently not working
     for (const [videoId, { response }] of videoIdMap) {
       if (!response) continue
-
-      const { data, error: updateError } = await supabase
-        .from("Video")
-        .update({ ai_processed_output: response })
-        .eq("id", videoId)
-        .select()
-
-      if (updateError) {
-        console.error(`Error updating video ${videoId}:`, updateError)
-      } else {
-        console.log(`Successfully updated video ${videoId}`)
-      }
     }
 
     return NextResponse.json({

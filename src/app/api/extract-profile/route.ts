@@ -1,8 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabase } from '@/utils/supabase/client';
 
 export const runtime = 'edge';
 
@@ -23,8 +19,7 @@ export async function GET(request: Request) {
     console.log(`Processing request for username: ${username}`);
 
     // Step 1: Call API A to get video URLs
-    //
-    const apiAUrl = `https://3bb7af4bcb0c.ngrok-free.app/profile/${username}`;
+    const apiAUrl = `${process.env.BACKEND_URL}/profile/${username}`;
     
     const ProfileResponse = await fetch(apiAUrl, {
       method: 'GET',

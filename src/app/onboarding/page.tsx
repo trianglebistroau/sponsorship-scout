@@ -165,24 +165,44 @@ const Onboarding = () => {
         // Send profile link to server
         const username = userTikTokProfile.split("@")[1] // Extract username from TikTok URL
         console.log("Extracted username:", username)
-        const response = await fetch(
+
+        // Call extract-profile API
+        const extractProfileResponse = await fetch(
           `/api/extract-profile?username=${username}`,
           {
             method: "GET",
           }
         )
 
-        if (!response.ok) {
-          const errorData = await response.json()
-          console.error("Error from API:", errorData)
+        if (!extractProfileResponse.ok) {
+          const errorData = await extractProfileResponse.json()
+          console.error("Error from extract-profile API:", errorData)
           alert(`Failed to process profile: ${errorData.error}`)
           return
         }
 
         console.log("Profile processed successfully")
+
+        // Call analyze-video API
+        const analyzeVideoResponse = await fetch(`/api/analyze-video`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username }),
+        })
+
+        if (!analyzeVideoResponse.ok) {
+          const errorData = await analyzeVideoResponse.json()
+          console.error("Error from analyze-video API:", errorData)
+          alert(`Failed to analyze video: ${errorData.error}`)
+          return
+        }
+
+        console.log("Video analysis completed successfully")
         setStep(step + 1)
       } catch (error) {
-        console.error("Error during API call:", error)
+        console.error("Error during API calls:", error)
         alert("An unexpected error occurred. Please try again.")
       }
     } else if (step < 3) {
