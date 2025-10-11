@@ -1,4 +1,4 @@
-import { Type } from "@google/genai";
+import { Type } from "@google/genai"
 
 export const S0Schema = {
   type: Type.OBJECT,
@@ -12,7 +12,8 @@ export const S0Schema = {
         },
         safe_zone_compliance: {
           type: Type.INTEGER,
-          description: "Percentage of subject within TikTok safe zone (top 126px, bottom 320px, left 60px, right 120px)",
+          description:
+            "Percentage of subject within TikTok safe zone (top 126px, bottom 320px, left 60px, right 120px)",
         },
         face_box_pct: {
           type: Type.INTEGER,
@@ -23,7 +24,12 @@ export const S0Schema = {
           description: "Percentage of frame occupied by main object",
         },
       },
-      required: ["aspect_ratio", "safe_zone_compliance", "face_box_pct", "subject_box_pct"],
+      required: [
+        "aspect_ratio",
+        "safe_zone_compliance",
+        "face_box_pct",
+        "subject_box_pct",
+      ],
     },
     lighting_clarity: {
       type: Type.OBJECT,
@@ -49,11 +55,17 @@ export const S0Schema = {
           description: "Whether the video is shaky",
         },
       },
-      required: ["avg_brightness", "contrast_score", "sharpness_score", "resolution", "stability"],
+      required: [
+        "avg_brightness",
+        "contrast_score",
+        "sharpness_score",
+        "resolution",
+        "stability",
+      ],
     },
   },
   required: ["framing", "lighting_clarity"],
-};
+}
 
 export const S1Schema = {
   type: Type.OBJECT,
@@ -78,47 +90,47 @@ export const S1Schema = {
         total_cuts: {
           type: Type.OBJECT,
           properties: {
-            timestamps: {
-              type: Type.ARRAY,
-              items: { type: Type.NUMBER },
-              description: "Timestamps when each cut happens.",
-            },
+            // timestamps: {
+            //   type: Type.ARRAY,
+            //   items: { type: Type.NUMBER },
+            //   description: "Timestamps when each cut happens.",
+            // },
             count: {
               type: Type.INTEGER,
               description: "Count of cuts.",
             },
           },
-          required: ["timestamps", "count"],
+          required: ["count"], // "timestamps"
         },
         rotation_changes_per_sec: {
           type: Type.OBJECT,
           properties: {
-            timestamps: {
-              type: Type.ARRAY,
-              items: { type: Type.NUMBER },
-              description: "Timestamps when each rotation happens.",
-            },
+            // timestamps: {
+            //   type: Type.ARRAY,
+            //   items: { type: Type.NUMBER },
+            //   description: "Timestamps when each rotation happens.",
+            // },
             count: {
               type: Type.NUMBER,
               description: "Count of rotations per second.",
             },
           },
-          required: ["timestamps", "count"],
+          required: ["count"], //"timestamps"
         },
-        effect_density: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              name: { type: Type.STRING, description: "Name of the visual effect." },
-              timestamp: { type: Type.NUMBER, description: "Timestamp of the effect." },
-            },
-            required: ["name", "timestamp"],
-          },
-          description: "List of visual effects with their names and timestamps.",
-        },
+        // effect_density: {
+        //   type: Type.ARRAY,
+        //   items: {
+        //     type: Type.OBJECT,
+        //     properties: {
+        //       name: { type: Type.STRING, description: "Name of the visual effect." },
+        //       timestamp: { type: Type.NUMBER, description: "Timestamp of the effect." },
+        //     },
+        //     required: ["name", "timestamp"],
+        //   },
+        //   description: "List of visual effects with their names and timestamps.",
+        // },
       },
-      required: ["total_cuts", "rotation_changes_per_sec", "effect_density"],
+      required: ["total_cuts", "rotation_changes_per_sec"], //, "effect_density"],
     },
     text_overlay_density: {
       type: Type.OBJECT,
@@ -127,11 +139,11 @@ export const S1Schema = {
           type: Type.INTEGER,
           description: "Count of distinct texts that appear in the video.",
         },
-        content_overlays: {
-          type: Type.ARRAY,
-          items: { type: Type.STRING },
-          description: "List of actual text strings that appear.",
-        },
+        // content_overlays: {
+        //   type: Type.ARRAY,
+        //   items: { type: Type.STRING },
+        //   description: "List of actual text strings that appear.",
+        // },
         cta_detection: {
           type: Type.OBJECT,
           properties: {
@@ -139,16 +151,16 @@ export const S1Schema = {
               type: Type.BOOLEAN,
               description: "Whether calls to action are detected.",
             },
-            timestamps: {
-              type: Type.ARRAY,
-              items: { type: Type.NUMBER },
-              description: "Timestamps when CTAs are detected.",
-            },
+            // timestamps: {
+            //   type: Type.ARRAY,
+            //   items: { type: Type.NUMBER },
+            //   description: "Timestamps when CTAs are detected.",
+            // },
           },
-          required: ["present", "timestamps"],
+          required: ["present"], // "timestamps"],
         },
       },
-      required: ["total_overlays", "content_overlays", "cta_detection"],
+      required: ["total_overlays", "cta_detection"], //"content_overlays"
     },
     speech_voice: {
       type: Type.OBJECT,
@@ -227,7 +239,7 @@ export const S1Schema = {
     "cta_presence",
     "brand_cues",
   ],
-};
+}
 
 export const S2Schema = {
   type: Type.OBJECT,
@@ -237,11 +249,13 @@ export const S2Schema = {
       properties: {
         score: {
           type: Type.INTEGER,
-          description: "Numeric score for Setup/Background (1=Poor, 2=Medium, 3=Excellent)",
+          description:
+            "Numeric score for Setup/Background (1=Poor, 2=Medium, 3=Excellent)",
         },
         category: {
           type: Type.STRING,
-          description: "Categorical score for Setup/Background (Poor, Medium, Excellent)",
+          description:
+            "Categorical score for Setup/Background (Poor, Medium, Excellent)",
         },
       },
       required: ["score", "category"],
@@ -251,11 +265,13 @@ export const S2Schema = {
       properties: {
         score: {
           type: Type.INTEGER,
-          description: "Numeric score for Video Quality (1=Poor, 2=Medium, 3=Excellent)",
+          description:
+            "Numeric score for Video Quality (1=Poor, 2=Medium, 3=Excellent)",
         },
         category: {
           type: Type.STRING,
-          description: "Categorical score for Video Quality (Poor, Medium, Excellent)",
+          description:
+            "Categorical score for Video Quality (Poor, Medium, Excellent)",
         },
       },
       required: ["score", "category"],
@@ -265,11 +281,13 @@ export const S2Schema = {
       properties: {
         score: {
           type: Type.INTEGER,
-          description: "Numeric score for Sound Quality (1=Poor, 2=Medium, 3=Excellent)",
+          description:
+            "Numeric score for Sound Quality (1=Poor, 2=Medium, 3=Excellent)",
         },
         category: {
           type: Type.STRING,
-          description: "Categorical score for Sound Quality (Poor, Medium, Excellent)",
+          description:
+            "Categorical score for Sound Quality (Poor, Medium, Excellent)",
         },
       },
       required: ["score", "category"],
@@ -279,11 +297,13 @@ export const S2Schema = {
       properties: {
         score: {
           type: Type.INTEGER,
-          description: "Numeric score for Framing (1=Poor, 2=Medium, 3=Excellent)",
+          description:
+            "Numeric score for Framing (1=Poor, 2=Medium, 3=Excellent)",
         },
         category: {
           type: Type.STRING,
-          description: "Categorical score for Framing (Poor, Medium, Excellent)",
+          description:
+            "Categorical score for Framing (Poor, Medium, Excellent)",
         },
       },
       required: ["score", "category"],
@@ -310,7 +330,7 @@ export const S2Schema = {
     "framing_evaluation",
     "overall_score",
   ],
-};
+}
 
 export const CONTENT_TYPES = [
   "Outfit Tutorials",
@@ -322,16 +342,20 @@ export const CONTENT_TYPES = [
   "Behind-the-Scenes / Daily Fashion Vlogs",
   "Humor / Entertainer",
   "Relatable / Storytime",
-] as const;
+] as const
 
 export const S3Schema = {
-    type: Type.OBJECT,
-    properties: {
-        video_id: { type: Type.STRING },
-        content_type_primary: { type: Type.STRING, enum: CONTENT_TYPES },
-        confidence_primary: { type: Type.NUMBER },
-        content_type_secondary: { type: Type.STRING, enum: CONTENT_TYPES, nullable: true },
-        confidence_secondary: { type: Type.NUMBER, nullable: true },
+  type: Type.OBJECT,
+  properties: {
+    // video_id: { type: Type.STRING },
+    content_type_primary: { type: Type.STRING, enum: CONTENT_TYPES },
+    confidence_primary: { type: Type.NUMBER },
+    content_type_secondary: {
+      type: Type.STRING,
+      enum: CONTENT_TYPES,
+      nullable: true,
     },
-    required: ["video_id", "content_type_primary", "confidence_primary"],
-};
+    confidence_secondary: { type: Type.NUMBER, nullable: true },
+  },
+  required: ["video_id", "content_type_primary", "confidence_primary"],
+}

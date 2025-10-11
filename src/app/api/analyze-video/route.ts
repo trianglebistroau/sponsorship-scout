@@ -29,6 +29,7 @@ export async function POST(req: Request) {
     .from("Video")
     .select("*")
     .eq("username", username)
+    .is("ai_processed_output", null)
 
   //Construct video id array, this is only for 1 username for now
   const videoIdMap = new Map<string, { url: string; response: any | null }>()
@@ -65,6 +66,12 @@ export async function POST(req: Request) {
       //turn stream back into blob
       const videoBlob = new Blob(chunks, { type: "video/mp4" })
       console.log("Video blob:", videoBlob)
+
+      console.log("Video size (bytes):", videoBlob.size)
+      if (videoBlob.size >= 5 * 10e5) {
+        console.log("Skipping video larger than 10MB")
+        continue //skip files larger than 10MB
+      }
 
       if (!videoResponse.ok) {
         throw new Error(
@@ -118,6 +125,88 @@ export async function POST(req: Request) {
     }
 
     console.log("Video ID Map with responses:", videoIdMap)
+
+    const { data: videoDataProfileData, error: videoError } = await supabase
+      .from("Video")
+      .select("ai_processed_output")
+      .eq("username", username)
+      .not("ai_processed_output", "is", null)
+
+    const perVidAnalytic = videoDataProfileData.map((video) => video.ai_processed_output["stage3_output"])
+    console.log("Per Video Analytics:", perVidAnalytic)
+
+    // Reduce perVidAnalytic into the desired stats
+    const stats = perVidAnalytic.reduce(
+      (acc, analytic) => {
+        const { content_type_primary, content_type_secondary, confidence_primary, confidence_secondary } = analytic;
+
+        // Count frequencies for primary and secondary content types
+        acc.primaryFrequency[content_type_primary] = (acc.primaryFrequency[content_type_primary] || 0) + 1;
+        acc.secondaryFrequency[content_type_secondary] = (acc.secondaryFrequency[content_type_secondary] || 0) + 1;
+
+        // Sum confidences for averaging later
+        acc.primaryConfidenceSum[content_type_primary] = (acc.primaryConfidenceSum[content_type_primary] || 0) + confidence_primary;
+        acc.secondaryConfidenceSum[content_type_secondary] = (acc.secondaryConfidenceSum[content_type_secondary] || 0) + confidence_secondary;
+
+        // Track total counts for averaging confidences
+        acc.primaryCount[content_type_primary] = (acc.primaryCount[content_type_primary] || 0) + 1;
+        acc.secondaryCount[content_type_secondary] = (acc.secondaryCount[content_type_secondary] || 0) + 1;
+
+        return acc;
+      },
+      {
+        primaryFrequency: {},
+        secondaryFrequency: {},
+        primaryConfidenceSum: {},
+        secondaryConfidenceSum: {},
+        primaryCount: {},
+        secondaryCount: {},
+      }
+    );
+
+    // Determine most frequent primary and secondary content types
+    let content_type_primary = Object.keys(stats.primaryFrequency).reduce((a, b) =>
+      stats.primaryFrequency[a] > stats.primaryFrequency[b] ? a : b
+    );
+    let content_type_secondary = Object.keys(stats.secondaryFrequency).reduce((a, b) =>
+      stats.secondaryFrequency[a] > stats.secondaryFrequency[b] ? a : b
+    );
+
+    // Compute average confidences
+    const confidence_primary = stats.primaryConfidenceSum[content_type_primary] / stats.primaryCount[content_type_primary];
+    const confidence_secondary = stats.secondaryConfidenceSum[content_type_secondary] / stats.secondaryCount[content_type_secondary];
+
+    // Swap primary and secondary if confidences are within 0.1
+    if (Math.abs(confidence_primary - confidence_secondary) <= 0.1) {
+      [content_type_primary, content_type_secondary] = [content_type_secondary, content_type_primary];
+    }
+
+    // Compute consistency
+    const consistency =
+      perVidAnalytic.filter((analytic) => analytic.content_type_primary === content_type_primary).length /
+      perVidAnalytic.length;
+
+    // Log the computed stats
+    const computedStats = {
+      content_type_primary,
+      confidence_primary,
+      content_type_secondary,
+      confidence_secondary,
+      consistency,
+    };
+    console.log("Computed Stats:", computedStats);
+
+    const updateResult = await supabase
+      .from("User")
+      .update({ content_profile: computedStats })
+      .eq("username", username)
+      .select();
+
+    if (updateResult.error) {
+      console.error("Error updating user content profile:", updateResult.error);
+    } else {
+      console.log("Successfully updated user content profile:", updateResult.data);
+    }
 
     //Update Supabase with response, currently not working
     for (const [videoId, { response }] of videoIdMap) {
