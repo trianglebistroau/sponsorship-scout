@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
   //Construct video id array, this is only for 1 username for now
   const videoIdMap = new Map<string, { url: string; response: any | null }>()
-  console.log("Video data from Supabase:", videoData, videoError)
+
   for (const video of videoData) {
     videoIdMap.set(video.id, {
       url: `${TIKTOK_BASE_URL}/@${username}/video/${video.id}`,
@@ -54,11 +54,12 @@ export async function POST(req: Request) {
         }
       )
 
-      console.log("Video stats:", videoStats)
+      const videoStatsData = await videoStats.json()
+      console.log("Video stats:", videoStatsData)
 
       const { error: statsUpdateError } = await supabase
         .from("Video")
-        .update( videoStats )
+        .update(videoStatsData)
         .eq("id", videoId)
         .select()
 
