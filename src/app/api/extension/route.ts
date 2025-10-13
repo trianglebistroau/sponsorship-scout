@@ -50,7 +50,7 @@ export async function POST(req: Request) {
   }
 
   // Get first 10 videos
-  const first10Videos = videoIds.slice(0, 10);
+  const first10Videos = videoIds;
   console.log(`Found ${videoIds.length} videos, processing first 10`);
 
   // Step 3: Insert videos into Supabase table

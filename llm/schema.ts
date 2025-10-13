@@ -347,7 +347,6 @@ export const CONTENT_TYPES = [
 export const S3Schema = {
   type: Type.OBJECT,
   properties: {
-    // video_id: { type: Type.STRING },
     content_type_primary: { type: Type.STRING, enum: CONTENT_TYPES },
     confidence_primary: { type: Type.NUMBER },
     content_type_secondary: {
@@ -357,5 +356,5 @@ export const S3Schema = {
     },
     confidence_secondary: { type: Type.NUMBER, nullable: true },
   },
-  required: ["video_id", "content_type_primary", "confidence_primary"],
+  required: ["content_type_primary", "confidence_primary"],
 }

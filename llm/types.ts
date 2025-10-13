@@ -91,7 +91,6 @@ export interface S2Output {
 export type ContentType = (typeof CONTENT_TYPES)[number]
 
 export interface S3Output {
-  // video_id: string
   content_type_primary: ContentType
   confidence_primary: number
   content_type_secondary: ContentType | null
