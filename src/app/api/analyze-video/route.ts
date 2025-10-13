@@ -1,4 +1,4 @@
-import { TIKTOK_BASE_URL } from "@/const/constants"
+﻿import { TIKTOK_BASE_URL } from "@/const/constants"
 import { supabase } from "@/utils/supabase/client"
 import { GoogleGenAI } from "@google/genai"
 import { initializeAI, runWorkflow, type WorkflowInput } from "llm/workflow"
@@ -41,6 +41,7 @@ export async function POST(req: Request) {
     })
   }
   console.log("Video ID Map:", videoIdMap)
+
   try {
     for (const [videoId, { url: videoUrl }] of videoIdMap) {
       const videoStats = await fetch(
@@ -55,7 +56,28 @@ export async function POST(req: Request) {
       )
 
       const videoStatsData = await videoStats.json()
+
+      videoStatsData.repostCount = parseInt(videoStatsData.repostCount) || 0
+
+      videoStatsData.engagement_rate =
+        videoStatsData.playCount === 0
+          ? 0
+          : (videoStatsData.diggCount + videoStatsData.commentCount) / videoStatsData.playCount;
+
+      videoStatsData.amplification_rate =
+        videoStatsData.playCount === 0
+          ? 0
+          : (videoStatsData.shareCount + videoStatsData.repostCount) / videoStatsData.playCount;
+
       console.log("Video stats:", videoStatsData)
+      // {
+      //   diggCount: '49', // like
+      //   shareCount: '1',
+      //   commentCount: '3',
+      //   playCount: '1118', // view
+      //   collectCount: '2', // download
+      //   repostCount: '0'
+      // }
 
       const { error: statsUpdateError } = await supabase
         .from("Video")
@@ -69,6 +91,8 @@ export async function POST(req: Request) {
         console.log(`Successfully updated video ${videoId}`)
       }
 
+      // continue;
+
       const videoResponse = await fetch(
         `${process.env.BACKEND_URL}/download?video_url=${videoUrl}`,
         {
@@ -79,6 +103,8 @@ export async function POST(req: Request) {
           },
         }
       )
+
+      console.log("Video response status: here")
 
       const reader = videoResponse.body.getReader()
       const chunks = []
@@ -150,6 +176,64 @@ export async function POST(req: Request) {
       })
     }
 
+
+    // STEP 3.5 CALCULATE ENGAGEMENT METRICS
+    // TODO: SWITCH TO MEDIAN AS EDGE FUNCTION SUPABASE
+    const { data: videos, error: playCountAggregateError } = await supabase
+      .from("Video")
+      .select("playCount")
+      .eq("username", username)
+      .not("playCount", "is", null);
+      
+    const median = videos?.length
+        ? videos.sort((a, b) => a.playCount - b.playCount)[Math.floor(videos.length / 2)].playCount
+        : 0
+
+    if (playCountAggregateError) {
+      console.error("Error computing play count aggregates:", playCountAggregateError)
+    }
+
+    console.log("median", median);
+
+    const { data: videoEngage, error: engageAgg } = await supabase
+        .from("Video")
+        .select("id, engagement_rate, amplification_rate, playCount")
+        .eq("username", username)
+        
+    for (const video of videoEngage) {
+      
+      console.log("video", video);
+
+      const {id : videoId, playCount, engagement_rate, amplification_rate} = video;
+
+      if (playCountAggregateError) {
+        console.error(`Error fetching video ${videoId}:`, playCountAggregateError)
+        continue
+      }
+
+      const reach_norm = playCount / median
+      const engagement_score = 0.4 * engagement_rate + 0.4 * amplification_rate
+      const engagement_rating = engagement_score < 0.8 ? "Poor" : engagement_score < 1.2 ? "Medium" : "Excellent"
+
+      console.log(`Video ID: ${videoId}, Reach Norm: ${reach_norm}, Engagement Score: ${engagement_score}`)
+
+      const { error: statsUpdateError } = await supabase
+        .from("Video")
+        .update({
+          reach_norm,
+          engagement_score,
+          engagement_rating,
+        })
+        .eq("id", videoId)
+
+      if (statsUpdateError) {
+        console.error(`Error updating video ${videoId} with engagement score:`, statsUpdateError)
+      }
+    }
+
+    
+
+    //  PER VIDEO ANALYTICS AGGREGATION
     console.log("Video ID Map with responses:", videoIdMap)
 
     const { data: videoDataProfileData, error: videoError } = await supabase
