@@ -356,5 +356,5 @@ export const S3Schema = {
     },
     confidence_secondary: { type: Type.NUMBER, nullable: true },
   },
-  required: ["content_type_primary", "confidence_primary"],
+  required: ["content_type_primary", "confidence_primary"], // "video_id", 
 }
