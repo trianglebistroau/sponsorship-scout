@@ -43,6 +43,31 @@ export async function POST(req: Request) {
   console.log("Video ID Map:", videoIdMap)
   try {
     for (const [videoId, { url: videoUrl }] of videoIdMap) {
+      const videoStats = await fetch(
+        `${process.env.BACKEND_URL}/video/stats/${username}/${videoId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "User-Agent": "Vercel-Edge-Function/1.0",
+          },
+        }
+      )
+
+      console.log("Video stats:", videoStats)
+
+      const { error: statsUpdateError } = await supabase
+        .from("Video")
+        .update( videoStats )
+        .eq("id", videoId)
+        .select()
+
+      if (statsUpdateError) {
+        console.error(`Error updating video ${videoId}:`, statsUpdateError)
+      } else {
+        console.log(`Successfully updated video ${videoId}`)
+      }
+
       const videoResponse = await fetch(
         `${process.env.BACKEND_URL}/download?video_url=${videoUrl}`,
         {
