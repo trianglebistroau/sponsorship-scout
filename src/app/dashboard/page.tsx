@@ -6,6 +6,7 @@ import { ProgressionLadder } from "@/components/ProgressionLadder";
 import { VideoCarousel } from "@/components/VideoCarousel";
 import { SponsorshipRadar } from "@/components/SponsorshipRadar";
 import { Sparkles, TrendingUp, Users, Award } from "lucide-react";
+import { VideoCarouselV2 } from "@/components/VideoCarouselV2";
 
 const Dashboard = () => {
   const creatorData = {
@@ -78,7 +79,7 @@ const Dashboard = () => {
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
             <PersonaProfile persona={creatorData.persona} />
-            <VideoCarousel />
+            <VideoCarouselV2 />
           </div>
 
           {/* Right Column */}
