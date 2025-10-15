@@ -40,20 +40,30 @@ export async function POST(req: Request) {
       response: null,
     })
   }
-  console.log("Video ID Map:", videoIdMap)
+  // console.log("Video ID Map:", videoIdMap)
 
   try {
     for (const [videoId, { url: videoUrl }] of videoIdMap) {
-      const videoStats = await fetch(
-        `${process.env.BACKEND_URL}/video/stats/${username}/${videoId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "User-Agent": "Vercel-Edge-Function/1.0",
-          },
+      let videoStats;
+      try {
+        videoStats = await fetch(
+          `${process.env.BACKEND_URL}/video/stats/${username}/${videoId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "User-Agent": "Vercel-Edge-Function/1.0",
+            },
+          }
+        );
+
+        if (!videoStats.ok) {
+          throw new Error(`Failed to fetch video stats: ${videoStats.status} ${videoStats.statusText}`);
         }
-      )
+      } catch (error) {
+        console.error(`Error fetching video stats for video ID ${videoId}:`, error);
+        continue; // Skip processing this video if fetching stats fails
+      }
 
       const videoStatsData = await videoStats.json()
 
@@ -120,7 +130,7 @@ export async function POST(req: Request) {
       console.log("Video blob:", videoBlob)
 
       console.log("Video size (bytes):", videoBlob.size)
-      if (videoBlob.size >= 5 * 10e5) {
+      if (videoBlob.size >= 10 * 10e5) {
         console.log("Skipping video larger than 10MB")
         continue //skip files larger than 10MB
       }
@@ -212,7 +222,7 @@ export async function POST(req: Request) {
       }
 
       const reach_norm = playCount / median
-      const engagement_score = 0.4 * engagement_rate + 0.4 * amplification_rate
+      const engagement_score = 0.4 * engagement_rate + 0.4 * amplification_rate + 0.2 * reach_norm
       const engagement_rating = engagement_score < 0.8 ? "Poor" : engagement_score < 1.2 ? "Medium" : "Excellent"
 
       console.log(`Video ID: ${videoId}, Reach Norm: ${reach_norm}, Engagement Score: ${engagement_score}`)
