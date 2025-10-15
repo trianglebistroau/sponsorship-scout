@@ -80,6 +80,8 @@ export async function POST(req: Request) {
         const hygieneLevel = video?.ai_processed_output?.stage2_output?.overall_score?.numeric_score || 0;
         const engagementLevel = video?.engagement_score || 0;
 
+        // console.log(`Video ID: ${video.id}, Hygiene Level: ${hygieneLevel}, Engagement Level: ${engagementLevel}`);
+
         acc.avgHygiene = (acc.avgHygiene * acc.count + hygieneLevel) / (acc.count += 1);
         acc.avgEngagement = (acc.avgEngagement * (acc.count - 1) + engagementLevel) / acc.count;
         return acc;
