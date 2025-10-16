@@ -1,5 +1,8 @@
+import { initializeAI, getPerVidRecommendation, getPerCreatorRecommendation } from "llm/workflow"
+
 import { supabase } from "@/utils/supabase/client"
 import { NextResponse } from "next/server"
+import { GoogleGenAI } from "@google/genai"
 
 export const runtime = "edge"
 
@@ -10,6 +13,15 @@ export async function POST(req: Request) {
     const body = await req.json()
     const username = body.username
     console.log("Username:", username)
+
+    // Initialize AI for the workflow
+    initializeAI(process.env.GEMINI_API_KEY!)
+    
+    // Initialize AI for file operations
+    const ai = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY!,
+    })
+      
 
     const { data: videoData, error: videoError } = await supabase
     .from("Video")
@@ -22,7 +34,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ done: "Error fetching video data" }, { status: 500 })
     }
 
-    const evaluatedVideos = videoData.map((video: any) => {
+    const evaluatedVideos = await Promise.all(videoData.map(async (video: any) => {
         const hygiene = video?.ai_processed_output?.stage2_output?.overall_score?.category || "Unknown";
         const engagement = video?.engagement_rating || "Unknown";
         
@@ -38,9 +50,13 @@ export async function POST(req: Request) {
         } else if (hygiene === "Excellent" && engagement === "Poor") {
             evaluation = "content idea not resonating, test new content type";
         }
+        
+        // Get recommendation from AI for the video
+        const ai_evaluation = await getPerVidRecommendation(hygiene, engagement, video.script || "");
+
         console.log(`Video ID: ${video.id}, Evaluation: ${evaluation}`);
-        return { ...video, evaluation };
-    });
+        return { ...video, evaluation : ai_evaluation };
+    }));
 
     console.log("Evaluated Videos:", evaluatedVideos);
 
@@ -80,8 +96,6 @@ export async function POST(req: Request) {
         const hygieneLevel = video?.ai_processed_output?.stage2_output?.overall_score?.numeric_score || 0;
         const engagementLevel = video?.engagement_score || 0;
 
-        // console.log(`Video ID: ${video.id}, Hygiene Level: ${hygieneLevel}, Engagement Level: ${engagementLevel}`);
-
         acc.avgHygiene = (acc.avgHygiene * acc.count + hygieneLevel) / (acc.count += 1);
         acc.avgEngagement = (acc.avgEngagement * (acc.count - 1) + engagementLevel) / acc.count;
         return acc;
@@ -96,13 +110,23 @@ export async function POST(req: Request) {
         creatorReccommendation = "Concept works, fix recurring technical issues";
     }
 
+    // Get recommendation from AI for the creator
+    const ai_creator_evaluation = await getPerCreatorRecommendation(
+        contentTypeAnalysis,
+        creatorAnalysis.avgHygiene,
+        creatorAnalysis.avgEngagement,
+        creatorReccommendation || "" // Use existing recommendation as script
+    )
+
+    console.log("AI Creator Evaluation:", ai_creator_evaluation);
+
     // update to Supabase
     const { error: creatorUpdateError } = await supabase
         .from("User")
         .update({
             content_analysis : contentTypeAnalysis,
             profile_analysis: creatorAnalysis,
-            recommendation: creatorReccommendation
+            recommendation: ai_creator_evaluation.content_recommendation + "\n\n" + ai_creator_evaluation.profile_recommendation
         })
         .eq("username", username);
 
@@ -115,6 +139,6 @@ export async function POST(req: Request) {
     return NextResponse.json({
         contentType : contentTypeAnalysis,
         creatorAnalysis,
-        creatorReccommendation
+        ai_creator_evaluation
     }, { status: 200 })
 }

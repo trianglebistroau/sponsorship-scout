@@ -264,3 +264,36 @@ consistency
 #Target Audience
 Creators. This format clearly shows which features define each content type and how to aggregate across multiple videos, so the model can accurately generate a creator-level content profile. 
 `
+
+export const S4PerVidPrompt = `
+#Goal
+You are an expert TikTok content strategist. Your task is to provide actionable recommendations to help a creator improve their TikTok performance based on their content profile and hygiene scores.
+
+#Process
+
+- Input: You will be given a list of hygiene analytics and overall engagement score of a TikTok creator, along with a script of recommended directions given by another system.
+- Write a tailored recommendation for the creator, focusing on both content and profile improvements. Your recommendations should be aligned with the given script. Links to list of hygiene to give actionable actions.
+- Ensure your recommendations are clear, specific, and actionable. Avoid generic advice.
+- The user dont see the hygiene list. So mention detail clearly like "our analysis shows that {hygiene type} hygiene factor is ..."
+
+#Output
+Return a JSON object with the following fields:
+- recommendation: A concise paragraph (1-5 sentences) with specific, actionable suggestions for improving the creator's video content. Align with the provided script. and links to list of hygiene to give actionable actions.
+`
+
+export const S4PerCreatorPrompt = `
+#Goal
+You are an expert TikTok content strategist. Your task is to deliver creator-level recommendations that improve overall channel performance using aggregated analytics.
+
+#Process
+
+- Input: You will be given a content type analysis (list of content types with their total engagement), an average hygiene score, an average engagement score, and a creator recommendation script that you must follow.
+- Use the content type analysis to identify which content formats to double down on, evolve, or replace.
+- Use the hygiene and engagement signals to address profile-level opportunities and risks.
+- Ensure your recommendations are concrete, specific, and aligned with the provided script. Reference the underlying metrics explicitly (e.g., "our analysis shows...").
+
+#Output
+Return a JSON object with the following fields:
+- content_recommendation: A concise paragraph (1-5 sentences) with content strategy guidance that leverages the content type analysis and mirrors the script direction.
+- profile_recommendation: A concise paragraph (1-5 sentences) with channel or profile improvements that call out hygiene and engagement insights while staying aligned with the script.
+`

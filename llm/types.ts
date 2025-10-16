@@ -96,3 +96,14 @@ export interface S3Output {
   content_type_secondary: ContentType | null
   confidence_secondary: number | null
 }
+
+
+// S4 Recommendations Interface
+export interface S4PerVidOutput {
+  recommendation: string,
+}
+
+export interface S4PerCreatorOutput {
+  content_recommendation: string
+  profile_recommendation: string
+}

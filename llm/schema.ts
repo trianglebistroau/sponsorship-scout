@@ -358,3 +358,20 @@ export const S3Schema = {
   },
   required: ["content_type_primary", "confidence_primary"], // "video_id", 
 }
+
+export const S4PerVidSchema = {
+  type: Type.OBJECT,
+  properties: {
+    recommendation: { type: Type.STRING },
+  },
+  required: ["recommendation"],
+}
+
+export const S4PerCreatorSchema = {
+  type: Type.OBJECT,
+  properties: {
+    content_recommendation: { type: Type.STRING },
+    profile_recommendation: { type: Type.STRING },
+  },
+  required: ["content_recommendation", "profile_recommendation"],
+}
