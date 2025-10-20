@@ -94,7 +94,7 @@ async function executeStage<T, S extends Record<string, any>>(
   contentParts.push(...contextualOutputs, prompt);
 
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-2.5-pro",
     contents: createUserContent(contentParts),
     config: {
       responseMimeType: "application/json",
