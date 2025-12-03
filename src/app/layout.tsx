@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import "../index.css"
 
+import { ThemeProvider } from "@/components/theme-provider"
+
 export const metadata: Metadata = {
   title: "Creator Coach - From 0 to Brand Sponsorships",
   description:
@@ -23,9 +25,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        <div id="root">{children}</div>
+    <html lang="en" suppressHydrationWarning>
+      <body className="bg-background text-foreground antialiased">
+        <ThemeProvider>
+          <div id="root">{children}</div>
+        </ThemeProvider>
       </body>
     </html>
   )

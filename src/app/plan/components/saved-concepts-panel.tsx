@@ -1,0 +1,279 @@
+import * as React from "react"
+import { format } from "date-fns"
+import { CalendarIcon, PenSquare, Target } from "lucide-react"
+
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Calendar } from "@/components/ui/calendar"
+import { Input } from "@/components/ui/input"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Textarea } from "@/components/ui/textarea"
+
+import type { FileNode, TagCategory } from "../../generate/types"
+import type { SavedConcept } from "../types"
+
+type SavedConceptsPanelProps = {
+  concepts: SavedConcept[]
+  onPlanConcept: (conceptId: string, date: Date | null) => void
+  onToggleExecuted: (conceptId: string) => void
+  onUpdateConcept: (conceptId: string, updates: Pick<SavedConcept, "title" | "summary">) => void
+  fileLookup: Record<string, FileNode>
+}
+
+export function SavedConceptsPanel({
+  concepts,
+  onPlanConcept,
+  onToggleExecuted,
+  onUpdateConcept,
+  fileLookup,
+}: SavedConceptsPanelProps) {
+  return (
+    <Card className="flex h-full flex-col">
+      <div className="border-b px-4 py-3">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Saved Concepts
+        </p>
+        <p className="text-lg font-semibold">{concepts.length} ideas</p>
+      </div>
+      <ScrollArea className="flex-1">
+        <div className="space-y-4 p-4">
+          {concepts.map((concept) => (
+            <ConceptListItem
+              key={concept.id}
+              concept={concept}
+              onPlanConcept={onPlanConcept}
+              onToggleExecuted={onToggleExecuted}
+              onUpdateConcept={onUpdateConcept}
+              fileLookup={fileLookup}
+            />
+          ))}
+        </div>
+      </ScrollArea>
+    </Card>
+  )
+}
+
+type ConceptListItemProps = {
+  concept: SavedConcept
+  onPlanConcept: (conceptId: string, date: Date | null) => void
+  onToggleExecuted: (conceptId: string) => void
+  onUpdateConcept: (conceptId: string, updates: Pick<SavedConcept, "title" | "summary">) => void
+  fileLookup: Record<string, FileNode>
+}
+
+const tagCategoryLabels: Record<TagCategory, string> = {
+  ideas: "Idea",
+  themes: "Theme",
+  strategies: "Strategy",
+}
+
+function ConceptListItem({
+  concept,
+  onPlanConcept,
+  onToggleExecuted,
+  onUpdateConcept,
+  fileLookup,
+}: ConceptListItemProps) {
+  const [open, setOpen] = React.useState(false)
+  const [isEditing, setIsEditing] = React.useState(false)
+  const [draftTitle, setDraftTitle] = React.useState(concept.title)
+  const [draftSummary, setDraftSummary] = React.useState(concept.summary ?? "")
+  const tagEntries = Object.entries(concept.tags ?? {}) as [TagCategory, string[]][]
+  const resolvedTags = tagEntries.flatMap(([category, ids]) =>
+    ids.map((tagId) => ({ category, node: fileLookup[tagId] }))
+  )
+
+  React.useEffect(() => {
+    setDraftTitle(concept.title)
+    setDraftSummary(concept.summary ?? "")
+  }, [concept.id, concept.summary, concept.title])
+
+  const handleSave = () => {
+    onUpdateConcept(concept.id, { title: draftTitle, summary: draftSummary })
+    setIsEditing(false)
+  }
+
+  const handleCancel = () => {
+    setDraftTitle(concept.title)
+    setDraftSummary(concept.summary ?? "")
+    setIsEditing(false)
+  }
+
+  return (
+    <Card className="bg-card/80">
+      <CardHeader className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 space-y-2">
+            <CardTitle className="text-xl">{concept.title}</CardTitle>
+            <CardDescription>{concept.summary}</CardDescription>
+          </div>
+          <div className="flex shrink-0 flex-col items-end gap-2 text-right">
+            <div className="flex items-center gap-2">
+              <Badge variant={concept.plannedDate ? "secondary" : "outline"}>
+                {concept.plannedDate ? "Scheduled" : "Unplanned"}
+              </Badge>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 text-muted-foreground"
+                onClick={() => setIsEditing(true)}
+              >
+                <PenSquare className="h-4 w-4" />
+                <span className="sr-only">Edit {concept.title}</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+        {resolvedTags.length ? (
+          <div className="flex flex-wrap gap-2">
+            {resolvedTags.map(({ category, node }) => {
+              if (!node) return null
+              const accentStyle = node.accentColor
+                ? {
+                    borderColor: `${node.accentColor}40`,
+                    color: node.accentColor,
+                  }
+                : undefined
+              return (
+                <Badge
+                  key={`${concept.id}-${category}-${node.id}`}
+                  variant="outline"
+                  className="text-[11px] font-medium"
+                  style={accentStyle}
+                >
+                  {tagCategoryLabels[category]}: {node.name}
+                </Badge>
+              )
+            })}
+          </div>
+        ) : null}
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="text-sm text-left">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Publishing date
+            </p>
+            <p className="text-foreground">
+              {concept.plannedDate ? format(concept.plannedDate, "MMM do") : "Not planned yet"}
+            </p>
+          </div>
+          <div className="flex flex-nowrap items-center justify-end gap-2">
+            <Popover open={open} onOpenChange={setOpen} modal={false}>
+              <PopoverTrigger asChild>
+                <Button size="sm" variant="outline" className="gap-2">
+                  <CalendarIcon className="h-4 w-4" />
+                  {concept.plannedDate ? "Reschedule" : "Plan date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <div className="space-y-3 p-3">
+                  <Calendar
+                    mode="single"
+                    selected={concept.plannedDate ?? undefined}
+                    onSelect={(date) => {
+                      if (!date) return
+                      onPlanConcept(concept.id, date)
+                      setOpen(false)
+                    }}
+                    initialFocus
+                  />
+                  {concept.plannedDate ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-center"
+                      onClick={() => {
+                        onPlanConcept(concept.id, null)
+                        setOpen(false)
+                      }}
+                    >
+                      Cancel schedule
+                    </Button>
+                  ) : null}
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button
+              variant={concept.executed ? "default" : "outline"}
+              size="icon"
+              className={concept.executed ? "text-primary-foreground" : "text-muted-foreground"}
+              onClick={() => onToggleExecuted(concept.id)}
+              aria-pressed={concept.executed}
+            >
+              <Target className="h-4 w-4" />
+              <span className="sr-only">{concept.executed ? "Mark unexecuted" : "Mark executed"}</span>
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+      <Dialog
+        open={isEditing}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            handleCancel()
+          } else {
+            setIsEditing(true)
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit concept</DialogTitle>
+            <DialogDescription>Keep descriptions tight before you publish.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Title
+              </label>
+              <Input value={draftTitle} onChange={(event) => setDraftTitle(event.target.value)} />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Summary
+              </label>
+              <Textarea
+                value={draftSummary}
+                onChange={(event) => setDraftSummary(event.target.value)}
+                className="min-h-[160px]"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="ghost" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSave}
+                disabled={!draftTitle.trim() || !draftSummary.trim()}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </Card>
+  )
+}
