@@ -15,8 +15,8 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.68.0(react@19.2.3))
       '@prisma/client':
-        specifier: ^6.19.0
-        version: 6.19.1(prisma@6.19.1(typescript@5.9.3))(typescript@5.9.3)
+        specifier: ^7.1.0
+        version: 7.1.0(prisma@6.19.1(typescript@5.9.3))(typescript@5.9.3)
       '@radix-ui/react-accordion':
         specifier: ^1.2.11
         version: 1.2.12(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@19.2.3))(react@19.2.3)
@@ -727,12 +727,15 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@prisma/client@6.19.1':
-    resolution: {integrity: sha512-4SXj4Oo6HyQkLUWT8Ke5R0PTAfVOKip5Roo+6+b2EDTkFg5be0FnBWiuRJc0BC0sRQIWGMLKW1XguhVfW/z3/A==}
-    engines: {node: '>=18.18'}
+  '@prisma/client-runtime-utils@7.1.0':
+    resolution: {integrity: sha512-39xmeBrNTN40FzF34aJMjfX1PowVCqoT3UKUWBBSP3aXV05NRqGBC3x2wCDs96ti6ZgdiVzqnRDHtbzU8X+lPQ==}
+
+  '@prisma/client@7.1.0':
+    resolution: {integrity: sha512-qf7GPYHmS/xybNiSOpzv9wBo+UwqfL2PeyX+08v+KVHDI0AlSCQIh5bBySkH3alu06NX9wy98JEnckhMHoMFfA==}
+    engines: {node: ^20.19 || ^22.12 || >=24.0}
     peerDependencies:
       prisma: '*'
-      typescript: '>=5.1.0'
+      typescript: '>=5.4.0'
     peerDependenciesMeta:
       prisma:
         optional: true
@@ -3904,7 +3907,11 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@prisma/client@6.19.1(prisma@6.19.1(typescript@5.9.3))(typescript@5.9.3)':
+  '@prisma/client-runtime-utils@7.1.0': {}
+
+  '@prisma/client@7.1.0(prisma@6.19.1(typescript@5.9.3))(typescript@5.9.3)':
+    dependencies:
+      '@prisma/client-runtime-utils': 7.1.0
     optionalDependencies:
       prisma: 6.19.1(typescript@5.9.3)
       typescript: 5.9.3
