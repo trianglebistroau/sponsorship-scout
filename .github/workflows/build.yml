@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     container:
       image: node:24-alpine
 
