@@ -3,7 +3,7 @@ import { supabase } from "../utils/supabase/client";
 export default async function Page() {
   const { data: video, error } = await supabase.from("Video").select("*");
 
-  console.log("data", video);
+  // console.log("data", video);
 
   return (
     <ul>

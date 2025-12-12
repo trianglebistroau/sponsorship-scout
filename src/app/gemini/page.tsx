@@ -23,16 +23,16 @@ export default async function Page() {
       },
     });
 
-    console.log("uploadResponse", uploadResponse);
+    // console.log("uploadResponse", uploadResponse);
 
     // Wait for the file to be processed
     let fileStatus = uploadResponse;
     while (fileStatus.state === "PROCESSING") {
-      console.log("File is still processing, waiting...");
+      // console.log("File is still processing, waiting...");
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       fileStatus = await ai.files.get({ name: uploadResponse.name });
-      console.log("File status:", fileStatus.state);
+      // console.log("File status:", fileStatus.state);
     }
 
     if (fileStatus.state === "FAILED") {
@@ -81,7 +81,7 @@ export default async function Page() {
     // Clean up: Delete the file after getting the response
     try {
       await ai.files.delete({ name: uploadResponse.name });
-      console.log("File deleted successfully:", uploadResponse.name);
+      // console.log("File deleted successfully:", uploadResponse.name);
     } catch (deleteError) {
       console.warn("Failed to delete file:", deleteError);
       // Don't throw here, since we got our response successfully
@@ -106,9 +106,9 @@ export default async function Page() {
     if (uploadResponse?.name) {
       try {
         await ai.files.delete({ name: uploadResponse.name });
-        console.log("File deleted after error:", uploadResponse.name);
+        // console.log("File deleted after error:", uploadResponse.name);
       } catch (deleteError) {
-        console.warn("Failed to delete file after error:", deleteError);
+        // console.warn("Failed to delete file after error:", deleteError);
       }
     }
   }

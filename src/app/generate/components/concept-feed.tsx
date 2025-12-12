@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import { PenSquare, Star, X } from "lucide-react"
+import * as React from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -49,11 +49,10 @@ const itemVariants = {
     opacity: 1,
     scale: 1,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 200,
       damping: 25,
       mass: 0.8,
-      duration: 0.6,
     },
   },
   exit: {
@@ -61,7 +60,7 @@ const itemVariants = {
     opacity: 0,
     transition: {
       duration: 0.4,
-      ease: [0.4, 0, 0.2, 1],
+      ease: [0.4, 0, 0.2, 1] as const,
     },
   },
 }
@@ -72,10 +71,9 @@ const starVariants = {
     scale: [1, 1.3, 1],
     rotate: [0, 15, -15, 0],
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 400,
       damping: 25,
-      duration: 0.5,
     },
   },
 }
@@ -357,7 +355,7 @@ export function ConceptFeed({
           <motion.div
             ref={sentinelRef}
             className="h-full snap-start flex items-center justify-center"
-            variants={sentinelVariants}
+            // variants={sentinelVariants}
             initial="hidden"
             animate="visible"
           >
