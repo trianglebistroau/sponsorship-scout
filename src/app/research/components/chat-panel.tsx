@@ -31,20 +31,20 @@ const mockMessages: ChatMessage[] = [
     id: "assistant-1",
     role: "assistant",
     content:
-      "### Research kickoff\nDrop a creator detail or target sponsor to map insight summaries, positioning, and assets in one place.",
+      "### Let's craft your next move\n\nNow for the fun part — I'll help you shape ideas, explore brand partnerships, and refine what makes your content unmistakably *you*.\n\nThink out loud here. Ask for ideas, clarity, or creative direction.\n\n**Try asking:**\n- Give me ideas for a brand deal with [brand name]\n- Help me make my content stand out\n- What worked best in my niche this month?\n- Draft 5 hooks for my next vlog\n\nJust start typing — we'll figure it out together.",
     timestamp: "2m ago",
   },
   {
     id: "user-1",
     role: "user",
-    content: "Looking for beauty brands that care about science-backed routines.",
+    content: "I want a running series that doesn't feel intimidating or try-hard.",
     timestamp: "Just now",
   },
   {
     id: "assistant-2",
     role: "assistant",
     content:
-      "**CeraVe**, **Glow Recipe**, and **Skinfix** all lean into derm-backed claims.\n\n- Position on barrier repair + derm approval.\n- Offer split-script draft for TikTok + IG stories.\n- Suggest a carousel CTA with IRL before/after hooks.",
+      "Yeah, totally get that.\n\nWhat if running is just the backdrop, not the main character?\n\nA few ideas that feel low-pressure:\n\n**1. 'Runs I Almost Skipped'**  \nHonest, very relatable. People connect with the struggle more than the pace.\n\n**2. 'One Run, One Thought'**  \nShort reflections while cooling down. Calm, repeatable, brand-safe.\n\n**3. 'Running Days That Felt Like Therapy'**  \nLeans into emotion, not performance.\n\nNone of these need to be perfect or intense. They work because they feel like real life.\n\nWant to shape one of these into a weekly format?",
     timestamp: "Just now",
   },
 ]
@@ -65,8 +65,8 @@ export function ResearchChatPanel({ inputValue, onInputChange }: ResearchChatPan
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
-            <CardTitle>Research Chat</CardTitle>
-            <CardDescription>Explore insights with AI-powered research.</CardDescription>
+            <CardTitle>Our Brainstorming Space</CardTitle>
+            <CardDescription>Think like a creative director — with backup.</CardDescription>
           </div>
           <Button variant="outline" size="sm" className="shrink-0">
             <RefreshCcw className="mr-2 h-4 w-4" /> New Thread
@@ -118,7 +118,7 @@ export function ResearchChatPanel({ inputValue, onInputChange }: ResearchChatPan
           <Textarea
             value={inputValue}
             onChange={(event) => onInputChange(event.target.value)}
-            placeholder="Ask for audience intel, brand talking points, or synthesis prompts"
+            placeholder="What's on your mind? Ask about brands, content ideas, or your next big move..."
             className="min-h-[120px] resize-none"
           />
           <div className="flex items-center gap-3">
@@ -126,7 +126,7 @@ export function ResearchChatPanel({ inputValue, onInputChange }: ResearchChatPan
               <Paperclip className="h-4 w-4" />
             </Button>
             <Button type="submit" className="flex-1" disabled={!inputValue.trim()}>
-              Send research prompt
+              Let's explore
               <Send className="ml-2 h-4 w-4" />
             </Button>
           </div>
