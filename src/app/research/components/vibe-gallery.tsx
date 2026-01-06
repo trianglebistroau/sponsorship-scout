@@ -75,8 +75,8 @@ export function VibeGallery({ sections, open, onOpenChange, onInsertVibe }: Vibe
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-1">
-              <CardTitle>Strategy, Themes & Brands</CardTitle>
-              <CardDescription>Vibe reference</CardDescription>
+              <CardTitle>Your Creative Blueprint</CardTitle>
+              <CardDescription>The worlds you show up in</CardDescription>
             </div>
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="icon" className="rounded-full">
