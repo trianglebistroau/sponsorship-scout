@@ -31,24 +31,17 @@ type ChatMessage = {
   role: "assistant" | "user"
   content: string
   timestamp: string
-  isStreaming?: boolean
 }
 
-// Helper to format timestamp from API
-function formatTimestamp(timestamp?: string): string {
-  if (!timestamp) return "Just now"
-  try {
-    const date = new Date(timestamp)
-    return date.toLocaleString(undefined, {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    })
-  } catch {
-    return "Just now"
-  }
-}
+const mockMessages: ChatMessage[] = [
+  {
+    id: "assistant-1",
+    role: "assistant",
+    content:
+      "### Your Creative Notes\n\nJot reactions, tweak ideas, ask questions — I'll use this to shape what comes next.\n\n**Try things like:**\n- 'This feels too polished'\n- 'Can we make this more chaotic?'\n- 'Should I wear gold or silver jewelry?'\n- 'I like the idea but not the hook'",
+    timestamp: "2m ago",
+  },
+]
 
 export type GenerateChatPanelProps = {
   className?: string
@@ -151,7 +144,8 @@ export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
         {
           id: assistantMessageId,
           role: "assistant",
-          content: "",
+          content:
+            "Got it! I'll tune the next ideas to match that vibe. Keep the feedback coming — it helps me learn what feels right for you.",
           timestamp: "Just now",
           isStreaming: true,
         },
@@ -302,6 +296,7 @@ export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
             value={inputValue}
             onChange={(event) => setInputValue(event.target.value)}
             placeholder="Share thoughts, reactions, or questions... I'm here to help shape ideas with you."
+            placeholder="Share thoughts, reactions, or questions... I'm here to help shape ideas with you."
             className="min-h-[120px] resize-none"
             disabled={isLoading || isInitializing}
           />
@@ -309,22 +304,9 @@ export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
             <Button type="button" variant="outline" size="icon" disabled={isLoading || isInitializing}>
               <Paperclip className="h-4 w-4" />
             </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={!inputValue.trim() || isLoading || isInitializing}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  Send message
-                  <Send className="ml-2 h-4 w-4" />
-                </>
-              )}
+            <Button type="submit" className="flex-1" disabled={!inputValue.trim()}>
+              Share thought
+              <Send className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </form>
