@@ -15,6 +15,7 @@ type PlannerCalendarProps = {
   scheduleByDay: Record<string, SavedConcept[]>
   isSynced: boolean
   onToggleSync: () => void
+  onDrop?: (conceptId: string, date: Date) => void
 }
 
 const DAY_KEY = "yyyy-MM-dd"
@@ -25,14 +26,32 @@ export function PlannerCalendar({
   scheduleByDay,
   isSynced,
   onToggleSync,
+  onDrop,
 }: PlannerCalendarProps) {
   const dayContent = React.useMemo(() => {
     const DayContent = ({ date }: DayContentProps) => {
       const key = format(date, DAY_KEY)
       const items = scheduleByDay[key] ?? []
 
+      const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault()
+        e.dataTransfer.dropEffect = "move"
+      }
+
+      const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault()
+        const conceptId = e.dataTransfer.getData("conceptId")
+        if (conceptId && onDrop) {
+          onDrop(conceptId, date)
+        }
+      }
+
       return (
-        <div className="flex h-full w-full flex-col gap-1 rounded-md bg-background/60 p-1.5">
+        <div 
+          className="flex h-full w-full flex-col gap-1 rounded-md bg-background/60 p-1.5 transition-colors hover:bg-background/80"
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
           <span className="text-xs font-semibold text-foreground">{format(date, "d")}</span>
           <div className="space-y-1">
             {items.slice(0, 2).map((item) => (

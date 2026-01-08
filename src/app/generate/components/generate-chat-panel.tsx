@@ -29,7 +29,7 @@ const mockMessages: ChatMessage[] = [
     id: "assistant-1",
     role: "assistant",
     content:
-      "### Thought Process\nShare your ideas, vision, and what makes your content unique. I'll help refine your concepts and provide suggestions.",
+      "### Your Creative Notes\n\nJot reactions, tweak ideas, ask questions — I'll use this to shape what comes next.\n\n**Try things like:**\n- 'This feels too polished'\n- 'Can we make this more chaotic?'\n- 'Should I wear gold or silver jewelry?'\n- 'I like the idea but not the hook'",
     timestamp: "2m ago",
   },
 ]
@@ -64,7 +64,7 @@ export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
           id: `assistant-${Date.now()}`,
           role: "assistant",
           content:
-            "Got it! I'll keep that in mind as we generate concepts together. Feel free to share more details about your vision.",
+            "Got it! I'll tune the next ideas to match that vibe. Keep the feedback coming — it helps me learn what feels right for you.",
           timestamp: "Just now",
         }
         setMessages((prev) => [...prev, aiMessage])
@@ -143,7 +143,7 @@ export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
           <Textarea
             value={inputValue}
             onChange={(event) => setInputValue(event.target.value)}
-            placeholder="Share your ideas, vision, or ask questions about the concepts..."
+            placeholder="Share thoughts, reactions, or questions... I'm here to help shape ideas with you."
             className="min-h-[120px] resize-none"
           />
           <div className="flex items-center gap-3">
@@ -151,7 +151,7 @@ export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
               <Paperclip className="h-4 w-4" />
             </Button>
             <Button type="submit" className="flex-1" disabled={!inputValue.trim()}>
-              Send message
+              Share thought
               <Send className="ml-2 h-4 w-4" />
             </Button>
           </div>

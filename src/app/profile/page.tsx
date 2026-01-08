@@ -1,12 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { Sparkles, Target, TrendingUp, Upload } from "lucide-react"
+import { Sparkles, Target, TrendingUp, Upload, Play } from "lucide-react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
 import { GeneratorNav } from "@/components/navigation"
 
 export default function ProfilePage() {
@@ -55,7 +56,7 @@ export default function ProfilePage() {
                     </div>
 
                     <p className="text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
-                      Indonesian-based senior UI/UX designer with 10+ years creating magic across industries—from early-stage startups to unicorns. Hobby includes playing guitar and exploring new coffee spots.
+                      Turning quiet moments into visual stories. Coffee, runs, design—captured with intention.
                     </p>
                   </div>
                 </CardContent>
@@ -70,35 +71,40 @@ export default function ProfilePage() {
                   Creative DNA
                 </CardTitle>
                 <CardDescription>
-                  Your unique creator identity at a glance
+                  What kind of creator you are
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Niche</h4>
+                  <h4 className="text-sm font-semibold text-foreground">Creator Type</h4>
+                  <p className="text-base font-bold text-foreground">
+                    Calm Visual Storyteller
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-foreground">Audience Personas</h4>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">UI/UX Design</Badge>
-                    <Badge variant="secondary">Tech Tutorials</Badge>
-                    <Badge variant="secondary">Lifestyle</Badge>
+                    <Badge variant="secondary">Lifestyle creators</Badge>
+                    <Badge variant="secondary">Routine lovers</Badge>
+                    <Badge variant="secondary">Quiet moments seekers</Badge>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Content Style</h4>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">Educational</Badge>
-                    <Badge variant="secondary">Casual</Badge>
-                    <Badge variant="secondary">Visual-first</Badge>
-                  </div>
+                  <h4 className="text-sm font-semibold text-foreground">Content Style/Taste</h4>
+                  <p className="text-sm text-foreground leading-relaxed">
+                    Clean shots, soft pacing, intentional framing. People follow for the calm visual flow and relatable everyday moments.
+                  </p>
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">Personality</h4>
+                  <h4 className="text-sm font-semibold text-foreground">Personality</h4>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">Friendly</Badge>
-                    <Badge variant="secondary">Curious</Badge>
-                    <Badge variant="secondary">Detail-oriented</Badge>
-                    <Badge variant="secondary">Collaborative</Badge>
+                    <Badge variant="secondary">Warm</Badge>
+                    <Badge variant="secondary">Observant</Badge>
+                    <Badge variant="secondary">Intentional</Badge>
+                    <Badge variant="secondary">Grounded</Badge>
                   </div>
                 </div>
               </CardContent>
@@ -106,94 +112,149 @@ export default function ProfilePage() {
           </div>
 
           {/* Profile Insights Section - Three Separate Cards */}
-          <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3">
+          <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:items-stretch">
             {/* Goals Card */}
-            <Card className="flex flex-col">
-              <CardHeader>
+            <Card className="flex flex-col h-full">
+              <CardHeader className="flex-shrink-0">
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5 text-blue-500" />
-                  Goals
+                  Creative Direction
                 </CardTitle>
                 <CardDescription>
-                  What you're working toward
+                  Where you're headed
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-1 space-y-4">
+              <CardContent className="relative flex-1 overflow-y-auto space-y-4 min-h-0">
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-semibold text-foreground">Core Vision</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Making everyday life feel visually intentional through calm storytelling.
+                  </p>
+                </div>
+
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Current Focus</h4>
-                  <ul className="space-y-1.5 text-sm text-muted-foreground">
+                  <h4 className="text-sm font-semibold text-foreground">Current Stage</h4>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Building reach, strong vibes</span>
+                      <span className="font-medium text-foreground">65%</span>
+                    </div>
+                    <Progress value={65} className="h-2" />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-semibold text-foreground">Core Messages</h4>
+                  <ul className="space-y-1 text-xs text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                      <span>Grow to 5k followers by Q2</span>
+                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-foreground/40" />
+                      <span>Routines don't have to feel boring</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                      <span>Land 2-3 brand partnerships</span>
+                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-foreground/40" />
+                      <span>Calm productivity over hustle culture</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                      <span>Experiment with new content formats</span>
+                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-foreground/40" />
+                      <span>Visual clarity brings peace</span>
                     </li>
                   </ul>
                 </div>
 
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Top Formats</h4>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline">Design Tips</Badge>
-                    <Badge variant="outline">Behind-the-Scenes</Badge>
-                    <Badge variant="outline">Day-in-Life</Badge>
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-semibold text-foreground">Tone</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Badge variant="outline" className="text-xs">Calm</Badge>
+                    <Badge variant="outline" className="text-xs">Honest</Badge>
+                    <Badge variant="outline" className="text-xs">Visual-first</Badge>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Past Posts</h4>
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-semibold text-foreground">Next 30–90 Days</h4>
+                  <ul className="space-y-1 text-xs text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-blue-500" />
+                      <span>More lifestyle moments</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-blue-500" />
+                      <span>Start one recurring series</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-blue-500" />
+                      <span>Try camera-facing content</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2 pt-3 border-t mt-auto">
+                  <h4 className="text-sm font-semibold text-foreground">Your Videos</h4>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="relative aspect-[9/16] rounded border border-dashed border-muted-foreground/30 bg-muted/30 flex items-center justify-center group hover:border-muted-foreground/50 transition-colors"
+                      >
+                        <Play className="h-5 w-5 text-muted-foreground/50 group-hover:text-muted-foreground/70 transition-colors" />
+                      </div>
+                    ))}
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full justify-start gap-2"
+                    className="w-full justify-start gap-2 text-xs h-8"
                   >
-                    <Upload className="h-4 w-4" />
-                    Upload 3-5 recent posts
+                    <Upload className="h-3.5 w-3.5" />
+                    Upload your content
                   </Button>
-                  <p className="text-xs text-muted-foreground">
-                    Connect TikTok to auto-fetch your latest content
-                  </p>
                 </div>
+                
+                {/* Scroll Indicator - Desktop Only */}
+                <div className="hidden lg:block sticky bottom-0 left-0 right-0 h-8 pointer-events-none bg-gradient-to-t from-background to-transparent" />
               </CardContent>
             </Card>
 
             {/* Superpowers Card */}
-            <Card className="flex flex-col">
+            <Card className="flex flex-col h-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-amber-500" />
                   Superpowers
                 </CardTitle>
                 <CardDescription>
-                  Your creative strengths
+                  What you're naturally great at
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-1 space-y-3">
                 <div className="space-y-2">
                   <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/30">
-                    <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">Visual Storytelling</h4>
-                    <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                      You create eye-catching visuals that stop the scroll
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">Visual Storytelling</h4>
+                      <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">12 videos</span>
+                    </div>
+                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                      Eye-catching visuals that stop the scroll. Consistently strong.
                     </p>
                   </div>
 
                   <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/30">
-                    <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">Consistent Posting</h4>
-                    <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                      You maintain a steady cadence that keeps your audience engaged
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">Consistent Pacing</h4>
+                      <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">15 videos</span>
+                    </div>
+                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                      Calm, intentional rhythm that keeps viewers engaged. Signature style.
                     </p>
                   </div>
 
                   <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/30">
-                    <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">Authentic Voice</h4>
-                    <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                      Your genuine personality shines through in every post
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">Authentic Voice</h4>
+                      <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">All videos</span>
+                    </div>
+                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                      Genuine personality shines through every frame. People trust you.
                     </p>
                   </div>
                 </div>
@@ -201,42 +262,89 @@ export default function ProfilePage() {
             </Card>
 
             {/* Growth Zones Card */}
-            <Card className="flex flex-col">
+            <Card className="flex flex-col h-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-emerald-500" />
                   Growth Zones
                 </CardTitle>
                 <CardDescription>
-                  Opportunities to level up
+                  Areas with untapped potential
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-1 space-y-3">
                 <div className="space-y-2">
                   <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
-                    <h4 className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">Call-to-Action Clarity</h4>
-                    <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-1">
-                      Experiment with stronger CTAs to boost engagement
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h4 className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">Camera-Facing Content</h4>
+                      <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">3 videos</span>
+                    </div>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                      Early experiments show promise. Adding direct presence could deepen connection.
                     </p>
                   </div>
 
                   <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
-                    <h4 className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">Trending Audio Use</h4>
-                    <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-1">
-                      Try incorporating more trending sounds for wider reach
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h4 className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">Educational Storytelling</h4>
+                      <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">5 videos</span>
+                    </div>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                      Your design insights resonate. More "why" behind the visuals could unlock new reach.
                     </p>
                   </div>
 
                   <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/30">
-                    <h4 className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">Collaboration Frequency</h4>
-                    <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-1">
-                      Partner with other creators to tap into new audiences
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h4 className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">Community Engagement</h4>
+                      <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">Opportunity</span>
+                    </div>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                      Responding to comments and building dialogue could amplify your voice.
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* Trust Validation Section */}
+          <Card className="animate-in fade-in duration-500">
+            <CardContent className="py-6 space-y-4">
+              <div className="space-y-2">
+                <p className="text-base font-medium text-foreground">
+                  Does this feel accurate?
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Was I close?
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9"
+                >
+                  Yes
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9"
+                >
+                  Somewhat
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9"
+                >
+                  Not really
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </main>

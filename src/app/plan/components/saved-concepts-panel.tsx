@@ -1,6 +1,6 @@
 import * as React from "react"
 import { format } from "date-fns"
-import { CalendarIcon, PenSquare, Target } from "lucide-react"
+import { CalendarIcon, Sparkles, Target, Upload, Video } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -37,6 +37,7 @@ type SavedConceptsPanelProps = {
   onToggleExecuted: (conceptId: string) => void
   onUpdateConcept: (conceptId: string, updates: Pick<SavedConcept, "title" | "summary">) => void
   fileLookup: Record<string, FileNode>
+  onDragStart?: (conceptId: string) => string
 }
 
 export function SavedConceptsPanel({
@@ -45,13 +46,14 @@ export function SavedConceptsPanel({
   onToggleExecuted,
   onUpdateConcept,
   fileLookup,
+  onDragStart,
 }: SavedConceptsPanelProps) {
   return (
     <Card className="flex h-full flex-col">
       <CardHeader>
         <div className="space-y-1">
-          <CardTitle>{concepts.length} ideas</CardTitle>
-          <CardDescription>Saved Concepts</CardDescription>
+          <CardTitle>Starred Concepts</CardTitle>
+          <CardDescription>{concepts.length} ideas ready to schedule</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-0">
@@ -65,6 +67,7 @@ export function SavedConceptsPanel({
               onToggleExecuted={onToggleExecuted}
               onUpdateConcept={onUpdateConcept}
               fileLookup={fileLookup}
+              onDragStart={onDragStart}
             />
           ))}
         </div>
@@ -80,12 +83,13 @@ type ConceptListItemProps = {
   onToggleExecuted: (conceptId: string) => void
   onUpdateConcept: (conceptId: string, updates: Pick<SavedConcept, "title" | "summary">) => void
   fileLookup: Record<string, FileNode>
+  onDragStart?: (conceptId: string) => string
 }
 
 const tagCategoryLabels: Record<TagCategory, string> = {
-  ideas: "Idea",
-  themes: "Theme",
-  strategies: "Strategy",
+  ideas: "Content Lane",
+  themes: "Format",
+  strategies: "Recurring Series",
 }
 
 function ConceptListItem({
@@ -94,8 +98,10 @@ function ConceptListItem({
   onToggleExecuted,
   onUpdateConcept,
   fileLookup,
+  onDragStart,
 }: ConceptListItemProps) {
   const [open, setOpen] = React.useState(false)
+  const [suggestionsOpen, setSuggestionsOpen] = React.useState(false)
   const [isEditing, setIsEditing] = React.useState(false)
   const [draftTitle, setDraftTitle] = React.useState(concept.title)
   const [draftSummary, setDraftSummary] = React.useState(concept.summary ?? "")
@@ -120,8 +126,20 @@ function ConceptListItem({
     setIsEditing(false)
   }
 
+  const handleDragStart = (e: React.DragEvent) => {
+    if (onDragStart) {
+      onDragStart(concept.id)
+    }
+    e.dataTransfer.effectAllowed = "move"
+    e.dataTransfer.setData("conceptId", concept.id)
+  }
+
   return (
-    <Card className="bg-card/80">
+    <Card 
+      className="bg-card/80 cursor-grab active:cursor-grabbing transition-transform hover:scale-[1.02]"
+      draggable
+      onDragStart={handleDragStart}
+    >
       <CardHeader className="space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 space-y-2">
@@ -137,11 +155,21 @@ function ConceptListItem({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-muted-foreground"
-                onClick={() => setIsEditing(true)}
+                className="h-8 w-8 text-muted-foreground"
+                title="Upload video"
               >
-                <PenSquare className="h-4 w-4" />
-                <span className="sr-only">Edit {concept.title}</span>
+                <Upload className="h-4 w-4" />
+                <span className="sr-only">Upload video for {concept.title}</span>
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground"
+                title="Generate with Veo"
+              >
+                <Video className="h-4 w-4" />
+                <span className="sr-only">Generate with Veo for {concept.title}</span>
               </Button>
             </div>
           </div>
@@ -216,16 +244,42 @@ function ConceptListItem({
                 </div>
               </PopoverContent>
             </Popover>
-            <Button
-              variant={concept.executed ? "default" : "outline"}
-              size="icon"
-              className={concept.executed ? "text-primary-foreground" : "text-muted-foreground"}
-              onClick={() => onToggleExecuted(concept.id)}
-              aria-pressed={concept.executed}
-            >
-              <Target className="h-4 w-4" />
-              <span className="sr-only">{concept.executed ? "Mark unexecuted" : "Mark executed"}</span>
-            </Button>
+            <Popover open={suggestionsOpen} onOpenChange={setSuggestionsOpen}>
+              <PopoverTrigger asChild>
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  className="text-muted-foreground"
+                  title="AI suggestions"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span className="sr-only">AI suggestions for {concept.title}</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80" align="end">
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground">Best posting window</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Around 7–9pm works well for this format</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground">Day fit</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Performs better mid-week (Tue–Thu)</p>
+                  </div>
+                  {resolvedTags.some(tag => tag.category === 'strategies' && tag.node) && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-foreground">Frequency</h4>
+                      <p className="text-xs text-muted-foreground mt-1">Once weekly keeps the series consistent</p>
+                    </div>
+                  )}
+                  <div className="pt-2 border-t">
+                    <p className="text-xs text-muted-foreground italic">
+                      Based on your formats + past saves
+                    </p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </CardContent>

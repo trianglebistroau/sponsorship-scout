@@ -22,9 +22,9 @@ export function ThoughtProcessPanel({ value, onChange, className }: ThoughtProce
   return (
     <Card className={cn("flex flex-1 flex-col lg:min-h-0", className)}>
       <CardHeader>
-        <CardTitle>Thought Process</CardTitle>
+        <CardTitle>Your Creative Notes</CardTitle>
         <CardDescription>
-          Put down your ideas, vision, questions, and what makes you YOU to the concepts.
+          Think out loud, I'm listening.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1">
@@ -32,7 +32,7 @@ export function ThoughtProcessPanel({ value, onChange, className }: ThoughtProce
           value={value}
           onChange={(event) => onChange(event.target.value)}
           className="h-full min-h-[180px] resize-none"
-          placeholder="e.g. Should I wear jewelry? Let's put the reference to the colour pallette of this collection here..."
+          placeholder="Jot reactions, tweak ideas, ask questions — I'll use this to shape what comes next.\n\ne.g. 'This feels too polished' or 'Should I wear gold or silver jewelry?'"
         />
       </CardContent>
     </Card>
