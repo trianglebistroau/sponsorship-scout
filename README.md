@@ -3,7 +3,7 @@
 ## Prisma
 `npx dotenv -e .env.local --prisma db pull` to pull from Supabase, alternatively, edit `prisma/schema.prisma` to push new changes to Supabase
 
-## Test commit
+## Test commit again
 
 ## Project info
 
