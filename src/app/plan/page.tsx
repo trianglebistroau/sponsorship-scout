@@ -18,58 +18,58 @@ const buildInitialConcepts = (): SavedConcept[] => {
   return [
     {
       id: "concept-1",
-      title: "Matcha tasting recap",
-      summary: "Quick beats + CTA focused on tasting notes.",
+      title: "Busy Girl Beach Reset",
+      summary: "A calm sunset reset vlog with aesthetic B-roll",
       tags: {
-        ideas: ["ideas/matcha-tasting"],
-        themes: ["themes/vlog"],
-        strategies: ["strategies/diversify-personal-brand"],
+        ideas: ["ideas/solo-runs"],
+        themes: ["themes/voiceover-broll"],
+        strategies: ["strategies/quiet-moments"],
       },
       plannedDate: new Date(year, month, 5),
       executed: false,
     },
     {
       id: "concept-2",
-      title: "Diversify personal brand",
-      summary: "Share 3 variations of the hero storyline.",
+      title: "Morning Run I Almost Skipped",
+      summary: "Honest fitness content without pressure",
       tags: {
-        ideas: ["ideas/day-in-life"],
+        ideas: ["ideas/solo-runs"],
         themes: ["themes/camera-facing"],
-        strategies: ["strategies/diversify-personal-brand"],
+        strategies: ["strategies/runs-almost-skipped"],
       },
       plannedDate: new Date(year, month, 12),
       executed: true,
     },
     {
       id: "concept-3",
-      title: "Beach day vlog",
-      summary: "Shot list + hook for sunrise session.",
+      title: "10-Minute Meals That Saved Me",
+      summary: "Quick cooking for busy days",
       tags: {
-        ideas: ["ideas/food-map"],
-        themes: ["themes/beach"],
-        strategies: ["strategies/repeat-consistency"],
+        ideas: ["ideas/cafe-hopping"],
+        themes: ["themes/day-in-life"],
+        strategies: ["strategies/quick-meals"],
       },
       executed: false,
     },
     {
       id: "concept-4",
-      title: "White Fox drop",
-      summary: "Post-launch hype checkpoints.",
+      title: "Café Study Session Essentials",
+      summary: "Aesthetic productivity with cozy vibes",
       tags: {
-        ideas: ["ideas/day-in-life"],
-        themes: ["themes/camera-facing"],
-        strategies: ["strategies/diversify-personal-brand"],
+        ideas: ["ideas/cafe-hopping"],
+        themes: ["themes/photo-dumps"],
+        strategies: [],
       },
       executed: false,
     },
     {
       id: "concept-5",
-      title: "Camera facing pep talk",
-      summary: "Short motivational script cues.",
+      title: "Quiet Moments After 9PM",
+      summary: "Late-night reflections and winding down",
       tags: {
-        ideas: ["ideas/matcha-tasting"],
+        ideas: ["ideas/night-resets"],
         themes: ["themes/camera-facing"],
-        strategies: ["strategies/repeat-consistency"],
+        strategies: ["strategies/quiet-moments"],
       },
       plannedDate: new Date(year, month, 22),
       executed: false,
@@ -127,6 +127,15 @@ export default function PlanPage() {
     )
   }, [])
 
+  const handleDragStart = React.useCallback((conceptId: string) => {
+    // Store concept ID for drop handling
+    return conceptId
+  }, [])
+
+  const handleDrop = React.useCallback((conceptId: string, date: Date) => {
+    handlePlanConcept(conceptId, date)
+  }, [handlePlanConcept])
+
   const handleUpdateConcept = React.useCallback(
     (conceptId: string, updates: Pick<SavedConcept, "title" | "summary">) => {
       setConcepts((prev) =>
@@ -150,6 +159,7 @@ export default function PlanPage() {
               scheduleByDay={scheduleByDay}
               isSynced={isSynced}
               onToggleSync={() => setIsSynced((prev) => !prev)}
+              onDrop={handleDrop}
             />
           </div>
           <div className="flex h-full flex-1 flex-col lg:basis-[30%]">
@@ -159,6 +169,7 @@ export default function PlanPage() {
               onToggleExecuted={handleToggleExecuted}
               onUpdateConcept={handleUpdateConcept}
               fileLookup={fileLookup}
+              onDragStart={handleDragStart}
             />
           </div>
         </div>

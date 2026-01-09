@@ -11,9 +11,6 @@ import { fileTreeData } from "./data/file-tree"
 import { applyFileOverrides, buildFileMap } from "./utils"
 import { FeedItem, FileNode, FileNodeUpdate, TagCategory } from "./types"
 
-const basePlaceholder =
-  "High-energy storyline about the creator's latest post paired with brand-safe takeaways."
-
 const TAG_CATEGORIES: TagCategory[] = ["ideas", "themes", "strategies"]
 
 const buildCategoryFileIds = (): Record<TagCategory, string[]> => {
@@ -32,6 +29,118 @@ const createEmptyTags = () => ({
   strategies: [] as string[],
 })
 
+const conceptTemplates = [
+  {
+    title: "Busy Girl Beach Reset",
+    duration: "2 min watch • Easy",
+    theme: "Soft reset energy with end-of-day reflection",
+    whyThisHits: [
+      "Reset-style content is trending",
+      "Aesthetic B-roll = high save potential",
+      "Relatable burnout → calm payoff"
+    ],
+    hooks: [
+      "POV: you finally logged off",
+      "This reset fixed my mood",
+      "Come reset with me"
+    ],
+    storyboard: [
+      "Arrival at beach",
+      "Quiet walk B-roll",
+      "One reflective line to camera",
+      "Sunset close"
+    ],
+    cta: [
+      "Save for later",
+      "Which reset should I do next?",
+      "Comment 'reset'"
+    ],
+    brandFit: "Would naturally align with Lululemon (wellness, calm routines) and Nike (movement as self-care)"
+  },
+  {
+    title: "10-Minute Meals That Saved Me",
+    duration: "90 sec watch • Easy",
+    theme: "Quick, practical food content for busy days",
+    whyThisHits: [
+      "Short-form cooking is highly shareable",
+      "Solves a real problem (fast meals)",
+      "No fancy ingredients = more relatable"
+    ],
+    hooks: [
+      "When you're too tired to cook but need to eat",
+      "This took 10 minutes, no joke",
+      "Lazy girl dinner that actually slaps"
+    ],
+    storyboard: [
+      "Ingredients laid out",
+      "Fast cuts of cooking process",
+      "Final plate reveal",
+      "Quick taste reaction"
+    ],
+    cta: [
+      "What should I make next?",
+      "Drop your go-to quick meal",
+      "Save this for busy nights"
+    ],
+    brandFit: null
+  },
+  {
+    title: "Morning Run I Almost Skipped",
+    duration: "2 min watch • Medium",
+    theme: "Honest, relatable fitness content without pressure",
+    whyThisHits: [
+      "Struggle-to-success arc is engaging",
+      "Authenticity > performance metrics",
+      "Viewers connect with the 'almost didn't' feeling"
+    ],
+    hooks: [
+      "I really didn't want to run today",
+      "POV: convincing yourself to just start",
+      "The run I almost skipped changed my whole day"
+    ],
+    storyboard: [
+      "Morning struggle (still in bed)",
+      "Lacing up shoes reluctantly",
+      "First steps outside",
+      "Mid-run reflection to camera",
+      "Post-run relief shot"
+    ],
+    cta: [
+      "Comment if you've been there",
+      "Which run almost didn't happen for you?",
+      "Save for motivation"
+    ],
+    brandFit: "Would naturally align with Nike (everyday movement, authentic athlete energy) and Apple (morning routine content)"
+  },
+  {
+    title: "Café Study Session Essentials",
+    duration: "90 sec watch • Easy",
+    theme: "Aesthetic productivity with a cozy vibe",
+    whyThisHits: [
+      "Study/work content is evergreen",
+      "Café aesthetic = high engagement",
+      "Viewers love 'what's in my bag' style content"
+    ],
+    hooks: [
+      "What I bring to every café study session",
+      "Setting up my mobile office",
+      "This setup keeps me locked in for hours"
+    ],
+    storyboard: [
+      "Walking into café",
+      "Setting up laptop and essentials",
+      "B-roll of study environment",
+      "Quick productivity tip to camera"
+    ],
+    cta: [
+      "What's your study essential?",
+      "Favorite café study spot?",
+      "Save for your next session"
+    ],
+    brandFit: "Would naturally align with Apple (productivity, clean visuals) and Lululemon (intentional routine content)"
+  }
+]
+
 const generateFeedItems = (
   startIndex: number,
   batchSize: number,
@@ -39,6 +148,9 @@ const generateFeedItems = (
 ): FeedItem[] => {
   return Array.from({ length: batchSize }).map((_, offset) => {
     const order = startIndex + offset + 1
+    const templateIndex = (order - 1) % conceptTemplates.length
+    const template = conceptTemplates[templateIndex]
+    
     const tags = TAG_CATEGORIES.reduce((acc, category, categoryIndex) => {
       const ids = categoryMap[category]
       if (!ids.length) {
@@ -58,12 +170,18 @@ const generateFeedItems = (
       return acc
     }, createEmptyTags())
 
+    const whyThisHitsText = template.whyThisHits.map(item => `- ${item}`).join('\n')
+    const hooksText = template.hooks.map((hook, i) => `${i + 1}. "${hook}"`).join('\n')
+    const storyboardText = template.storyboard.map((beat, i) => `${i + 1}. ${beat}`).join('\n')
+    const ctaText = template.cta.map(cta => `- "${cta}"`).join('\n')
+    const brandFitSection = template.brandFit ? `\n\n### Suggested Brand Fit\n${template.brandFit}` : ''
+
     return {
       id: `feed-${order}`,
-      title: `Creator spotlight #${order}`,
-      excerpt: `${basePlaceholder} Clip ${order} keeps looping with a concise CTA placeholder.`,
-      duration: "2 min watch",
-      body: `## Hook for clip ${order}\n\n${basePlaceholder}\n\n- Bullet one\n- Bullet two\n\n**CTA**: Drop your CTA copy here.`,
+      title: template.title,
+      excerpt: template.theme,
+      duration: template.duration,
+      body: `### Theme\n${template.theme}\n\n### Why this hits\n${whyThisHitsText}\n\n### Hook Options\n${hooksText}\n\n### Storyboard\n${storyboardText}\n\n### CTA Ideas\n${ctaText}${brandFitSection}`,
       tags,
     }
   })

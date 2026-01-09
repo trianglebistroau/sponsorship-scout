@@ -32,9 +32,9 @@ export type ConceptFeedProps = {
 }
 
 const tagCategoryLabels: Record<TagCategory, string> = {
-  ideas: "Idea",
-  themes: "Theme",
-  strategies: "Strategy",
+  ideas: "Content Lane",
+  themes: "Format",
+  strategies: "Recurring Series",
 }
 
 // Animation variants for snappy feel
@@ -90,6 +90,32 @@ const sentinelVariants = {
   },
 }
 
+// Helper to parse markdown sections
+const parseConceptBody = (body: string) => {
+  const sections: Record<string, string> = {}
+  const lines = body.split('\n')
+  let currentSection = ''
+  let currentContent: string[] = []
+
+  lines.forEach((line) => {
+    if (line.startsWith('### ')) {
+      if (currentSection && currentContent.length) {
+        sections[currentSection] = currentContent.join('\n').trim()
+      }
+      currentSection = line.replace('### ', '').trim()
+      currentContent = []
+    } else if (currentSection) {
+      currentContent.push(line)
+    }
+  })
+
+  if (currentSection && currentContent.length) {
+    sections[currentSection] = currentContent.join('\n').trim()
+  }
+
+  return sections
+}
+
 export function ConceptFeed({
   items,
   onLoadMore,
@@ -105,6 +131,7 @@ export function ConceptFeed({
   const sentinelRef = React.useRef<HTMLDivElement | null>(null)
   const loadingRef = React.useRef(false)
   const [editingId, setEditingId] = React.useState<string | null>(null)
+  const [expandedId, setExpandedId] = React.useState<string | null>(null)
   const [draftTitle, setDraftTitle] = React.useState("")
   const [draftBody, setDraftBody] = React.useState("")
 
@@ -142,8 +169,13 @@ export function ConceptFeed({
 
   const startEditing = React.useCallback((item: FeedItem) => {
     setEditingId(item.id)
+    setExpandedId(null) // Close expanded view when editing
     setDraftTitle(item.title)
     setDraftBody(item.body)
+  }, [])
+
+  const toggleExpanded = React.useCallback((itemId: string) => {
+    setExpandedId((prev) => prev === itemId ? null : itemId)
   }, [])
 
   const handleCancel = React.useCallback(() => {
@@ -161,8 +193,8 @@ export function ConceptFeed({
   return (
     <Card className={cn("flex h-full flex-col lg:min-h-0", className)}>
       <CardHeader>
-        <CardTitle>Concept Feed</CardTitle>
-        <CardDescription>Find your next viral idea.</CardDescription>
+        <CardTitle>Your Idea Stream</CardTitle>
+        <CardDescription>Fresh ideas made for you, tuned to your creative blueprint.</CardDescription>
         {activeFilters.length ? (
           <div className="mt-3 flex flex-wrap gap-2">
             {activeFilters.map((file) => (
@@ -192,10 +224,13 @@ export function ConceptFeed({
             {items.map((item) => {
               const isStarred = starredItemIds.has(item.id)
               const isEditing = editingId === item.id
+              const isExpanded = expandedId === item.id
               const tagEntries = Object.entries(item.tags) as [TagCategory, string[]][]
               const resolvedTags = tagEntries.flatMap(([category, ids]) =>
                 ids.map((tagId) => ({ category, node: fileLookup[tagId] }))
               )
+              
+              const sections = parseConceptBody(item.body)
 
               return (
                 <motion.div
@@ -265,10 +300,10 @@ export function ConceptFeed({
                     </div>
                   </CardHeader>
 
-                  <CardContent className={cn("flex-1", isEditing && "overflow-hidden")}>
+                  <CardContent className={cn("flex-1 space-y-4", isEditing && "overflow-hidden")}>
                     <AnimatePresence mode="wait">
                       {!isEditing && resolvedTags.length ? (
-                      <div className="mb-3 flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {resolvedTags.map(({ category, node }) => {
                           if (!node) return null
                           const accentStyle = node.accentColor
@@ -337,10 +372,118 @@ export function ConceptFeed({
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.3 }}
+                          className="space-y-4"
                         >
-                          <p className="text-sm leading-relaxed text-muted-foreground">
-                            {item.excerpt}
-                          </p>
+                          {/* Theme */}
+                          <div>
+                            <p className="text-sm leading-relaxed text-muted-foreground">
+                              {sections.Theme || item.excerpt}
+                            </p>
+                          </div>
+
+                          {/* Why this hits */}
+                          {sections['Why this hits'] && (
+                            <div className="space-y-2">
+                              <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground/70">
+                                Why this hits
+                              </h4>
+                              <div className="space-y-1">
+                                {sections['Why this hits'].split('\n').filter(line => line.trim().startsWith('-')).slice(0, 3).map((line, i) => (
+                                  <p key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-foreground/40" />
+                                    <span>{line.replace(/^-\s*/, '')}</span>
+                                  </p>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Hook Options - show 2-3 */}
+                          {sections['Hook Options'] && (
+                            <div className="space-y-2">
+                              <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground/70">
+                                Hook Options
+                              </h4>
+                              <div className="space-y-1.5">
+                                {sections['Hook Options'].split('\n').filter(line => line.trim()).slice(0, 3).map((hook, i) => (
+                                  <p key={i} className="text-sm font-medium text-foreground/90 italic">
+                                    {hook.replace(/^\d+\.\s*/, '')}
+                                  </p>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Storyboard Summary - first 3-4 beats */}
+                          {sections['Storyboard'] && (
+                            <div className="space-y-2">
+                              <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground/70">
+                                Storyboard
+                              </h4>
+                              <div className="space-y-1">
+                                {sections['Storyboard'].split('\n').filter(line => line.trim()).slice(0, isExpanded ? undefined : 4).map((beat, i) => (
+                                  <p key={i} className="text-sm text-muted-foreground">
+                                    {beat.replace(/^\d+\.\s*/, '').trim()}
+                                  </p>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Expanded content */}
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="space-y-4 border-t pt-4"
+                            >
+                              {/* Full Storyboard already shown above */}
+                              
+                              {/* CTA Ideas */}
+                              {sections['CTA Ideas'] && (
+                                <div className="space-y-2">
+                                  <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground/70">
+                                    CTA Ideas
+                                  </h4>
+                                  <div className="space-y-1">
+                                    {sections['CTA Ideas'].split('\n').filter(line => line.trim().startsWith('-')).map((cta, i) => (
+                                      <p key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                                        <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-foreground/40" />
+                                        <span>{cta.replace(/^-\s*/, '').replace(/"/g, '')}</span>
+                                      </p>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Suggested Brand Fit */}
+                              {sections['Suggested Brand Fit'] && (
+                                <div className="space-y-2">
+                                  <h4 className="text-xs font-semibold uppercase tracking-wide text-foreground/70">
+                                    Suggested Brand Fit
+                                  </h4>
+                                  <p className="text-sm text-muted-foreground leading-relaxed">
+                                    {sections['Suggested Brand Fit']}
+                                  </p>
+                                </div>
+                              )}
+                            </motion.div>
+                          )}
+
+                          {/* See More / See Less toggle */}
+                          {(sections['CTA Ideas'] || sections['Suggested Brand Fit']) && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toggleExpanded(item.id)}
+                              className="text-xs text-muted-foreground hover:text-foreground"
+                            >
+                              {isExpanded ? 'See less' : 'See full details'}
+                            </Button>
+                          )}
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -360,7 +503,7 @@ export function ConceptFeed({
             animate="visible"
           >
             <p className="text-xs text-muted-foreground">
-              Keep scrolling for more virtual reels…
+              Keep scrolling for more ideas tailored to you…
             </p>
           </motion.div>
         </div>

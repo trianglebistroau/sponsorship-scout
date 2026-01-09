@@ -213,3 +213,589 @@ Want to shape one of these into a weekly format?”
 - No logic changes
 - No layout refactors
 */
+
+#Generate page
+/*
+#GOAL
+- Refine the "Generate" page so it feels like scrolling a personalised TikTok-style idea feed.
+This page should feel alive, conversational, and creator-native — not analytical or salesy.
+- The Generate page surfaces content concepts tailored to the creator’s:
+    - Content Lanes
+    - Formats
+    - Recurring Series
+    - Brand Fit
+(from "Your Creative Blueprint" in Research)
+- All changes are copy, naming, hierarchy, and light structural guidance only.
+- Do NOT introduce new libraries or global styles.
+
+#Constraints
+- Do NOT change page-level layout or navigation
+- Do NOT modify GeneratorNav
+- Reuse existing Card, Badge, Tag, Button patterns
+- Keep scroll behaviour intact
+- Concepts should remain editable and persistent
+- This page is guidance + inspiration, not instruction
+
+#Tasks
+##"Concept Feed" section
+- Rename “Concept Feed” to “Your Idea Stream” or something similar but relate to personal touch
+- Subtitle: “Fresh ideas made for you, tuned to your creative blueprint.”
+- Intent:
+    - Feels like a feed, not a results page.
+    - Less ‘viral chasing’, more ‘this feels like you’.
+    - Replicate the vibe of "For You" page of TikTok
+
+- "Creator Spotlight"
+    - each Creator Spotlight should surface information in a calm, low-pressure, scannable way
+    - Rename Creator Spotlight to the actual concept name as the primary headline. It needs to be short, evocative, human
+        - Example: instead of "Creator Spotlight #1", change to "Busy Girl Beach Reset"
+    - Keep the timing (e.g. 2 mins watch), which acts as the expected time to film the content. Consider adding the level of difficulty based on previous users' performance (easy, medium and difficult and colour code as green, yellow and red)
+    - Tags and Filters
+        - All tags inside each Creator Spotlight must align with
+    "Your Creative Blueprint" terminology.
+        - Replace Idea, Theme, Strategy and Brand with 
+            - Content Lane
+            - Format
+            - Recurring Series (if applicable)
+            - Brand Fit (optional)
+        - These tags:
+            - Act as visual metadata
+            - Also act as filters
+            - Must match Vibe Picker values on the left (changed the wording to "Your Creative Blueprint" to match with the Research page) 
+        - Example tag row:
+            - [Content Lane: Café hopping]
+            - [Format: Camera-facing reflection]
+            - [Recurring Series: Quiet Moments After 9PM]
+    - Instead of presenting the whole sentence in the body (markdown) as "## Hook for clip 1 High-energy storyline about the creator's latest post paired with brand-safe takeaways.
+        - Bullet one
+        - Bullet two
+        **CTA**: Drop your CTA copy here."
+    it should have these sub-areas
+        - Theme:
+            - short descriptor
+            - Example: “Soft reset energy with end-of-day reflection”
+        - Why this hits: 
+            - give users the reason why this video will perform well for them
+            - Example bullets:
+                - Reset-style content is trending
+                - Aesthetic B-roll = high save potential
+                - Relatable burnout → calm payoff
+        - Hook Options: 
+            - short, bold, skimmable list. Note that this is only the suggestion, users can change based on their own style and preference
+            - Example
+                - “POV: you finally logged off”
+                - “This reset fixed my mood”
+                - “Come reset with me”
+        - Storyboard: 
+            - high-level beats only. No over-directing
+            - Example
+                - Arrival at beach
+                - Quiet walk B-roll
+                - One reflective line to camera
+                - Sunset close
+        - CTA Ideas: 
+            - Optional, soft suggestion (depending on the context of the videos, if it's related to brand sponsors, campaigns or community encouragement)
+            - Example
+                - “Save for later”
+                - “Which reset should I do next?”
+                - “Comment ‘reset’”
+        - Suggested Brand Fit (Optional)
+            - only show if relevant. Give the reason why this content might draw those brands' attention
+            - Example: "“Would naturally align with: Lululemon and WhiteFox because ...”
+    - Apply this structure to all following "Creator Spotlight" concepts (i.e. "Creator Spotlight #2", "Creator Spotlight #3", etc)
+
+##"Thought Process"
+- Rename "Thought Process" into "Your Creative Notes"
+- Subtitle: "Think out loud, I'm listening"
+- Intent: This is a living feedback loop, not a form. This panel serves 3 purposes
+    1. A place for creators to dump thoughts while scrolling
+    2. A chat space to tweak or question a concept
+    3. Signal input for the agent to learn creator preferences
+- Instruction Above User Input: Replace the existing copy with something like "Jot reactions, tweak ideas, ask questions — I’ll use this to shape what comes next."
+- Example User Inputs:
+    - “This feels too polished”
+    - “Can we make this more chaotic?”
+    - “Should I wear gold or silver jewellery?”
+    - “I like the idea but not the hook”
+- Example AI Response Tone: 
+    - Friendly, collaborative, creator-to-creator
+    - “Gold works better here — it catches light in sunset shots.
+I’ll lean more into that soft-glow aesthetic for the next idea.”
+
+#Tone & Vibe Rules
+- Conversational, not instructional
+- Confident but gentle
+- No buzzwords
+- No growth-hacking language
+- Feels like a creative partner, not an algorithm
+
+#Expected Output
+- “Concept Feed” renamed to “Your Idea Stream”
+- Tags aligned with Your Creative Blueprint
+- Concept cards feel skimmable, inspiring, low-pressure
+- Right panel "Thought Process" (changed to "Your Creative Notes") feels like a creative buddy + memory system
+- No breaking layout or logic changes
+*/
+
+Follow-Up Prompt
+/*
+#GOAL
+- Update the Generate page so each Concept Drop shows its core creative details by default — without requiring users to click “Edit”.
+- Creators should be able to understand, react to, and feel inspired by an idea within 2–3 seconds of scrolling.
+- Editing remains available, but discovery comes first. Currently the concept structure (Why this hits, Hook Options, Storyboard, etc) only appears inside Edit mode. Each concept should surface
+    - High-signal inspiration upfront
+    - Deeper detail progressively
+    - Edit mode only for customization
+
+#Task
+- By default (visible without clicking the Edit button), show these following sections inline inside each concept (apart from Concept Name and Theme already presented). These should be read-only, visually calm and clearly part of the feed experience
+    - “Why this hits” (2–3 short bullets max)
+    - 2–3 Hook options (stacked, lightweight)
+    - Summary Storyboard to get users a feel-alike
+- When the user click the Edit button, expand the concept (inline, not modal) and reveal
+    - Full storyboard
+    - CTA ideas (if applicable)
+    - Suggested brand fit
+    This expansion should:
+    - Push content downward naturally
+    - Preserve scroll context
+    - Feel like unfolding a thought, not opening a form
+    Note that editing should NOT be required to understand the idea and should feel secondary when users want to manually edit themselves, including copy tweaks, hook reqrites and for personal notes
+
+#Visual Guidance
+- Use spacing + typography hierarchy to separate:
+  - “Why this hits”
+  - “Hooks”
+  - “Storyboard”
+- Avoid heavy borders or background changes
+- Use subtle dividers or opacity shifts only if needed
+- Keep the feed breathable
+
+#Tone Principle
+Scrolling the Generate page should feel like: “I’m discovering ideas made for me” NOT “I need to open this to see what it is”
+
+#Expected Output
+- Creators understand the idea instantly
+- Clicking Edit feels optional, not mandatory
+- Feed feels rich, alive, and skim-friendly
+- No layout breakage
+- No new components or libraries
+*/
+
+
+#Plan Page
+/*
+#CONTEXT
+- The Plan page currently allows users to schedule starred concepts via a calendar (left) and a list of saved/starred content (right).
+- The structure is correct. This task enhances interaction, guidance, and clarity — NOT a redesign.
+
+#GOAL
+Transform the Plan page into a creator-friendly scheduling space that:
+- Feels intuitive and low-effort
+- Encourages better posting decisions
+- Gently suggests timing + content fit
+- Never over-promises performance
+
+#Tasks
+##1. Drag and Drop Scheduling
+- Allow users to drag starred content cards directly onto the calendar
+- Dropping a card on a date schedules it immediately
+- Preserve existing “Reschedule” button as:
+  - Secondary
+  - Accessibility fallback
+  - Keyboard / non-drag option
+- DO NOT remove the button.
+
+##2. Starred Content Section
+- The right-hand list should ONLY display concepts the user has starred in the Generate page. 
+- Ensure the following information is presented in each idea card
+  - Concept Title
+  - A one-line, creator-friendly short Summary (e.g. A calm night reset vlog with cafe visual)
+  - Tags (compact chips)
+    - Content Lane
+    - Format
+    - Recurring Series (if any)
+    - Brand Fit (optional)
+accurately reflect the actual generated concepts
+- Next to the Concept Title and status (Scheduled or Unplanned), replace the "Edit" button icon with a small inline, subtle icon buttons for users to
+    - Upload Video
+    - Generate with Veo   
+- No placeholder or random concepts
+
+##3. AI Suggestions (Soft Guidance)
+- Replace the looped circle icon next to “Reschedule” button with“Suggestion” icon (sparkle / clock / insight-style)
+- On click, show a dropdown / popover (NOT modal) containing:
+  - Suggested posting window (e.g. “Best around 7–9pm”)
+  - Suggested day fit (e.g. “Performs better mid-week”)
+  - Suggested frequency if it's a recurring series
+  - Short reasoning (muted text)
+  “Based on your formats + past saves”
+- Tone:
+    - Advisory, not predictive
+    - No guarantees
+    - No hard metrics
+
+#UX Principles and Layout Rules
+- Suggestions should feel optional
+- Drag & drop should feel playful, not technical
+- Information should reduce thinking, not add pressure
+- Everything is editable, nothing is forced
+- Keep existing two-column layout:
+  - Calendar (left)
+  - Starred content list (right)
+- No new design systems
+- Use existing spacing, cards, and components
+- Mobile:
+  - Stack naturally
+  - Drag interaction degrades gracefully
+
+#Expected Output
+- Users can drag ideas onto the calendar effortlessly
+- Each idea is recognizable at a glance
+- AI suggestions feel like a friendly nudge
+- Page feels calm, supportive, and creator-first
+- Code remains modular and future-ready (uploads, Veo, analytics)
+
+DO NOT refactor unrelated logic.
+DO NOT introduce hard-coded performance claims.
+*/
+
+Follow-up prompt
+/*
+#CONTEXT
+After implementing AI Suggestions on the Plan page, the current UI shows:
+- An extra icon still appearing next to the Reschedule button
+- The AI Suggestions trigger rendered on the LEFT side of the content card
+- This creates visual crowding and breaks the intended action hierarchy.
+- This task is a UI cleanup + intent clarification. NO new logic. NO new features.
+
+#GOAL
+Refine the content card actions so:
+- AI Suggestions feel like a contextual, optional insight
+- Primary actions remain clear and uncluttered
+- Visual hierarchy feels calm and intuitive
+
+#TASK
+##1.REMOVE REDUNDANT ICON
+- Remove the existing standalone icon that appears next to the right of the Reschedule button
+- There should NOT be two adjacent icons competing for attention
+
+##2. AI Suggestions button
+- Place the AI Suggestions trigger on the RIGHT side of the action row
+- Align it visually with the Reschedule button and "Publishing Date"
+- Remove the text label "Suggestions"; instead, use icon-only affordance. The magic-wand-style sparkle icon itself should clearly imply insight, recommendation and timing hint. Avoid over-explaining.
+- Clicking the icon reveals the AI suggestion popover, which should:
+  - Anchor to the icon
+  - Appear to the left or below (space-aware)
+  - Contain the same soft guidance copy as before
+- No modal. No full-width expansion.
+
+#UI Principles
+- Reduce visual noise
+- Right-side = actions & controls
+- Left-side = content & memory
+- Icon over text for secondary insights
+- Calm and clever
+
+#Expected Output
+- Clean action row
+- One clear AI Suggestions icon on the right
+- No redundant icons
+- Better spacing and breathing room
+- The card feels lighter and easier to scan
+
+DO NOT:
+- Add explanatory text
+- Add tooltips unless already supported
+- Change scheduling logic
+*/
+
+#Profile Page
+/*
+#CONTEXT
+- This Profile page appears AFTER an AI conversational onboarding flow. The system has already:
+    - Spoken with the creator to understand their goals, personality, vision
+    - Analysed their TikTok account (with consent)
+    - Scraped basic video metadata + thumbnails (future-ready)
+- This page is NOT an analytics dashboard. It is a creator-facing identity + direction page. Think it like “Your creative mirror + north star.”
+- DO NOT redesign the entire page.
+- DO NOT add heavy metrics, charts, or dense copy.
+
+#GOAL
+- Evolve the Profile page from a static summary into a:
+    - Clear creator identity snapshot
+    - Light strategic guide
+    - Emotionally affirming, conversational experience
+- Tone:
+    - Bold, warm, human, creator-friendly.
+    - Short sentences. No jargon. No corporate language.
+
+#TASK
+#1. Account/Profile Header
+- Keep the current layout and structure, which includes
+    - Cover background
+    - Avatar
+    - Name, TikTok handle, follower count
+    - Short bio paragraph
+- Update the bio copy logic to enrich its meaning
+    - Auto-generated from onboarding conversation + TikTok presence
+    - Written like a creator bio, not a CV
+    - 1–2 sentences max
+    - Example vibe: “A fashionista turning everyday routines into calm and soft stories.”
+
+##2. Creative DNA (Identity, not tags)
+- Keep this as a distinct card. Replace simple labels with narrative framing. This section answers: “What kind of creator am I?”
+- This section includes
+    - Creator Type
+        - One strong identity phrase
+        - Example: “Calm Visual Educator”, “Relatable Lifestyle Storyteller”
+    - Audience Personas
+        - 2–3 groups their content resonates with most
+        - Written like humans, not demographics
+        - Example: “Aesthetic lovers”, “Quiet environment creatives”
+    - Content Style/Taste
+        - Why people follow them
+        - Example traits: aesthetic framing, doodle overlays, soft pacing, bubbly sound design
+    - Personality 
+        - 3–5 traits
+        - Friendly, curious, warm, thoughtful, etc.
+        - Chips / badges are fine
+- Keep copy light and scannable. Avoid paragraphs.
+
+##3. Goals
+- This section should feel like a creaive direction, NOT a task list
+- Replace the current Goals content with
+###1. Personal Brand Vision
+    - One clear purpose statement
+    - Example: “Showing fashion in a way that feels friendly and real through personalised animations and colours.”
+###2. Target Audience
+    - Who they are creating for right now
+    - Short phrases, not bullet-heavy
+###3. Current Stage vs Desired Direction
+    - Gentle progress framing with a progress bar
+    - Example: “Strong engagement, still growing reach.”
+###4. Core Video Messages
+    - 2–4 recurring ideas they communicate through content
+    - Example: “Your life doesn’t have to look polished to be worthy of being shared.”
+###5. Tone of Voice
+    - How their videos feel
+    - Example: calm, honest, visually-led, conversational
+###6. 30-90D Strategy
+    - Short, bold, creator-friendly guidance
+    - Example:
+        - Double down on visual explainers
+        - Introduce one recurring series
+        - Test 2 new formats without pressure
+###7. Your TikTok Videos
+    - Show thumbnails of TikTok videos users have dropped and shared
+    - If not, show placeholders
+
+##4. Superpowers and Growth Zones
+- Keep existing card layout, visual style and tone
+- Enhance each pillar with
+    - Number of videos produced in this area (light, optional)
+    - Quick observational insight:
+        - “Consistently strong”
+        - “Underused but promising”
+        - “Occasional off-track experiments”
+- Avoid judgmental language.
+- Frame Growth Zones as opportunity, not weakness.
+
+#UI Principles
+- Prefer short blocks over long paragraphs
+- Speak like a creative partner, not a platform
+- Avoid analytics-heavy wording
+- Keep it calm, encouraging, editorial
+- This page should feel reassuring, not demanding
+
+#Expected Output
+- Updated Profile page copy and structure
+- Same components, richer meaning
+- Clear creator identity
+- Clear creative direction
+- Still concise, breathable, and human
+*/
+
+#Follow-up Profile
+/*
+#Context
+- The Profile page structure is correct, but visual balance, hierarchy, and content alignment need refinement.
+- This task is about layout tuning, spacing, and copy calibration, NOT adding new data sources or features.
+- Do NOT:
+    - Rebuild the page from scratch
+    - Remove existing sections
+    - Introduce new libraries or design systems
+
+#Goals
+##1. Balance the lower three sections (Goals, Superpowes and Growth Zones)
+- Currently, Goals is too tall and causes imbalance.
+- On desktop (lg+):
+    - Use a 3-column layout where each section stretches evenly to the bottom of the card.
+    - Internal scrolling is allowed ONLY inside the Goals section if content overflows.
+- On mobile: Sections remain stacked vertically (current behavior is fine).
+- Layout guidance
+    - Wrap the three sections in a grid container:
+        - grid-cols-1 by default
+        - lg:grid-cols-3 on desktop
+    - Each section should use flex-col + justify-between where appropriate.
+    - Avoid leaving large empty vertical gaps in Superpowers or Growth Zones.
+
+##2. Restructure Goals Content to reduce vertical density
+- Goals content should feel scannable, not essay-like.
+- Group related items into compact blocks:
+    - Core Vision (1–2 lines max)
+    - Current Stage (progress bar stays)
+    - Core Video Messages (limit to 3 short bullets)
+    - Tone of Voice (chips only)
+    - 30–90 Day Strategy (max 3 bullets)
+- Move “Your TikTok Videos” to the bottom and visually compress it.
+
+##3. Creative DNA card - fix visual hierarchy and consistency
+- Improve readability and alignment with other cards (Goals / Superpowers / Growth Zones).
+
+Required changes:
+- Remove low-contrast grey heading styles.
+- Ensure consistent typography scale:
+    - Heading (e.g. Creator Type, Audience Personas) = strong, prominent
+    - Subheading of Creator Type (a.k.a Calm Visual Educator in this case) is in bold
+    - Descriptions (e.g. content style sentence) = body text in black
+
+- Align spacing between subsections (Creator Type, Audience Personas, Content Style, Personality).
+
+##Content
+- This profile should NO LONGER feel like a “UI/UX designer dashboard”.
+- Adjust copy to reflect:
+    - Lifestyle / routines / calm productivity
+    - Visual-first storytelling
+    - Research → Generate → Plan workflow
+- Replace overly technical language with creator-native phrasing.
+- Keep tone calm, warm, and human — not analytical.
+
+#Layout Rules
+- Maintain existing Card, CardHeader, CardContent components.
+- No visible borders between the three lower sections.
+- Use spacing, alignment, and hierarchy instead of dividers.
+- Match visual rhythm used in Research / Generate / Plan pages.
+
+#Expected Outcome
+- Goals, Superpowers, and Growth Zones align evenly and fill the card height.
+- Creative DNA card feels clear, readable, and visually consistent.
+- Page feels balanced, calm, and creator-first — not lopsided or dashboard-heavy.
+- TSX remains valid, modular, and ready for future data integrations.
+
+#Important
+Trust existing layout structure.
+Only refactor layout and copy where necessary to achieve balance and consistency.
+*/
+
+#Conversation Onboarding
+/*
+#GOAL
+- Introduce a new AI Conversation (Onboarding) page that lives before the Profile page and feels like a calm, creator-first chat with a trusted peer.
+- The conversation should help Solvi understand the creator’s personality, taste, goals, and creative patterns — without asking them to over-explain or fill forms.
+- Build trust through reflection and validation, not interrogation.
+- Seamlessly transition users from this conversation into the Profile page.
+- Refine the Profile page so it visually balances content and reinforces trust with confirmation prompts
+
+#CONTEXT
+- The profile, Research, Generate and Plan pages are currently in place on subsequent folders within 'app' of 'src'
+- Users should now land on an AI Conversation page first.
+- This page should follow the same visual system (dark mode, soft gradients, calm pacing) but use an aesthetic, calming chat-style layout (similar to attached images).
+- This is NOT a generic chatbot. It should feel creator-friendly, warm, and observant.
+
+#TASK
+##1. AI Conversation Onboarding Page
+- Create a new route + folder (same level as profile/research/generate/plan), e.g. `/conversation`.
+- Implement the following step-based conversational flow:
+1. Welcome + Name
+- Open with a friendly, peer-level message:
+    - “Hey! Welcome to Solvi.”
+    - “Before we make anything, I want to understand you.”
+    - “What can I call you?”
+- Single text input
+- Helper text: “Nickname, real name, or your TikTok handle”
+2. Taste Discovery
+- New screen/state after name is submitted
+- Title: “Your taste says everything”
+- Message: “Drop 3 videos that feel most you. They can be yours or creators that inspire you.”
+- Include an upload / drop video button
+- No analytics language, no pressure
+3. AI Reflection + Validation
+- After videos are uploaded, show an AI-generated reflection block:
+    - Tone
+    - Energy
+    - Format bias
+    - Emotional texture (optional)
+- Intro text: “Here’s what I’m picking up from your taste:”
+- Ask a single validation question:
+  - “Am I reading this right?”
+- Response options:
+    - Yes
+    - Partially
+    - Not really
+- If Partially or Not really, prompt: “Tell me more”
+- After response, follow up with:
+    - “Nice. What else do you like?”
+    - Options: Upload more videos / Send a message / Skip
+4. Content Performance 
+- Screen 1:
+    - “Now drop 3 videos that performed best for you”
+    - Upload button
+- Screen 2:
+    - “Want to look at what didn’t land?”
+    - “Send me 3 videos you think might be holding you back”
+    - Upload button
+5. Processing State
+- Full-screen loading state
+- Subtle animation (hourglass flip, soft pulse, orbiting dot)
+- Copy examples (can vary):
+    - “Building your profile…”
+    - “Connecting the dots…”
+    - “Making sense of your creative chaos ✨”
+6. Completion + Transition
+- Friendly confirmation state with a calm, positive tone:
+    - “Sorted.”
+    - “Time to explore your own zone.”
+- Add a smiley face and a thumbs up to confirm
+- Auto-Navigate user to Profile page
+##2. Profile Page
+- Keep the current visual and look of the page
+- Only slightly making some adjustments egarding content
+1. Card Layout Balance
+- Goals, SuperPowers, and Growth Zones cards must:
+    - Have equal height on web
+    - Align visually in a row
+- Allow internal scrolling per card (especially Goals)
+- Add a subtle scroll affordance (gradient fade, soft shadow, or indicator) to signal more content
+- On mobile, cards can stack naturally with no scroll indicator required
+2. Trust Validation Section
+- Under the three cards, add a confirmation prompt:
+    - “Does this feel accurate?”
+    - “Was I close?”
+- Response options:
+    - Yes
+    - Somewhat
+    - Not really
+- If Somewhat or Not really selected, prompt user: "Tell me more" and kindly auto update based on users input. Recheck with users again through prompt: "Have I got this right this time?" until they select "Yes"
+- This is for trust-building, not correction
+
+#VISUAL GUIDANCE
+- Keep typography, spacing, and color consistent with Profile / Research / Generate / Plan
+- Avoid dashboard-like density
+- Avoid heavy borders
+- Use spacing, hierarchy, and subtle dividers only
+- Conversation should feel slow, intentional, and human
+
+#TONE PRINCIPLE
+The experience should feel like “I’m being understood by someone who gets creators”, NOT “I’m onboarding into a tool”
+
+#EXPECTED OUTCOME
+- Users feel welcomed and seen before seeing insights
+- Profile page feels earned, not generated
+- Cards feel visually balanced and intentional
+- Validation reinforces trust and authenticity
+- No new libraries or heavy components
+- No layout breakage
+*/
+
+

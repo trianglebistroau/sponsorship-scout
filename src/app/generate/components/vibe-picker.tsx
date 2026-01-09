@@ -134,11 +134,11 @@ export function VibePicker({
     [getCheckboxId, mentionMode, onPreviewFile, onSelectVibe, onToggleFile, selectionSet]
   )
 
-  const headerTitle = title ?? "Vibe Picker"
+  const headerTitle = title ?? "Your Creative Blueprint"
   const headerDescription =
     description ?? (
       <>
-        Your styles, goals, and identities. <br />All in one place.
+        The worlds you show up in. <br />Filter your idea stream.
       </>
     )
 
