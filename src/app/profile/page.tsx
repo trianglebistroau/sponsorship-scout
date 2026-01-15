@@ -307,44 +307,6 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           </div>
-
-          {/* Trust Validation Section */}
-          <Card className="animate-in fade-in duration-500">
-            <CardContent className="py-6 space-y-4">
-              <div className="space-y-2">
-                <p className="text-base font-medium text-foreground">
-                  Does this feel accurate?
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Was I close?
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9"
-                >
-                  Yes
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9"
-                >
-                  Somewhat
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9"
-                >
-                  Not really
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </main>
