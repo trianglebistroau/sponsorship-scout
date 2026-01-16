@@ -692,7 +692,7 @@ export default function ConversationPage() {
           handleGrowthClarification()
           break
         case "goal-editing":
-          handleGoalEdit()
+          handleGoalEditComplete()
           break
       }
     }
