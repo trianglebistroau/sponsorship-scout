@@ -1134,3 +1134,150 @@ Automatically redirect to Profile page.
 - Fewer UI controls, more conversation
 - Onboarding feels human, confident, and intentional
 */
+
+#Follow-Up #3
+/*
+#CONTEXT
+The onboarding conversational chat is functionally correct, but the tone, visual contrast, and interaction details don’t yet match the intended creator-first, funky, high-trust experience.
+
+This pass is about:
+- Making the agent feel more playful and alive during thinking moments
+- Improving visual contrast and readability of analysis blocks
+- Correcting interaction logic around validation and editing
+- Elevating the final transition into a confident, full-screen moment
+
+We are NOT adding new steps.
+We are polishing how each moment feels.
+
+
+#GOAL
+- Make loading moments feel fun, quirky, and creator-coded
+- Ensure all analysis content is clearly readable with strong contrast
+- Fix incorrect follow-up logic after validation (especially Superpowers + Goals)
+- Allow true inline editing of proposed goals (not adding new ones)
+- End onboarding with a bold, full-screen transition that feels earned
+- Match language to a Gen Z / creator tone: confident, playful, straightforward
+
+
+#TASKS
+
+## 1. Loading States: Funky + Quirky Copy
+Current issue:
+- Loading text feels neutral and generic
+- Missed opportunity to engage creators emotionally
+
+Fix:
+- Replace all loading messages with playful, creator-friendly copy
+- Examples (rotate or randomize if possible):
+    - “Reading the room 👀”
+    - “Scanning for main-character energy…”
+    - “Connecting the dots (and the vibes)…”
+    - “Looking for patterns your audience loves…”
+    - “Peeking under the hood of your content 🛠️”
+
+Animation:
+- Keep subtle (pulse, hourglass flip, breathing dot)
+- Avoid anything that feels like a spinner or system loader
+- Loading must fully complete BEFORE analysis content renders
+
+
+## 2. Analysis Content: Fix Contrast + Readability
+Current issue:
+- Light yellow, green, and purple backgrounds reduce readability
+- Analysis feels washed out and hard to scan
+
+Fix:
+- Increase contrast for all analysis blocks:
+    - Superpowers: deeper amber / orange tint with dark text
+    - Growth Zones: deeper green or teal tint with dark text
+    - Taste analysis (Tone, Energy, Format Bias): richer purple with strong text contrast
+- Ensure WCAG-friendly contrast without looking “enterprise”
+- Headings and body text must be clearly legible at a glance
+
+Rule: Analysis blocks should feel highlighted and confident, not soft or faded
+
+---
+
+## 3. Superpowers Validation: Correct Follow-Up Logic
+Current issue:
+- After “Does this feel accurate?” → Yes, the agent asks users to write what else they perform well at (not intended)
+
+Fix:
+- When user clicks “Yes”:
+    - Do NOT ask them to type anything
+    - Instead ask: “Want to add more videos to refine this?”
+    - Provide two options:
+        - Upload more videos (optional)
+        - Skip
+- Make it visually clear this step is optional
+- No text input box appears unless the user uploads more videos
+
+
+## 4. Goals Editing: True Inline Editing (Not Additive)
+Current issue: When users edit goals, their input is treated as a new goal instead of correcting the model’s suggestion
+
+Fix:
+- When the agent proposes goals:
+    - Render them as editable text blocks (inline)
+- Clicking “Edit”:
+    - Switch the agent’s message into an editable state
+    - Allow users to directly modify existing bullet points
+- Do NOT append new goals unless the user explicitly adds a new line
+- Once user clicks “Confirm”:
+    - Lock the edited content
+    - Proceed to final transition
+
+Mental model: “Fix what I said” not “Add more things”. User can still add points if they wish but the main idea is to fix if what the model predicts has already been accurate.
+
+
+## 5. Final Transition: Full-Screen, Not in Chat
+Current issue: Loading after goal confirmation still appears inside the chat
+
+Fix:
+- After goals are confirmed:
+    - Exit chat UI entirely
+    - Show a full-screen loading/transition page
+- Include:
+    - Bold, playful copy
+    - Subtle animation (icons, motion, pulse)
+- Copy examples:
+    - “Connecting the dots 🧠✨”
+    - “Turning chaos into clarity…”
+
+End state:
+- A short, positive confirmation moment:
+    - “Sorted. You’re in.”
+    - “This is your space now.”
+- Automatically redirect to Profile page
+
+
+## 6. Language & Tone Alignment
+Across all new copy:
+- Use creator-first, Gen Z-friendly language
+- Short sentences
+- Confident but warm
+- No corporate or analytical phrasing
+
+Avoid:
+- “Analysis complete”
+- “Validated”
+- “Proceed”
+- “Continue”
+
+Prefer:
+- “Got it.”
+- “That tracks.”
+- “Nice.”
+- “This checks out.”
+- “Let’s keep going.”
+
+---
+
+#EXPECTED OUTPUT
+- Loading moments feel fun, not empty
+- Analysis is readable, confident, and visually grounded
+- Validation flows match the intended logic
+- Goal editing feels intuitive and respectful
+- Final transition feels like a reward, not a system step
+- Overall onboarding feels like chatting with a smart, stylish creative partner
+*/

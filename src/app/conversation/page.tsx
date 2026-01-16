@@ -78,6 +78,8 @@ export default function ConversationPage() {
   const [growthVideos, setGrowthVideos] = React.useState<File[]>([])
   const [growthZones, setGrowthZones] = React.useState<GrowthZone[]>([])
   const [proposedGoals, setProposedGoals] = React.useState<string[]>([])
+  const [editableGoals, setEditableGoals] = React.useState<string[]>([])
+  const [isEditingGoals, setIsEditingGoals] = React.useState(false)
 
   // Auto-scroll to bottom when messages change
   React.useEffect(() => {
@@ -189,10 +191,18 @@ export default function ConversationPage() {
     setCurrentStage("analyzing-taste")
     
     // Show loading message
+    const loadingMessages = [
+      "Reading the room 👀",
+      "Scanning for main-character energy…",
+      "Looking for patterns your audience loves…",
+      "Peeking under the hood of your content 🛠️"
+    ]
+    const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)]
+    
     setTimeout(() => {
       addSystemMessage(
         <div className="space-y-3">
-          <p className="text-base leading-relaxed">Looking for patterns…</p>
+          <p className="text-base leading-relaxed">{randomMessage}</p>
         </div>
       )
     }, 600)
@@ -241,7 +251,7 @@ export default function ConversationPage() {
       setTimeout(() => {
         addSystemMessage(
           <div className="space-y-3">
-            <p className="text-base leading-relaxed">Tell me more about what you're aiming for.</p>
+            <p className="text-base leading-relaxed">Got it. Tell me more about what you're going for.</p>
           </div>
         )
         setCurrentStage("taste-clarification")
@@ -270,7 +280,7 @@ export default function ConversationPage() {
           <AnalysisBlock title="Tone" content={updatedAnalysis.tone} />
           <AnalysisBlock title="Energy" content={updatedAnalysis.energy} />
           <AnalysisBlock title="Format Bias" content={updatedAnalysis.formatBias} />
-          <p className="text-base leading-relaxed font-medium pt-2">Better?</p>
+          <p className="text-base leading-relaxed font-medium pt-2">That better?</p>
         </div>
       )
       setCurrentStage("awaiting-taste-validation")
@@ -286,7 +296,7 @@ export default function ConversationPage() {
     setTimeout(() => {
       addSystemMessage(
         <div className="space-y-3">
-          <p className="text-base leading-relaxed">Now send me 3 videos that performed best for you.</p>
+          <p className="text-base leading-relaxed">Now drop 3 videos that performed best for you.</p>
         </div>
       )
       setCurrentStage("awaiting-best-videos")
@@ -316,10 +326,18 @@ export default function ConversationPage() {
     
     setCurrentStage("analyzing-superpowers")
     
+    const loadingMessages = [
+      "Connecting the dots (and the vibes)…",
+      "Reading between the frames…",
+      "Scanning for main-character energy…",
+      "Looking for patterns that pop…"
+    ]
+    const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)]
+    
     setTimeout(() => {
       addSystemMessage(
         <div className="space-y-3">
-          <p className="text-base leading-relaxed">Reading between the frames…</p>
+          <p className="text-base leading-relaxed">{randomMessage}</p>
         </div>
       )
     }, 600)
@@ -364,8 +382,8 @@ export default function ConversationPage() {
       setTimeout(() => {
         addSystemMessage(
           <div className="space-y-3">
-            <p className="text-base leading-relaxed">Nice. What else do you think you perform well at?</p>
-            <p className="text-sm text-muted-foreground">(Optional)</p>
+            <p className="text-base leading-relaxed">Nice. Want to add more videos to refine this?</p>
+            <p className="text-sm text-muted-foreground">(Optional — you can skip)</p>
           </div>
         )
         setCurrentStage("superpowers-optional-more")
@@ -406,7 +424,7 @@ export default function ConversationPage() {
           {updatedSuperpowers.map((sp, idx) => (
             <SuperpowerBlock key={idx} {...sp} />
           ))}
-          <p className="text-base leading-relaxed font-medium pt-2">Better?</p>
+          <p className="text-base leading-relaxed font-medium pt-2">That track better?</p>
         </div>
       )
       setCurrentStage("awaiting-superpowers-validation")
@@ -422,8 +440,8 @@ export default function ConversationPage() {
     setTimeout(() => {
       addSystemMessage(
         <div className="space-y-3">
-          <p className="text-base leading-relaxed">Want to see what didn't land?</p>
-          <p className="text-base leading-relaxed">Send 3 videos that felt off or underperformed.</p>
+          <p className="text-base leading-relaxed">Want to look at what didn't land?</p>
+          <p className="text-base leading-relaxed">Drop 3 videos that felt off or underperformed.</p>
         </div>
       )
       setCurrentStage("awaiting-growth-videos")
@@ -453,10 +471,18 @@ export default function ConversationPage() {
     
     setCurrentStage("analyzing-growth")
     
+    const loadingMessages = [
+      "Reading the room 👀",
+      "Spotting the gaps…",
+      "Looking for unlock potential…",
+      "Connecting the dots 🧠"
+    ]
+    const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)]
+    
     setTimeout(() => {
       addSystemMessage(
         <div className="space-y-3">
-          <p className="text-base leading-relaxed">Spotting the gaps…</p>
+          <p className="text-base leading-relaxed">{randomMessage}</p>
         </div>
       )
     }, 600)
@@ -501,7 +527,7 @@ export default function ConversationPage() {
       setTimeout(() => {
         addSystemMessage(
           <div className="space-y-3">
-            <p className="text-base leading-relaxed">Want me to look at more?</p>
+            <p className="text-base leading-relaxed">Cool. Want me to look at more?</p>
             <p className="text-sm text-muted-foreground">(Optional)</p>
           </div>
         )
@@ -512,7 +538,7 @@ export default function ConversationPage() {
       setTimeout(() => {
         addSystemMessage(
           <div className="space-y-3">
-            <p className="text-base leading-relaxed">Tell me what you're noticing instead.</p>
+            <p className="text-base leading-relaxed">Tell me what you're seeing instead.</p>
           </div>
         )
         setCurrentStage("growth-clarification")
@@ -562,17 +588,18 @@ export default function ConversationPage() {
       "Experiment with formats that feel authentic while expanding reach"
     ]
     setProposedGoals(goals)
+    setEditableGoals(goals)
     
     setTimeout(() => {
       addSystemMessage(
-        <div className="space-y-4">
-          <p className="text-base leading-relaxed">Based on everything so far, I think your goal is:</p>
+        <div className="space-y-4" id="goal-proposal-message">
+          <p className="text-base leading-relaxed">Based on everything, here's what I think you're working toward:</p>
           <ul className="space-y-2 pl-4">
             {goals.map((goal, idx) => (
               <li key={idx} className="text-base leading-relaxed list-disc">{goal}</li>
             ))}
           </ul>
-          <p className="text-base leading-relaxed font-medium pt-2">Sound right?</p>
+          <p className="text-base leading-relaxed font-medium pt-2">This track?</p>
         </div>
       )
       setCurrentStage("goal-proposal")
@@ -582,99 +609,66 @@ export default function ConversationPage() {
   // STEP 8: Goal confirmation
   const handleGoalConfirmation = (confirmed: boolean) => {
     if (confirmed) {
-      addUserMessage("Yes")
+      addUserMessage("Confirmed")
       proceedToFinalProcessing()
     } else {
-      addUserMessage("Let me adjust")
-      setTimeout(() => {
-        addSystemMessage(
-          <div className="space-y-3">
-            <p className="text-base leading-relaxed">Tell me what needs to change:</p>
-          </div>
-        )
-        setCurrentStage("goal-editing")
-      }, 800)
+      setIsEditingGoals(true)
+      setCurrentStage("goal-editing")
     }
   }
 
-  const handleGoalEdit = () => {
-    if (!inputValue.trim()) return
-    
-    addUserMessage(inputValue)
-    setInputValue("")
-    
-    const updatedGoals = [...proposedGoals, inputValue]
-    setProposedGoals(updatedGoals)
+  const handleGoalEditComplete = () => {
+    addUserMessage("Updated goals")
+    setIsEditingGoals(false)
     
     setTimeout(() => {
       addSystemMessage(
         <div className="space-y-4">
-          <p className="text-base leading-relaxed">Updated goals:</p>
+          <p className="text-base leading-relaxed">Updated. Here's what we've got:</p>
           <ul className="space-y-2 pl-4">
-            {updatedGoals.map((goal, idx) => (
+            {editableGoals.map((goal, idx) => (
               <li key={idx} className="text-base leading-relaxed list-disc">{goal}</li>
             ))}
           </ul>
-          <p className="text-base leading-relaxed font-medium pt-2">Better?</p>
+          <p className="text-base leading-relaxed font-medium pt-2">That better?</p>
         </div>
       )
       setCurrentStage("goal-proposal")
-    }, 1200)
+    }, 800)
   }
 
   const proceedToFinalProcessing = async () => {
     setCurrentStage("final-processing")
     
-    setTimeout(() => {
-      addSystemMessage(
-        <div className="flex items-center justify-center py-8">
-          <div className="space-y-3 text-center">
-            <div className="animate-pulse">
-              <div className="w-12 h-12 mx-auto border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
-            <p className="text-base leading-relaxed">Connecting the dots…</p>
-          </div>
-        </div>
-      )
-    }, 600)
-    
     await simulateAnalysis(3500)
     
-    setTimeout(() => {
-      addSystemMessage(
-        <div className="space-y-3 text-center">
-          <p className="text-xl font-semibold">All set.</p>
-          <p className="text-base leading-relaxed">Your creative space is ready.</p>
-        </div>
-      )
-      setCurrentStage("completion")
-    }, 800)
+    setCurrentStage("completion")
   }
 
   // Helper Components
   function AnalysisBlock({ title, content }: { title: string; content: string }) {
     return (
-      <div className="rounded-lg bg-violet-500/10 border border-violet-500/20 p-4 space-y-1">
-        <h4 className="text-sm font-semibold text-violet-300">{title}</h4>
-        <p className="text-sm leading-relaxed text-violet-100/80">{content}</p>
+      <div className="rounded-lg bg-violet-600/20 border border-violet-500/40 p-4 space-y-1">
+        <h4 className="text-sm font-semibold text-violet-200">{title}</h4>
+        <p className="text-sm leading-relaxed text-violet-50">{content}</p>
       </div>
     )
   }
 
   function SuperpowerBlock({ title, description }: Superpower) {
     return (
-      <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-4 space-y-2">
-        <h4 className="text-sm font-semibold text-amber-300">{title}</h4>
-        <p className="text-sm leading-relaxed text-amber-100/80">{description}</p>
+      <div className="rounded-lg bg-amber-600/20 border border-amber-500/40 p-4 space-y-2">
+        <h4 className="text-sm font-semibold text-amber-200">{title}</h4>
+        <p className="text-sm leading-relaxed text-amber-50">{description}</p>
       </div>
     )
   }
 
   function GrowthZoneBlock({ title, description }: GrowthZone) {
     return (
-      <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-4 space-y-2">
-        <h4 className="text-sm font-semibold text-emerald-300">{title}</h4>
-        <p className="text-sm leading-relaxed text-emerald-100/80">{description}</p>
+      <div className="rounded-lg bg-emerald-600/20 border border-emerald-500/40 p-4 space-y-2">
+        <h4 className="text-sm font-semibold text-emerald-200">{title}</h4>
+        <p className="text-sm leading-relaxed text-emerald-50">{description}</p>
       </div>
     )
   }
@@ -904,22 +898,30 @@ export default function ConversationPage() {
       case "superpowers-optional-more":
         return (
           <div className="flex gap-2">
-            <Textarea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="What else do you excel at?..."
-              className="flex-1 resize-none"
-              rows={3}
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => document.getElementById("superpowers-more-upload")?.click()}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Add More Videos
+            </Button>
+            <input
+              id="superpowers-more-upload"
+              type="file"
+              accept="video/*"
+              multiple
+              onChange={(e) => {
+                handleBestUpload(e.target.files)
+                if (e.target.files && e.target.files.length > 0) {
+                  setTimeout(() => handleBestAnalyze(), 500)
+                }
+              }}
+              className="hidden"
             />
-            <div className="flex flex-col gap-2">
-              <Button onClick={handleSuperpowersClarification} size="icon" className="shrink-0">
-                <Check className="w-4 h-4" />
-              </Button>
-              <Button onClick={handleSkipOptionalSuperpowers} size="icon" variant="outline" className="shrink-0">
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+            <Button onClick={handleSkipOptionalSuperpowers}>
+              Skip
+            </Button>
           </div>
         )
 
@@ -1040,18 +1042,24 @@ export default function ConversationPage() {
 
       case "goal-editing":
         return (
-          <div className="flex gap-2">
-            <Textarea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="What needs to change?..."
-              className="flex-1 resize-none"
-              rows={3}
-              autoFocus
-            />
-            <Button onClick={handleGoalEdit} size="icon" className="shrink-0 self-end">
-              <Check className="w-4 h-4" />
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Edit your goals below:</p>
+            {editableGoals.map((goal, idx) => (
+              <Textarea
+                key={idx}
+                value={goal}
+                onChange={(e) => {
+                  const newGoals = [...editableGoals]
+                  newGoals[idx] = e.target.value
+                  setEditableGoals(newGoals)
+                }}
+                className="resize-none"
+                rows={2}
+              />
+            ))}
+            <Button onClick={handleGoalEditComplete} className="w-full">
+              <Check className="w-4 h-4 mr-2" />
+              Done
             </Button>
           </div>
         )
@@ -1063,45 +1071,74 @@ export default function ConversationPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="h-screen flex items-center justify-center px-4">
-        <div className="w-full max-w-2xl h-full max-h-[90vh] flex flex-col py-8">
-          {/* Chat Feed */}
-          <div className="flex-1 overflow-y-auto space-y-6 mb-6 px-2">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn(
-                  "flex",
-                  message.type === "system" ? "justify-start" : "justify-end"
-                )}
-              >
+      {/* Full-Screen Final Processing */}
+      {currentStage === "final-processing" && (
+        <div className="h-screen flex items-center justify-center px-4">
+          <div className="text-center space-y-8">
+            <div className="relative inline-block">
+              <div className="w-20 h-20 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+            <div className="space-y-3">
+              <p className="text-2xl font-semibold">Connecting the dots 🧠✨</p>
+              <p className="text-base text-muted-foreground">Turning chaos into clarity…</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full-Screen Completion */}
+      {currentStage === "completion" && (
+        <div className="h-screen flex items-center justify-center px-4">
+          <div className="text-center space-y-6">
+            <div className="text-6xl mb-4">✨</div>
+            <div className="space-y-2">
+              <p className="text-3xl font-bold">Sorted. You're in.</p>
+              <p className="text-lg text-muted-foreground">This is your space now.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chat Interface */}
+      {currentStage !== "final-processing" && currentStage !== "completion" && (
+        <div className="h-screen flex items-center justify-center px-4">
+          <div className="w-full max-w-2xl h-full max-h-[90vh] flex flex-col py-8">
+            {/* Chat Feed */}
+            <div className="flex-1 overflow-y-auto space-y-6 mb-6 px-2">
+              {messages.map((message) => (
                 <div
+                  key={message.id}
                   className={cn(
-                    "max-w-[85%] rounded-2xl px-5 py-4",
-                    message.type === "system"
-                      ? "bg-muted/50 text-foreground"
-                      : "bg-primary text-primary-foreground"
+                    "flex",
+                    message.type === "system" ? "justify-start" : "justify-end"
                   )}
                 >
-                  {message.content}
+                  <div
+                    className={cn(
+                      "max-w-[85%] rounded-2xl px-5 py-4",
+                      message.type === "system"
+                        ? "bg-muted/50 text-foreground"
+                        : "bg-primary text-primary-foreground"
+                    )}
+                  >
+                    {message.content}
+                  </div>
                 </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input Area */}
-          {currentStage !== "analyzing-taste" && 
-           currentStage !== "analyzing-superpowers" && 
-           currentStage !== "analyzing-growth" && 
-           currentStage !== "final-processing" &&
-           currentStage !== "completion" && (
-            <div className="px-2">
-              {renderInputArea()}
+              ))}
+              <div ref={messagesEndRef} />
             </div>
-          )}
+
+            {/* Input Area */}
+            {currentStage !== "analyzing-taste" && 
+             currentStage !== "analyzing-superpowers" && 
+             currentStage !== "analyzing-growth" && (
+              <div className="px-2">
+                {renderInputArea()}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </main>
   )
 }
