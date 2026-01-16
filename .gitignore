@@ -2,7 +2,7 @@
 .next
 next-env.d.ts
 dist
-
+.env
 # Logs
 logs
 *.log
