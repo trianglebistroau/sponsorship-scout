@@ -2,41 +2,54 @@
 
 import { Loader2, Paperclip, RefreshCcw, Send } from "lucide-react"
 import * as React from "react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 
 import {
-    createChatSession,
-    deleteChatSession,
-    streamMessage,
+  createChatSession,
+  deleteChatSession,
+  getChatHistory,
+  streamMessage,
 } from "@/lib/chat-api"
-import { convertMarkdownToHtml } from "../../generate/utils"
+
+const RESEARCH_SESSION_STORAGE_KEY = "research-chat-session-id"
 
 type ChatMessage = {
   id: string
   role: "assistant" | "user"
   content: string
   timestamp: string
+  isStreaming?: boolean
 }
 
-const initialMessage: ChatMessage = {
-  id: "assistant-1",
-  role: "assistant",
-  content:
-    "### Let's craft your next move\n\nNow for the fun part — I'll help you shape ideas, explore brand partnerships, and refine what makes your content unmistakably *you*.\n\nThink out loud here. Ask for ideas, clarity, or creative direction.\n\n**Try asking:**\n- Give me ideas for a brand deal with [brand name]\n- Help me make my content stand out\n- What worked best in my niche this month?\n- Draft 5 hooks for my next vlog\n\nJust start typing — we'll figure it out together.",
-  timestamp: "Just now",
+// Helper to format timestamp from API
+function formatTimestamp(timestamp?: string): string {
+  if (!timestamp) return "Just now"
+  try {
+    const date = new Date(timestamp)
+    return date.toLocaleString(undefined, {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })
+  } catch {
+    return "Just now"
+  }
 }
 
 type ResearchChatPanelProps = {
@@ -45,35 +58,69 @@ type ResearchChatPanelProps = {
 }
 
 export function ResearchChatPanel({ inputValue, onInputChange }: ResearchChatPanelProps) {
-  const [messages, setMessages] = React.useState<ChatMessage[]>([initialMessage])
+  const [messages, setMessages] = React.useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = React.useState(false)
+  const [isInitializing, setIsInitializing] = React.useState(true)
   const [sessionId, setSessionId] = React.useState<string | null>(null)
   const [error, setError] = React.useState<string | null>(null)
   const scrollRef = React.useRef<HTMLDivElement>(null)
 
-  // Initialize session on mount
+  // Initialize session on mount - restore from localStorage or create new
   React.useEffect(() => {
     const initSession = async () => {
+      setIsInitializing(true)
+      
+      // Check for existing session in localStorage
+      const storedSessionId = localStorage.getItem(RESEARCH_SESSION_STORAGE_KEY)
+      
+      if (storedSessionId) {
+        try {
+          // Try to fetch existing history
+          const historyResponse = await getChatHistory(storedSessionId)
+          
+          // Convert history to ChatMessage format
+          const historyMessages: ChatMessage[] = historyResponse.message_history.map(
+            (msg, index) => ({
+              id: `${msg.role}-${index}-${Date.now()}`,
+              role: msg.role,
+              content: msg.content,
+              timestamp: formatTimestamp(msg.timestamp),
+            })
+          )
+          
+          setMessages(historyMessages)
+          setSessionId(storedSessionId)
+          setError(null)
+          setIsInitializing(false)
+          return
+        } catch (err) {
+          console.error("Failed to restore session, creating new one:", err)
+          // Session expired or invalid, remove from storage
+          localStorage.removeItem(RESEARCH_SESSION_STORAGE_KEY)
+        }
+      }
+      
+      // Create new session
       try {
         const response = await createChatSession(
           "You are a creative brainstorming AI assistant helping content creators shape ideas, explore brand partnerships, and refine their unique content style. Be conversational, supportive, and provide actionable suggestions."
         )
         setSessionId(response.session_id)
+        localStorage.setItem(RESEARCH_SESSION_STORAGE_KEY, response.session_id)
         setError(null)
       } catch (err) {
         console.error("Failed to create session:", err)
         setError("Failed to connect to chat service. Please try again.")
       }
+      
+      setIsInitializing(false)
     }
     initSession()
 
-    // Cleanup on unmount
+    // Cleanup on unmount - don't delete session, just disconnect
     return () => {
-      if (sessionId) {
-        deleteChatSession(sessionId).catch(console.error)
-      }
+      // We no longer delete the session on unmount to preserve history
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSubmit = React.useCallback(
@@ -107,6 +154,7 @@ export function ResearchChatPanel({ inputValue, onInputChange }: ResearchChatPan
           role: "assistant",
           content: "",
           timestamp: "Just now",
+          isStreaming: true,
         },
       ])
 
@@ -117,11 +165,19 @@ export function ResearchChatPanel({ inputValue, onInputChange }: ResearchChatPan
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === assistantMessageId
-                ? { ...msg, content: fullContent }
+                ? { ...msg, content: fullContent, isStreaming: true }
                 : msg
             )
           )
         }
+        // Mark streaming as complete
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessageId
+              ? { ...msg, isStreaming: false }
+              : msg
+          )
+        )
       } catch (err) {
         console.error("Failed to stream message:", err)
         setError("Failed to get response. Please try again.")
@@ -139,12 +195,13 @@ export function ResearchChatPanel({ inputValue, onInputChange }: ResearchChatPan
     if (sessionId) {
       try {
         await deleteChatSession(sessionId)
+        localStorage.removeItem(RESEARCH_SESSION_STORAGE_KEY)
       } catch (err) {
         console.error("Failed to delete old session:", err)
       }
     }
 
-    setMessages([initialMessage])
+    setMessages([])
     onInputChange("")
     setError(null)
 
@@ -154,6 +211,7 @@ export function ResearchChatPanel({ inputValue, onInputChange }: ResearchChatPan
         "You are a creative brainstorming AI assistant helping content creators shape ideas, explore brand partnerships, and refine their unique content style. Be conversational, supportive, and provide actionable suggestions."
       )
       setSessionId(response.session_id)
+      localStorage.setItem(RESEARCH_SESSION_STORAGE_KEY, response.session_id)
     } catch (err) {
       console.error("Failed to create new session:", err)
       setError("Failed to start new chat. Please try again.")
@@ -179,7 +237,7 @@ export function ResearchChatPanel({ inputValue, onInputChange }: ResearchChatPan
             size="sm"
             className="shrink-0"
             onClick={handleNewThread}
-            disabled={isLoading}
+            disabled={isLoading || isInitializing}
           >
             <RefreshCcw className="mr-2 h-4 w-4" /> New Thread
           </Button>
@@ -192,11 +250,14 @@ export function ResearchChatPanel({ inputValue, onInputChange }: ResearchChatPan
       <CardContent className="flex-1 overflow-hidden p-0">
         <ScrollArea className="h-full" ref={scrollRef}>
           <div className="space-y-6 p-6">
+            {isInitializing && (
+              <div className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>Loading chat history...</span>
+              </div>
+            )}
             {messages.map((message) => {
               const isAssistant = message.role === "assistant"
-              const renderedContent = isAssistant
-                ? convertMarkdownToHtml(message.content)
-                : null
 
               return (
                 <div key={message.id} className="space-y-2">
@@ -214,10 +275,14 @@ export function ResearchChatPanel({ inputValue, onInputChange }: ResearchChatPan
                   </div>
                   {isAssistant ? (
                     message.content ? (
-                      <article
-                        className="prose prose-sm text-foreground dark:prose-invert"
-                        dangerouslySetInnerHTML={{ __html: renderedContent ?? "" }}
-                      />
+                      <article className="prose prose-sm text-foreground dark:prose-invert max-w-none">
+                        <ReactMarkdown 
+                          key={message.isStreaming ? `streaming-${message.content.length}` : 'complete'}
+                          remarkPlugins={[remarkGfm]}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
+                      </article>
                     ) : (
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -242,16 +307,16 @@ export function ResearchChatPanel({ inputValue, onInputChange }: ResearchChatPan
             onChange={(event) => onInputChange(event.target.value)}
             placeholder="What's on your mind? Ask about brands, content ideas, or your next big move..."
             className="min-h-[120px] resize-none"
-            disabled={isLoading}
+            disabled={isLoading || isInitializing}
           />
           <div className="flex items-center gap-3">
-            <Button type="button" variant="outline" size="icon" disabled={isLoading}>
+            <Button type="button" variant="outline" size="icon" disabled={isLoading || isInitializing}>
               <Paperclip className="h-4 w-4" />
             </Button>
             <Button
               type="submit"
               className="flex-1"
-              disabled={!inputValue.trim() || isLoading}
+              disabled={!inputValue.trim() || isLoading || isInitializing}
             >
               {isLoading ? (
                 <>
