@@ -147,11 +147,17 @@ importers:
         specifier: ^7.61.1
         version: 7.70.0(react@19.2.3)
 <<<<<<< HEAD
+<<<<<<< HEAD
       react-markdown:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@18.3.27)(react@19.2.3)
 =======
 >>>>>>> b1d8c3a (feat: update workflow (profile, research, generate, plan + new onboarding page))
+=======
+      react-markdown:
+        specifier: ^10.1.0
+        version: 10.1.0(@types/react@18.3.27)(react@19.2.3)
+>>>>>>> 2731c18 (feat: chatbot with history + message renderer (#13))
       react-resizable-panels:
         specifier: ^2.1.9
         version: 2.1.9(react-dom@18.3.1(react@19.2.3))(react@19.2.3)
@@ -2068,6 +2074,9 @@ packages:
 =======
 >>>>>>> b1d8c3a (feat: update workflow (profile, research, generate, plan + new onboarding page))
 
+  ccount@2.0.1:
+    resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
+
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
@@ -3838,14 +3847,20 @@ packages:
     engines: {node: '>=8.0'}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2731c18 (feat: chatbot with history + message renderer (#13))
   trim-lines@3.0.1:
     resolution: {integrity: sha512-kRj8B+YHZCc9kQYdWfJB2/oUl9rA99qbowYYBtr4ui4mZyAQ2JpvVBd/6U2YloATfqBhBTSMhTpgBHtU0Mf3Rg==}
 
   trough@2.2.0:
     resolution: {integrity: sha512-tmMpK00BjZiUyVyvrBK7knerNgmgvcV/KLVyuma/SC+TQN167GrMRciANTz09+k3zW8L8t60jWO1GpfkZdjTaw==}
 
+<<<<<<< HEAD
 =======
 >>>>>>> b1d8c3a (feat: update workflow (profile, research, generate, plan + new onboarding page))
+=======
+>>>>>>> 2731c18 (feat: chatbot with history + message renderer (#13))
   ts-api-utils@2.4.0:
     resolution: {integrity: sha512-3TaVTaAv2gTiMB35i3FiGJaRfwb3Pyn/j3m/bfAvGe8FB7CF6u+LMYqYlDh7reQf7UNvoTvdfAqHGmPGOSsPmA==}
     engines: {node: '>=18.12'}
@@ -4083,6 +4098,9 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 =======
 >>>>>>> b1d8c3a (feat: update workflow (profile, research, generate, plan + new onboarding page))
+
+  zwitch@2.0.4:
+    resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
 
@@ -5735,6 +5753,8 @@ snapshots:
   ccount@2.0.1: {}
 =======
 >>>>>>> b1d8c3a (feat: update workflow (profile, research, generate, plan + new onboarding page))
+
+  ccount@2.0.1: {}
 
   chalk@4.1.2:
     dependencies:
@@ -8071,12 +8091,18 @@ snapshots:
       is-number: 7.0.0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2731c18 (feat: chatbot with history + message renderer (#13))
   trim-lines@3.0.1: {}
 
   trough@2.2.0: {}
 
+<<<<<<< HEAD
 =======
 >>>>>>> b1d8c3a (feat: update workflow (profile, research, generate, plan + new onboarding page))
+=======
+>>>>>>> 2731c18 (feat: chatbot with history + message renderer (#13))
   ts-api-utils@2.4.0(typescript@5.9.3):
     dependencies:
       typescript: 5.9.3
@@ -8340,7 +8366,12 @@ snapshots:
 
   zod@4.3.5: {}
 <<<<<<< HEAD
+<<<<<<< HEAD
 
   zwitch@2.0.4: {}
 =======
 >>>>>>> b1d8c3a (feat: update workflow (profile, research, generate, plan + new onboarding page))
+=======
+
+  zwitch@2.0.4: {}
+>>>>>>> 2731c18 (feat: chatbot with history + message renderer (#13))
