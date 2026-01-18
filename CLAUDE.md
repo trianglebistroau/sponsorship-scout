@@ -247,7 +247,7 @@ DIRECT_URL=postgresql://...            # For Prisma migrations (direct connectio
 GEMINI_API_KEY=your-gemini-api-key
 
 # Backend API (if applicable)
-BACKEND_URL=http://localhost:8000
+BACKEND_URL_DEV=``
 ```
 
 **Security Note:** Supabase uses Row Level Security (RLS) on both User and Video tables. Ensure RLS policies are configured properly in Supabase dashboard.
