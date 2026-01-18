@@ -66,4 +66,4 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          BACKEND_URL: ${{ secrets.BACKEND_URL_DEV }}
