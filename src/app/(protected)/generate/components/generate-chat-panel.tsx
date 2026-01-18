@@ -1,38 +1,53 @@
 "use client"
 
-import { Loader2, Paperclip, RefreshCcw, Send, Wifi, WifiOff } from "lucide-react"
+import { Loader2, Paperclip, RefreshCcw, Send } from "lucide-react"
 import * as React from "react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
 } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 
-import { createChatSession, deleteChatSession } from "@/lib/chat-api"
-import { ChatWebSocket } from "@/lib/chat-websocket"
-import { convertMarkdownToHtml } from "../utils"
+import {
+  createChatSession,
+  deleteChatSession,
+  getChatHistory,
+  streamMessage,
+} from "@/lib/chat-api"
+
+const GENERATE_SESSION_STORAGE_KEY = "generate-chat-session-id"
 
 type ChatMessage = {
   id: string
   role: "assistant" | "user"
   content: string
   timestamp: string
+  isStreaming?: boolean
 }
 
-const initialMessage: ChatMessage = {
-  id: "assistant-1",
-  role: "assistant",
-  content:
-    "### Thought Process\nShare your ideas, vision, and what makes your content unique. I'll help refine your concepts and provide suggestions.",
-  timestamp: "Just now",
+// Helper to format timestamp from API
+function formatTimestamp(timestamp?: string): string {
+  if (!timestamp) return "Just now"
+  try {
+    const date = new Date(timestamp)
+    return date.toLocaleString(undefined, {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })
+  } catch {
+    return "Just now"
+  }
 }
 
 export type GenerateChatPanelProps = {
@@ -40,89 +55,71 @@ export type GenerateChatPanelProps = {
 }
 
 export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
-  const [messages, setMessages] = React.useState<ChatMessage[]>([initialMessage])
+  const [messages, setMessages] = React.useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = React.useState("")
   const [isLoading, setIsLoading] = React.useState(false)
-  const [isConnected, setIsConnected] = React.useState(false)
+  const [isInitializing, setIsInitializing] = React.useState(true)
   const [sessionId, setSessionId] = React.useState<string | null>(null)
   const [error, setError] = React.useState<string | null>(null)
   const scrollRef = React.useRef<HTMLDivElement>(null)
-  const wsRef = React.useRef<ChatWebSocket | null>(null)
-  const currentAssistantMessageRef = React.useRef<string | null>(null)
 
-  // Initialize session and WebSocket connection
+  // Initialize session on mount - restore from localStorage or create new
   React.useEffect(() => {
     const initSession = async () => {
+      setIsInitializing(true)
+      
+      // Check for existing session in localStorage
+      const storedSessionId = localStorage.getItem(GENERATE_SESSION_STORAGE_KEY)
+      
+      if (storedSessionId) {
+        try {
+          // Try to fetch existing history
+          const historyResponse = await getChatHistory(storedSessionId)
+          
+          // Convert history to ChatMessage format
+          const historyMessages: ChatMessage[] = historyResponse.message_history.map(
+            (msg, index) => ({
+              id: `${msg.role}-${index}-${Date.now()}`,
+              role: msg.role,
+              content: msg.content,
+              timestamp: formatTimestamp(msg.timestamp),
+            })
+          )
+          
+          setMessages(historyMessages)
+          setSessionId(storedSessionId)
+          setError(null)
+          setIsInitializing(false)
+          return
+        } catch (err) {
+          console.error("Failed to restore session, creating new one:", err)
+          // Session expired or invalid, remove from storage
+          localStorage.removeItem(GENERATE_SESSION_STORAGE_KEY)
+        }
+      }
+      
+      // Create new session
       try {
         const response = await createChatSession(
           "You are a creative AI assistant helping content creators refine their ideas, vision, and unique content concepts. Provide helpful suggestions and engage thoughtfully with their creative process."
         )
         setSessionId(response.session_id)
+        localStorage.setItem(GENERATE_SESSION_STORAGE_KEY, response.session_id)
         setError(null)
-
-        // Connect WebSocket after session is created
-        const ws = new ChatWebSocket({
-          sessionId: response.session_id,
-          onMessage: (content) => {
-            setIsLoading(false)
-
-            // If we don't have a current assistant message, create one
-            if (!currentAssistantMessageRef.current) {
-              const newMessageId = `assistant-${Date.now()}`
-              currentAssistantMessageRef.current = newMessageId
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: newMessageId,
-                  role: "assistant",
-                  content: content,
-                  timestamp: "Just now",
-                },
-              ])
-            } else {
-              // Append to existing assistant message
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === currentAssistantMessageRef.current
-                    ? { ...msg, content: msg.content + content }
-                    : msg
-                )
-              )
-            }
-          },
-          onError: (errorMsg) => {
-            setError(errorMsg)
-            setIsLoading(false)
-          },
-          onOpen: () => {
-            setIsConnected(true)
-            setError(null)
-          },
-          onClose: () => {
-            setIsConnected(false)
-          },
-        })
-
-        ws.connect()
-        wsRef.current = ws
       } catch (err) {
         console.error("Failed to create session:", err)
         setError("Failed to connect to chat service. Please try again.")
       }
+      
+      setIsInitializing(false)
     }
 
     initSession()
 
-    // Cleanup on unmount
+    // Cleanup on unmount - don't delete session, just disconnect
     return () => {
-      if (wsRef.current) {
-        wsRef.current.disconnect()
-      }
-      if (sessionId) {
-        deleteChatSession(sessionId).catch(console.error)
-      }
+      // We no longer delete the session on unmount to preserve history
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSubmit = React.useCallback(
@@ -130,8 +127,8 @@ export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
       event.preventDefault()
       if (!inputValue.trim() || isLoading) return
 
-      if (!wsRef.current?.isConnected()) {
-        setError("Not connected. Please wait or refresh to reconnect.")
+      if (!sessionId) {
+        setError("No active session. Please refresh to start a new chat.")
         return
       }
 
@@ -147,85 +144,73 @@ export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
       setIsLoading(true)
       setError(null)
 
-      // Reset current assistant message ref for new response
-      currentAssistantMessageRef.current = null
+      // Create placeholder for assistant response
+      const assistantMessageId = `assistant-${Date.now()}`
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: assistantMessageId,
+          role: "assistant",
+          content: "",
+          timestamp: "Just now",
+          isStreaming: true,
+        },
+      ])
 
-      // Send via WebSocket
-      wsRef.current.sendMessage(inputValue)
+      try {
+        let fullContent = ""
+        for await (const chunk of streamMessage(sessionId, inputValue)) {
+          fullContent += chunk
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? { ...msg, content: fullContent, isStreaming: true }
+                : msg
+            )
+          )
+        }
+        // Mark streaming as complete
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessageId
+              ? { ...msg, isStreaming: false }
+              : msg
+          )
+        )
+      } catch (err) {
+        console.error("Failed to stream message:", err)
+        setError("Failed to get response. Please try again.")
+        // Remove the empty assistant message on error
+        setMessages((prev) => prev.filter((msg) => msg.id !== assistantMessageId))
+      } finally {
+        setIsLoading(false)
+      }
     },
-    [inputValue, isLoading]
+    [inputValue, isLoading, sessionId]
   )
 
   const handleNewThread = React.useCallback(async () => {
-    // Disconnect existing WebSocket
-    if (wsRef.current) {
-      wsRef.current.disconnect()
-    }
-
-    // Delete old session
+    // Delete old session if exists
     if (sessionId) {
       try {
         await deleteChatSession(sessionId)
+        localStorage.removeItem(GENERATE_SESSION_STORAGE_KEY)
       } catch (err) {
         console.error("Failed to delete old session:", err)
       }
     }
 
-    setMessages([initialMessage])
+    setMessages([])
     setInputValue("")
     setError(null)
-    setIsConnected(false)
-    currentAssistantMessageRef.current = null
 
-    // Create new session and reconnect
+    // Create new session
     try {
       const response = await createChatSession(
         "You are a creative AI assistant helping content creators refine their ideas, vision, and unique content concepts. Provide helpful suggestions and engage thoughtfully with their creative process."
       )
       setSessionId(response.session_id)
-
-      const ws = new ChatWebSocket({
-        sessionId: response.session_id,
-        onMessage: (content) => {
-          setIsLoading(false)
-
-          if (!currentAssistantMessageRef.current) {
-            const newMessageId = `assistant-${Date.now()}`
-            currentAssistantMessageRef.current = newMessageId
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: newMessageId,
-                role: "assistant",
-                content: content,
-                timestamp: "Just now",
-              },
-            ])
-          } else {
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === currentAssistantMessageRef.current
-                  ? { ...msg, content: msg.content + content }
-                  : msg
-              )
-            )
-          }
-        },
-        onError: (errorMsg) => {
-          setError(errorMsg)
-          setIsLoading(false)
-        },
-        onOpen: () => {
-          setIsConnected(true)
-          setError(null)
-        },
-        onClose: () => {
-          setIsConnected(false)
-        },
-      })
-
-      ws.connect()
-      wsRef.current = ws
+      localStorage.setItem(GENERATE_SESSION_STORAGE_KEY, response.session_id)
     } catch (err) {
       console.error("Failed to create new session:", err)
       setError("Failed to start new chat. Please try again.")
@@ -242,22 +227,6 @@ export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
     <Card className={className}>
       <CardHeader className="py-2">
         <div className="flex items-center justify-between gap-2">
-          <Badge
-            variant={isConnected ? "default" : "secondary"}
-            className="flex items-center gap-1"
-          >
-            {isConnected ? (
-              <>
-                <Wifi className="h-3 w-3" />
-                <span>Live</span>
-              </>
-            ) : (
-              <>
-                <WifiOff className="h-3 w-3" />
-                <span>Offline</span>
-              </>
-            )}
-          </Badge>
           {error && (
             <p className="text-xs text-destructive truncate flex-1">{error}</p>
           )}
@@ -267,7 +236,7 @@ export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
             size="sm"
             className="shrink-0"
             onClick={handleNewThread}
-            disabled={isLoading}
+            disabled={isLoading || isInitializing}
           >
             <RefreshCcw className="mr-2 h-4 w-4" /> New Thread
           </Button>
@@ -302,10 +271,14 @@ export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
                   </div>
                   {isAssistant ? (
                     message.content ? (
-                      <article
-                        className="prose prose-sm text-foreground dark:prose-invert"
-                        dangerouslySetInnerHTML={{ __html: renderedContent ?? "" }}
-                      />
+                      <article className="prose prose-sm text-foreground dark:prose-invert max-w-none">
+                        <ReactMarkdown 
+                          key={message.isStreaming ? `streaming-${message.content.length}` : 'complete'}
+                          remarkPlugins={[remarkGfm]}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
+                      </article>
                     ) : (
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -331,16 +304,16 @@ export function GenerateChatPanel({ className }: GenerateChatPanelProps) {
             placeholder="Share thoughts, reactions, or questions... I'm here to help shape ideas with you."
             placeholder="Share thoughts, reactions, or questions... I'm here to help shape ideas with you."
             className="min-h-[120px] resize-none"
-            disabled={isLoading || !isConnected}
+            disabled={isLoading || isInitializing}
           />
           <div className="flex items-center gap-3">
-            <Button type="button" variant="outline" size="icon" disabled={isLoading}>
+            <Button type="button" variant="outline" size="icon" disabled={isLoading || isInitializing}>
               <Paperclip className="h-4 w-4" />
             </Button>
             <Button
               type="submit"
               className="flex-1"
-              disabled={!inputValue.trim() || isLoading || !isConnected}
+              disabled={!inputValue.trim() || isLoading || isInitializing}
             >
               {isLoading ? (
                 <>
