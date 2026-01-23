@@ -59,6 +59,7 @@ function CreativeDNA({ mounted = true }: { mounted?: boolean }) {
 
         <div className="space-y-3">
           <ThemesCarousel themes={THEMES} />
+          
         </div>
       </div>
 
