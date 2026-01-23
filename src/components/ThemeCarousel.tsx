@@ -55,15 +55,15 @@ return (
     aria-roledescription="carousel"
     aria-label="Theme carousel"
     >
-    <button
+    {/* <button
         aria-label="Previous theme"
         onClick={() => setCurrent((c) => (c - 1 + total) % total)}
         className="z-20 p-2 rounded-md hover:bg-background/60 focus:outline-none focus:ring"
     >
         <ArrowLeft className="h-5 w-5" />
-    </button>
+    </button> */}
 
-    <div className="relative mx-4 w-full max-w-2xl h-[150px] md:h-[160px]">
+    <div className="relative mx-4 w-full max-w-2xl h-[250px] md:h-[360px]">
         {themes.map((t, i) => {
         if (![prevIndex, current, nextIndex].includes(i)) return null;
 
@@ -95,13 +95,14 @@ return (
 
         const transformStyle: React.CSSProperties = {
             transform: `translateX(${translateX}px) rotateY(${rotateY}deg) scale(${scale})`,
-            transition: "transform 500ms cubic-bezier(.2,.9,.2,1), opacity 400ms",
+            transition: "transform 1000ms cubic-bezier(.2,.9,.2,1), opacity 600ms",
             zIndex,
             opacity,
             willChange: "transform, opacity",
         };
 
         return (
+
             <Card
             key={t.title}
             className="absolute top-8 left-4 md:left-24 w-[86%] md:w-[68%] max-w-[520px] cursor-pointer"
@@ -110,7 +111,7 @@ return (
                 if (i !== current) setCurrent(i);
             }}
             >
-            <CardContent className="min-h-[80px] md:min-h-[90px] p-4">
+            <CardContent className="min-h-[80px] md:min-h-[140px] p-4">
                 <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                     <h4 className="text-sm font-semibold text-foreground">{t.title}</h4>
@@ -119,18 +120,29 @@ return (
                 </div>
             </CardContent>
             </Card>
+
+
         );
         })}
+        
+        <span className="absolute bottom-2 flex space-x-2 justify-center w-full text-center">
+            {current}
+            {current+1}
+            {/* <span className="text-muted-foreground"> / {total}</span> */}
+            {current}
+
+        </span>
     </div>
 
+
     {/* Right arrow */}
-    <button
+    {/* <button
         aria-label="Next theme"
         onClick={() => setCurrent((c) => (c + 1) % total)}
         className="z-20 p-2 rounded-md hover:bg-background/60 focus:outline-none focus:ring"
     >
         <ArrowRight className="h-5 w-5" />
-    </button>
+    </button> */}
     </div>
 );
 }
