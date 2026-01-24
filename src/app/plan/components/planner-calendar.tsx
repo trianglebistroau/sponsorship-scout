@@ -48,22 +48,22 @@ export function PlannerCalendar({
 
       return (
         <div 
-          className="flex h-full w-full flex-col gap-1 rounded-md bg-background/60 p-1.5 transition-colors hover:bg-background/80"
+          className="flex h-full w-full flex-col gap-0.5 rounded-md bg-background/60 p-1 transition-colors hover:bg-background/80"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
         >
-          <span className="text-xs font-semibold text-foreground">{format(date, "d")}</span>
-          <div className="space-y-1">
-            {items.slice(0, 2).map((item) => (
+          <span className="text-[11px] font-semibold text-foreground">{format(date, "d")}</span>
+          <div className="space-y-0.5">
+            {items.slice(0, 1).map((item) => (
               <p
                 key={item.id}
-                className="truncate rounded bg-primary/10 px-1 py-0.5 text-[10px] font-medium text-primary"
+                className="truncate rounded bg-primary/10 px-1 py-0.5 text-[9px] font-medium text-primary leading-tight"
               >
                 {item.title}
               </p>
             ))}
-            {items.length > 2 ? (
-              <p className="text-[10px] text-muted-foreground">+{items.length - 2} more</p>
+            {items.length > 1 ? (
+              <p className="text-[9px] text-muted-foreground leading-tight">+{items.length - 1} more</p>
             ) : null}
           </div>
         </div>
@@ -102,28 +102,30 @@ export function PlannerCalendar({
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 overflow-hidden p-2">
-        <Calendar
-          month={month}
-          onMonthChange={onMonthChange}
-          components={{ DayContent: dayContent }}
-          modifiers={{ busy: busyDays }}
-          modifiersClassNames={{ busy: "border-primary/60" }}
-          className="w-full"
-          classNames={{
-            months: "w-full",
-            month: "w-full space-y-4",
-            table: "w-full border-collapse",
-            head_row: "grid grid-cols-7",
-            head_cell:
-              "text-center text-xs font-medium text-muted-foreground pb-2",
-            row: "grid grid-cols-7 gap-2",
-            cell: "relative min-h-[110px] rounded-lg border border-border bg-muted/40 p-1 align-top",
-            day: "flex h-full w-full items-start justify-start bg-transparent p-0 text-left",
-          }}
-          showOutsideDays={false}
-          mode="single"
-        />
+      <CardContent className="flex-1 overflow-auto p-2">
+        <div className="min-w-[600px]">
+          <Calendar
+            month={month}
+            onMonthChange={onMonthChange}
+            components={{ DayContent: dayContent }}
+            modifiers={{ busy: busyDays }}
+            modifiersClassNames={{ busy: "border-primary/60" }}
+            className="w-full"
+            classNames={{
+              months: "w-full",
+              month: "w-full space-y-4",
+              table: "w-full border-collapse",
+              head_row: "grid grid-cols-7",
+              head_cell:
+                "text-center text-xs font-medium text-muted-foreground pb-2",
+              row: "grid grid-cols-7 gap-2",
+              cell: "relative min-h-[80px] lg:min-h-[110px] rounded-lg border border-border bg-muted/40 p-0.5 lg:p-1 align-top",
+              day: "flex h-full w-full items-start justify-start bg-transparent p-0 text-left",
+            }}
+            showOutsideDays={false}
+            mode="single"
+          />
+        </div>
       </CardContent>
     </Card>
   )

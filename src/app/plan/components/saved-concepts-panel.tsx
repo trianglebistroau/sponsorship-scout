@@ -1,9 +1,10 @@
-import * as React from "react"
 import { format } from "date-fns"
-import { CalendarIcon, Sparkles, Target, Upload, Video } from "lucide-react"
+import { CalendarIcon, Sparkles, Upload, Video } from "lucide-react"
+import * as React from "react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Card,
   CardContent,
@@ -11,8 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Calendar } from "@/components/ui/calendar"
-import { Input } from "@/components/ui/input"
 import {
   Dialog,
   DialogContent,
@@ -20,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import {
   Popover,
   PopoverContent,
@@ -35,6 +35,8 @@ type SavedConceptsPanelProps = {
   concepts: SavedConcept[]
   onPlanConcept: (conceptId: string, date: Date | null) => void
   onToggleExecuted: (conceptId: string) => void
+  onToggleChecklist?: (conceptId: string, index: number) => void
+  onToggleReminder?: (conceptId: string) => void
   onUpdateConcept: (conceptId: string, updates: Pick<SavedConcept, "title" | "summary">) => void
   fileLookup: Record<string, FileNode>
   onDragStart?: (conceptId: string) => string
@@ -45,6 +47,8 @@ export function SavedConceptsPanel({
   onPlanConcept,
   onToggleExecuted,
   onUpdateConcept,
+  onToggleChecklist,
+  onToggleReminder,
   fileLookup,
   onDragStart,
 }: SavedConceptsPanelProps) {
@@ -66,6 +70,8 @@ export function SavedConceptsPanel({
               onPlanConcept={onPlanConcept}
               onToggleExecuted={onToggleExecuted}
               onUpdateConcept={onUpdateConcept}
+              onToggleChecklist={onToggleChecklist}
+              onToggleReminder={onToggleReminder}
               fileLookup={fileLookup}
               onDragStart={onDragStart}
             />
@@ -84,6 +90,8 @@ type ConceptListItemProps = {
   onUpdateConcept: (conceptId: string, updates: Pick<SavedConcept, "title" | "summary">) => void
   fileLookup: Record<string, FileNode>
   onDragStart?: (conceptId: string) => string
+  onToggleChecklist?: (conceptId: string, index: number) => void
+  onToggleReminder?: (conceptId: string) => void
 }
 
 const tagCategoryLabels: Record<TagCategory, string> = {
@@ -99,6 +107,8 @@ function ConceptListItem({
   onUpdateConcept,
   fileLookup,
   onDragStart,
+  onToggleChecklist,
+  onToggleReminder,
 }: ConceptListItemProps) {
   const [open, setOpen] = React.useState(false)
   const [suggestionsOpen, setSuggestionsOpen] = React.useState(false)
@@ -141,21 +151,14 @@ function ConceptListItem({
       onDragStart={handleDragStart}
     >
       <CardHeader className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 space-y-2">
-            <CardTitle className="text-xl">{concept.title}</CardTitle>
-            <CardDescription>{concept.summary}</CardDescription>
-          </div>
-          <div className="flex shrink-0 flex-col items-end gap-2 text-right">
-            <div className="flex items-center gap-2">
-              <Badge variant={concept.plannedDate ? "secondary" : "outline"}>
-                {concept.plannedDate ? "Scheduled" : "Unplanned"}
-              </Badge>
+        <CardTitle className="text-xl">{concept.title}</CardTitle>
+
+        <div className="flex items-center gap-1">
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
                 title="Upload video"
               >
                 <Upload className="h-4 w-4" />
@@ -165,13 +168,28 @@ function ConceptListItem({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
                 title="Generate with Veo"
               >
                 <Video className="h-4 w-4" />
                 <span className="sr-only">Generate with Veo for {concept.title}</span>
               </Button>
             </div>
+        <div className="flex items-start justify-between gap-3">
+        <div className="flex shrink-0 items-start gap-2">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Badge variant={concept.plannedDate ? "secondary" : "outline"} className="text-xs">
+                  {concept.plannedDate ? "Scheduled" : "Unplanned"}
+                </Badge>
+                {concept.reminder && (
+                  <Badge variant="secondary" className="text-xs">
+                    Reminder set
+                  </Badge>
+                )}
+              </div>
+            </div>
+            
           </div>
         </div>
         {resolvedTags.length ? (
@@ -260,11 +278,25 @@ function ConceptListItem({
                 <div className="space-y-3">
                   <div>
                     <h4 className="text-sm font-semibold text-foreground">Best posting window</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Around 7–9pm works well for this format</p>
+                    <p className="text-xs text-muted-foreground mt-1"> </p>
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-foreground">Day fit</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Performs better mid-week (Tue–Thu)</p>
+                    <h4 className="text-sm font-semibold text-foreground">checklist to do</h4>
+                    <span>
+                      {concept.checklists?.map((item, index) => (
+                        <p key={index} className="text-xs text-muted-foreground mt-1 flex items-center justify-between">
+                          <span>{format(item, "MMM do")}</span>
+                          <input
+                            type="checkbox"
+                            checked={concept.completedChecklists?.[index] || false}
+                            onChange={() => {
+                              if (onToggleChecklist) onToggleChecklist(concept.id, index)
+                            }}
+                          />
+                        </p>
+                      ))}
+                    </span>
+
                   </div>
                   {resolvedTags.some(tag => tag.category === 'strategies' && tag.node) && (
                     <div>
@@ -272,6 +304,18 @@ function ConceptListItem({
                       <p className="text-xs text-muted-foreground mt-1">Once weekly keeps the series consistent</p>
                     </div>
                   )}
+
+                  <Button
+                    type="button"
+                    variant={concept.reminder ? "secondary" : "ghost"}
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground"
+                    title="Toggle reminder"
+                    onClick={() => onToggleReminder?.(concept.id)}
+                  >
+                    <CalendarIcon className="h-4 w-4" />
+                  </Button>
+                    <span className="p-5">{concept.reminder ? "Reminder set." : "want to set a reminder?"}</span>
                   <div className="pt-2 border-t">
                     <p className="text-xs text-muted-foreground italic">
                       Based on your formats + past saves

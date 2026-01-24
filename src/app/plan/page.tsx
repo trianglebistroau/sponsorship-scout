@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { format } from "date-fns"
+import * as React from "react"
 
 import { GeneratorNav } from "@/components/navigation"
 import { fileTreeData } from "../generate/data/file-tree"
@@ -25,8 +25,11 @@ const buildInitialConcepts = (): SavedConcept[] => {
         themes: ["themes/voiceover-broll"],
         strategies: ["strategies/quiet-moments"],
       },
+      completedChecklists: [true, false, false],
+      checklists: [new Date(year, month, 1), new Date(year, month, 3), new Date(year, month, 4)],
       plannedDate: new Date(year, month, 5),
       executed: false,
+      reminder: false,
     },
     {
       id: "concept-2",
@@ -39,6 +42,7 @@ const buildInitialConcepts = (): SavedConcept[] => {
       },
       plannedDate: new Date(year, month, 12),
       executed: true,
+      reminder: false,
     },
     {
       id: "concept-3",
@@ -50,6 +54,7 @@ const buildInitialConcepts = (): SavedConcept[] => {
         strategies: ["strategies/quick-meals"],
       },
       executed: false,
+      reminder: false,
     },
     {
       id: "concept-4",
@@ -61,6 +66,7 @@ const buildInitialConcepts = (): SavedConcept[] => {
         strategies: [],
       },
       executed: false,
+      reminder: false,
     },
     {
       id: "concept-5",
@@ -73,6 +79,7 @@ const buildInitialConcepts = (): SavedConcept[] => {
       },
       plannedDate: new Date(year, month, 22),
       executed: false,
+      reminder: false,
     },
   ]
 }
@@ -117,6 +124,7 @@ export default function PlanPage() {
     )
   }, [])
 
+
   const handleToggleExecuted = React.useCallback((conceptId: string) => {
     setConcepts((prev) =>
       prev.map((concept) =>
@@ -128,7 +136,6 @@ export default function PlanPage() {
   }, [])
 
   const handleDragStart = React.useCallback((conceptId: string) => {
-    // Store concept ID for drop handling
     return conceptId
   }, [])
 
@@ -146,6 +153,26 @@ export default function PlanPage() {
     },
     []
   )
+
+  const handleToggleChecklist = React.useCallback((conceptId: string, index: number) => {
+    setConcepts((prev) =>
+      prev.map((concept) => {
+        if (concept.id !== conceptId) return concept
+        const completed = concept.completedChecklists ? [...concept.completedChecklists] : []
+        completed[index] = !completed[index]
+        return { ...concept, completedChecklists: completed }
+      })
+    )
+  }, [])
+
+  const handleToggleReminder = React.useCallback((conceptId: string) => {
+    setConcepts((prev) =>
+      prev.map((concept) =>
+        concept.id === conceptId ? { ...concept, reminder: !concept.reminder } : concept
+      )
+    )
+  }, [])
+
 
   return (
     <main className="h-screen bg-background overflow-hidden">
@@ -168,8 +195,10 @@ export default function PlanPage() {
               onPlanConcept={handlePlanConcept}
               onToggleExecuted={handleToggleExecuted}
               onUpdateConcept={handleUpdateConcept}
+              onToggleChecklist={handleToggleChecklist}
               fileLookup={fileLookup}
               onDragStart={handleDragStart}
+              onToggleReminder={handleToggleReminder}
             />
           </div>
         </div>

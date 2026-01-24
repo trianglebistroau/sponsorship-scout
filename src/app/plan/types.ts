@@ -7,4 +7,7 @@ export type SavedConcept = {
   tags: FeedItemTags
   plannedDate?: Date | null
   executed?: boolean
+  checklists?: Date[]
+  completedChecklists?: boolean[]
+  reminder?: boolean
 }

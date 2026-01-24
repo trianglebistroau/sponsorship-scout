@@ -300,7 +300,7 @@ export default function GeneratorPage() {
             onRemoveFilter={handleRemoveFile}
             className="lg:basis-[50%]"
           />
-
+          
           <div className="flex h-full flex-col lg:basis-[30%] lg:overflow-hidden">
             <GenerateChatPanel className="flex h-full flex-col" />
           </div>
