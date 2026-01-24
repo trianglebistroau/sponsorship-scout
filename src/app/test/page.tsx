@@ -1,150 +1,195 @@
-"use client";
-import React, { useState } from "react";
-import styled from "@emotion/styled";
-import DotGrid from "./components/DotGrid";
-import Card, { IdeaData } from "./components/Card";
-import { animate, motion, useMotionValue, useTransform, useSpring, useMotionTemplate } from "framer-motion";
+'use client'
 
-// -- Layout Containers --
-const Container = styled.div`
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  perspective: 1200px; /* Stronger perspective for the deck feel */
-  background-color: #0a0a0a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
+import React, { useState, useRef, useCallback, useEffect, use } from "react";
+import DeckPage from "./pages/CardsDisplay";
+import Blob from "./components/bubble";
 
-const DeckWrapper = styled(motion.div)`
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transform-style: preserve-3d;
-  backdrop-filter: blur(3px) brightness(120%);
-`;
+import { motion, AnimatePresence } from 'framer-motion';
+import { set } from "date-fns";
 
 
-const INITIAL_IDEAS: IdeaData[] = [
-    { id: 0, title: "Idea 1: The 'Secret Sauce'", hook: "Everyone thinks X is hard...", beats: ["Struggle", "Secret", "Result"], rationale: "Validates struggle.", status: "shown" },
-    { id: 1, title: "Idea 2: Chaos Edition", hook: "Stop trying to be perfect...", beats: ["Mistake", "Messy work", "Happy end"], rationale: "Authenticity.", status: "shown" },
-    { id: 2, title: "Idea 3: The Contrarian", hook: "Why popular advice is wrong...", beats: ["Myth", "Truth", "Proof"], rationale: "Shock value.", status: "ready" },
-    { id: 3, title: "Idea 4: ASMR Style", hook: "Quiet luxury vibes...", beats: ["Sound", "Texture", "Calm"], rationale: "Sensory appeal.", status: "ready" },
-    { id: 4, title: "Idea 5: The Underdog", hook: "From zero to hero...", beats: ["Low point", "Climb", "Victory"], rationale: "Relatable journey.", status: "ready" },
-    { id: 5, title: "Idea 6: The Visionary", hook: "Imagine a world where...", beats: ["Vision", "Action", "Impact"], rationale: "Inspires imagination.", status: "hidden" },
-];
+export default function TestPage() {
+    const [isOpen, setIsOpen] = useState(false);
+    const [question, setQuestion] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [messages, setMessages] = useState([]);
 
-export default function DeckPage() {
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [ideas, setIdeas] = useState(INITIAL_IDEAS);
-
-
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-    const mouseXSpring = useSpring(mouseX, { stiffness: 40, damping: 20 });
-    const mouseYSpring = useSpring(mouseY, { stiffness: 40, damping: 20 });
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        const { innerWidth, innerHeight } = window;
-        mouseX.set(e.clientX - innerWidth / 2);
-        mouseY.set(e.clientY - innerHeight / 2);
-    };
-
-
-    const rotateX = useTransform(mouseYSpring, [-500, 500], [10, -10]);
-    const rotateY = useTransform(mouseXSpring, [-500, 500], [-10, 10]);
+    const [showHints, setShowHints] = useState(false);
     
+    const blobRef = useRef(null);
+    const idleTimer = useRef(null);
 
-    const bgX = useTransform(mouseXSpring, [-500, 500], [40, -40]);
-    const bgY = useTransform(mouseYSpring, [-500, 500], [40, -40]);
+    useEffect(() => {
+        const timer = setTimeout(() => setShowHints(true), 3000);
+        console.log("set timeout for hints", timer);
 
+        return () => clearTimeout(timer);
+    }, []);
 
-    const handleNext = () => {
-        if (currentIndex < ideas.length - 1) {
-            setCurrentIndex(prev => prev + 1);
+    const setBlob = useCallback((state, dur = 700) => {
+        blobRef.current?.setState(state, { duration: dur });
+    }, []);
 
+    // Auto-return to idle
+    const bumpIdle = useCallback((delayMs = 6000) => {
+        if (idleTimer.current) clearTimeout(idleTimer.current);
+        idleTimer.current = setTimeout(() => {
+            if (!loading) setBlob('idle', 800);
+        }, delayMs);
+    }, [setBlob, loading]);
+
+    useEffect(() => {
+        bumpIdle(4000);
+        return () => idleTimer.current && clearTimeout(idleTimer.current);
+    }, [bumpIdle]);
+
+    const handleAsk = async () => {
+        if (!question.trim() || loading) return;
+        
+        const userMessage = question.trim();
+        setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+        setQuestion('');
+        setLoading(true);
+        
+        try {
+            if (idleTimer.current) clearTimeout(idleTimer.current);
+            setBlob('thinking', 350);
+            
+            // Your API call here
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            const response = `Answer to: ${userMessage}`;
+            
+            setMessages(prev => [...prev, { role: 'assistant', text: response }]);
+            setBlob('success', 650);
+            bumpIdle(5000);
+        } catch (e) {
+            console.error(e);
+            setMessages(prev => [...prev, { role: 'assistant', text: 'Failed to get answer' }]);
+            setBlob('fail', 900);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handlePrev = (index: number) => {
-        // Allow clicking a history card to jump back to it
-        setCurrentIndex(index);
-    };
-
-    const handleUpdate = (updated: IdeaData) => {
-        const newIdeas = [...ideas];
-        newIdeas[currentIndex] = updated;
-        setIdeas(newIdeas);
-    };
-
-    const onCommit = (index: number) => {
-        ideas[index].status = "committed";
-        setIdeas([...ideas]);
-    }
-
     return (
-        <Container onMouseMove={handleMouseMove}>
-            <DotGrid style={{ x: bgX, y: bgY }} />
+        <div>
+            <DeckPage />
 
-            <DeckWrapper>
-                {ideas.map((idea, index) => {
-                    const isHistory = index < currentIndex;
-                    const isActive = index === currentIndex;
-                    const isFuture = index > currentIndex;
-
-                    // Calculate offset for stacking
-                    const offset = index - currentIndex;
-
-                    return (
+            <div className="fixed bottom-6 right-6 flex items-center gap-3">
+                <AnimatePresence>
+                    {showHints &&(
                         <motion.div
-                            key={idea.id}
-                            onClick={() => isHistory && handlePrev(index)}
-                            style={{
-                                position: "absolute",
-                                zIndex: isActive ? 10 : 10 - Math.abs(offset), // Center is highest
-                                transformStyle: "preserve-3d",
-                                rotateX: isActive ? rotateX : 0,
-                                rotateY: isActive ? rotateY : 0,
-                                cursor: isHistory ? "pointer" : "default"
-                            }}
-                            initial={false}
-                            animate={{
-                                // HISTORY (Left Stack)
-                                x: isHistory ? -550 + (offset * 40) :
-                                // FUTURE (Right Stack)
-                                   isFuture ? 550 + (offset * 40) :
-                                // ACTIVE (Center)
-                                    0,
-                                
-                                scale: isActive ? 1 : 0.85,
-                                opacity: isActive ? 1 : isHistory ? 0.6 : 0.3,
-                                rotateZ: isHistory ? -10 + (offset * 2) : isFuture ? 5 : 0,
-                            }}
-                            whileHover={isHistory ? {
-                                x: -480 + (offset * 40),
-                                opacity: 1,
-                                scale: 0.9,
-                                rotateZ: -5 + (offset * 2)
-                            } : {}}
-                            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            transition={{ duration: 2.5 }}
+                            className="text-sm font-medium"
                         >
-                            <Card
-                                data={idea}
-                                uiStatus={isActive ? "active" : isHistory ? "history" : "future"}
-                                onUpdate={handleUpdate}
-                                onCommit={onCommit}
-                                onReject={handleNext}
-                                id={idea.id}
-                            />
+                            click me!
+                        
                         </motion.div>
-                    );
-                })}
-            </DeckWrapper>
-        </Container>
+                    )}
+                </AnimatePresence>
+                
+                <AnimatePresence>
+                    {showHints &&(
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            transition={{ duration: 1 }}
+                            className="text-sm font-medium"
+                        >
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="h-16 w-16 rounded-full shadow-lg hover:scale-110 transition-transform"
+                        >
+                            <Blob ref={blobRef}/>
+                        </button>
+
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+            {/* Floating Blob Button */}
+
+            {/* Chat Panel */}
+            <div
+                className={`fixed bottom-0 right-0 w-full sm:w-96 bg-white dark:bg-slate-900 border-t sm:border-l border-slate-300 dark:border-slate-700 shadow-2xl transition-transform duration-300 z-40 ${
+                    isOpen ? 'translate-y-0' : 'translate-y-full'
+                }`}
+                style={{ height: '70vh', maxHeight: '600px' }}
+            >
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 border-b border-slate-300 dark:border-slate-700">
+                    <h3 className="font-semibold">Chat Assistant</h3>
+                    <button
+                        onClick={() => setIsOpen(false)}
+                        className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ height: 'calc(100% - 140px)' }}>
+                    {messages.length === 0 ? (
+                        <div className="text-center text-slate-500 mt-8">
+                            Ask me anything!
+                        </div>
+                    ) : (
+                        messages.map((msg, i) => (
+                            <div
+                                key={i}
+                                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                            >
+                                <div
+                                    className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                                        msg.role === 'user'
+                                            ? 'bg-indigo-500 text-white'
+                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100'
+                                    }`}
+                                >
+                                    {msg.text}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Input */}
+                <div className="p-4 border-t border-slate-300 dark:border-slate-700">
+                    <div className="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 p-2">
+                        <input
+                            type="text"
+                            value={question}
+                            onChange={(e) => {
+                                setQuestion(e.target.value);
+                                bumpIdle(5000);
+                            }}
+                            onKeyDown={(e) => e.key === 'Enter' && handleAsk()}
+                            placeholder="Type a message..."
+                            className="flex-1 bg-transparent px-2 py-1 outline-none"
+                            disabled={loading}
+                        />
+                        <button
+                            onClick={handleAsk}
+                            disabled={loading || !question.trim()}
+                            className="rounded-lg bg-indigo-500 text-white px-3 py-1 font-semibold hover:brightness-110 disabled:opacity-50 text-sm"
+                        >
+                            {loading ? '...' : 'Send'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Overlay when chat is open */}
+            {isOpen && (
+                <div
+                    onClick={() => setIsOpen(false)}
+                    className="fixed inset-0 bg-black/20 z-30 sm:hidden"
+                />
+            )}
+        </div>
     );
 }
