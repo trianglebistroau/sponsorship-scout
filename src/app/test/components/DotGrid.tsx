@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
-import { motion } from "framer-motion";
-import React,{ useEffect, useState } from "react";
+import { motion, MotionStyle } from "framer-motion";
+import { useEffect, useState } from "react";
 
 
 const SIZE = 50;
@@ -21,7 +21,7 @@ const StyledDotGrid = styled(motion.div, {
   transform: translateZ(-500px);
 `;
 
-const DotGrid = ({ style }: { style?: React.CSSProperties }) => {
+const DotGrid = ({ style }: { style?: MotionStyle }) => {
   const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
