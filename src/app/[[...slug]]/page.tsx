@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { ClientOnly } from './client';
+import { ClientOnly } from './client';
 
 export function generateStaticParams() {
   return [{ slug: [''] }]
@@ -8,9 +9,9 @@ export function generateStaticParams() {
 export default async function Page({ params }: { params: Promise<{ slug?: string[] }> }) {
   const resolvedParams = await params;
   
-  // Redirect root route ("/") to landing page
+  // Redirect root route ("/") to "/generate"
   if (!resolvedParams.slug || resolvedParams.slug.length === 0) {
-    redirect("/landing");
+    redirect("/conversation");
   }
 
   return <ClientOnly />;
