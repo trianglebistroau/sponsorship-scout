@@ -1,13 +1,15 @@
-import { ClientOnly } from './client'
 import { redirect } from "next/navigation";
+import { ClientOnly } from './client';
 
 export function generateStaticParams() {
   return [{ slug: [''] }]
 }
 
-export default function Page({ params }: { params: { slug?: string[] } }) {
+export default async function Page({ params }: { params: Promise<{ slug?: string[] }> }) {
+  const resolvedParams = await params;
+  
   // Redirect root route ("/") to "/generate"
-  if (!params.slug || params.slug.length === 0) {
+  if (!resolvedParams.slug || resolvedParams.slug.length === 0) {
     redirect("/conversation");
   }
 
