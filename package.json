@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
     "prepare": "husky"
@@ -20,6 +20,8 @@
     ]
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@google/genai": "^1.19.0",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^7.1.0",
@@ -58,7 +60,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
-    "framer-motion": "^12.26.2",
+    "framer-motion": "^12.29.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.462.0",
     "next": "^16.0.10",
@@ -76,6 +78,7 @@
     "superjson": "^2.2.5",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "three": "^0.182.0",
     "vaul": "^0.9.9",
     "zod": "^4.1.9"
   },
@@ -96,15 +99,17 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
+    "glslify": "^7.1.1",
+    "glslify-loader": "^2.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.6",
     "lovable-tagger": "^1.1.9",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "prisma": "^6.19.0",
+    "raw-loader": "^4.0.2",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0"
-  },
-  "packageManager": "pnpm@10.17.1+sha512.17c560fca4867ae9473a3899ad84a88334914f379be46d455cbf92e5cf4b39d34985d452d2583baf19967fa76cb5c17bc9e245529d0b98745721aa7200ecaf7a"
+  }
 }

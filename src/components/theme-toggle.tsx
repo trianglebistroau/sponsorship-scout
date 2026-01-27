@@ -28,6 +28,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       size="icon"
       className={cn("relative h-10 w-10", className)}
       onClick={handleToggle}
+      suppressHydrationWarning={true}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       >
       <Sun
