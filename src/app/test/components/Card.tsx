@@ -2,6 +2,8 @@
 import styled from "@emotion/styled";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // -- Status Theme Mapping with Dark/Light mode support --
 const getStatusStyles = (
@@ -52,8 +54,8 @@ const Container = styled.div<{
   $isDark: boolean;
 }>`
   position: relative;
-  width: 400px;
-  height: 600px;
+  width: min(560px, 72vw);
+  height: min(760px, 66vh);
   border-radius: 20px;
   transform-style: preserve-3d;
   transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -62,6 +64,28 @@ const Container = styled.div<{
               0 0 30px ${props => getStatusStyles(props.$ideaStatus, props.$isDark).glow};
   cursor: ${props => props.$uiStatus === "active" ? "default" : "pointer"};
   pointer-events: ${props => (props.$uiStatus === "active" || props.$uiStatus === "history") ? "all" : "none"};
+`;
+
+const MarkdownWrap = styled.div<{ $isDark: boolean }>`
+  flex: 1;
+  overflow: auto;
+  padding: 0.9rem;
+  border-radius: 12px;
+  border: 1px solid ${p => p.$isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.12)"};
+  background: ${p => p.$isDark ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.6)"};
+
+  /* basic markdown typography */
+  & h1, & h2, & h3 { margin: 0.6rem 0 0.3rem; }
+  & p { margin: 0.4rem 0; line-height: 1.45; }
+  & hr { border: none; border-top: 1px solid rgba(128,128,128,0.25); margin: 0.8rem 0; }
+
+  /* tables */
+  & table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  & th, & td { border: 1px solid rgba(128,128,128,0.25); padding: 0.45rem; vertical-align: top; }
+  & thead th { position: sticky; top: 0; background: ${p => p.$isDark ? "rgba(20,20,20,0.95)" : "rgba(245,245,245,0.95)"}; }
+
+  /* code blocks */
+  & pre { overflow: auto; padding: 0.8rem; border-radius: 10px; }
 `;
 
 const Face = styled.div<{ 
@@ -168,6 +192,7 @@ export interface IdeaData {
   hook: string;
   beats: string[];
   rationale: string;
+  contentMd?: string;
   status: "ready" | "hidden" | "shown" | "committed" | "rejected";
 }
 
@@ -182,9 +207,11 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onReject, onNext, id }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isFlipped, setisFlipped] = useState(false);
   const [editState, setEditState] = useState(data);
   const [isDark, setIsDark] = useState(true);
+  const isPlaceholder = data.status === "ready" || data.id === -1;
+
 
   // Detect theme from document
   useEffect(() => {
@@ -206,12 +233,12 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
 
   useEffect(() => {
     setEditState(data);
-    setIsEditing(false);
+    setisFlipped(false);
   }, [data]);
 
   const handleSave = () => {
     onUpdate(editState);
-    setIsEditing(false);
+    setisFlipped(false);
   };
 
   const handleBeatChange = (index: number, val: string) => {
@@ -240,12 +267,12 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
   }
 
   return (
-    <Container $uiStatus={uiStatus} $ideaStatus={data.status} $isFlipped={isEditing} $isDark={isDark}>
+    <Container $uiStatus={uiStatus} $ideaStatus={data.status} $isFlipped={isFlipped} $isDark={isDark}>
       <Face $variant="front" $ideaStatus={data.status} $isDark={isDark}>
         {data.status === "committed" && <StatusBadge color="#4ade80" $isDark={isDark}>Committed</StatusBadge>}
         {data.status === "rejected" && <StatusBadge color="#f87171" $isDark={isDark}>Rejected</StatusBadge>}
         
-        <div>
+        {/* <div>
           <Label color={styles.label}>Concept</Label>
           <h2 style={{margin: "0.2rem 0"}}>{data.title}</h2>
         </div>
@@ -260,12 +287,20 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
           <ul style={{paddingLeft: '1.2rem', margin: 0, opacity: 0.9}}>
             {data.beats.map((b, i) => <li key={i}>{b}</li>)}
           </ul>
-        </Section>
+        </Section> */}
+
+        <Label>Full Script (Markdown)</Label>
+
+        <MarkdownWrap $isDark={isDark}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {data.contentMd ?? "*No details available.*"}
+          </ReactMarkdown>
+        </MarkdownWrap>
 
         {uiStatus === "active" && (
           <ButtonGroup>
             <Button variant="primary" $isDark={isDark} onClick={() => onCommit(id)}>Commit</Button>
-            <Button $isDark={isDark} onClick={() => setIsEditing(true)}>Edit</Button>
+            <Button $isDark={isDark} onClick={() => setisFlipped(true)}>Edit</Button>
             <Button $isDark={isDark} onClick={() => onReject(id)}>Reject</Button>
             <Button $isDark={isDark} onClick={onNext}>Next</Button>
           </ButtonGroup>
@@ -280,7 +315,7 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
 
       <Face $variant="back" $ideaStatus={data.status} $isDark={isDark}>
         <Label>Refine Idea</Label>
-        <Section>
+        {/* <Section>
           <Label>Title</Label>
           <EditableInput 
             $isDark={isDark}
@@ -311,11 +346,21 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
               />
             ))}
           </div>
+        </Section> */}
+
+        <Section style={{ flex: 1 , overflowY: 'auto' }}>
+          <Label>Full Script (Markdown)</Label>
+          <EditableInput
+            $isDark={isDark}
+            value={editState.contentMd || ""}
+            onChange={e => setEditState({...editState, contentMd: e.target.value})}
+            style={{ flex: 1, height: '100%' }}
+          />
         </Section>
         
         <ButtonGroup>
           <Button variant="primary" $isDark={isDark} onClick={handleSave}>Apply Changes</Button>
-          <Button $isDark={isDark} onClick={() => setIsEditing(false)}>Cancel</Button>
+          <Button $isDark={isDark} onClick={() => setisFlipped(false)}>Cancel</Button>
         </ButtonGroup>
       </Face>
     </Container>
