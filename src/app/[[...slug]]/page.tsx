@@ -8,9 +8,9 @@ export function generateStaticParams() {
 export default async function Page({ params }: { params: Promise<{ slug?: string[] }> }) {
   const resolvedParams = await params;
   
-  // Redirect root route ("/") to "/generate"
+  // Redirect root route ("/") to landing page
   if (!resolvedParams.slug || resolvedParams.slug.length === 0) {
-    redirect("/conversation");
+    redirect("/landing");
   }
 
   return <ClientOnly />;

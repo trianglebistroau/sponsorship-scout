@@ -1281,3 +1281,167 @@ Prefer:
 - Final transition feels like a reward, not a system step
 - Overall onboarding feels like chatting with a smart, stylish creative partner
 */
+
+# LANDING PAGE
+/*
+#GOAL
+Design a new Landing Page for Solvi, the first touchpoint creators see when visiting the site.
+
+This page should:
+- Instantly resonate with content creators (TikTok-first, creative, energetic)
+- Clearly communicate the pain Solvi solves (without sounding analytical or corporate)
+- Explain the value of Solvi in a simple, visual, creator-native way
+- Sneak peek the actual user journey: Understand to Ideate to Create to Plan
+- Drive users to Sign up / Log in via existing Google OAuth in 'auth' 
+- Feel minimal, aesthetic, bold, and confident, NOT busy or salesy
+
+This is NOT an onboarding or chat page.
+This is the public-facing introduction to Solvi.
+
+
+#CONTEXT
+Creators today struggle with:
+- Idea burnout (“What do I post next?”)
+- Analytics that feel overwhelming, abstract, or useless
+- Not knowing their real content pillars or secret sauce
+- Guessing why some videos hit and others flop
+- Feeling locked out of trends, brands, and algorithm logic
+- Not knowing how to start or grow sustainably as a creator
+
+Solvi positions itself as: A creative partner that understands your style, learns your patterns, and helps you build content with intention, NOT guesswork.
+
+
+#FOLDER & ROUTING SETUP
+- Create a new folder inside `src/app` called `/landing`
+- This page should be the default public entry point
+- Do NOT modify:
+    - Auth logic
+    - Google OAuth flow
+- The CTA buttons should link to the existing auth route only
+- Flow: Landing Page to Google OAuth to Onboarding Chat to Profile to Chat to Generate to Plan
+
+
+#PAGE STRUCTURE 
+## 1. Navigation Bar (Top)
+- Minimal, clean
+- Left: Solvi logo / wordmark
+- Right:
+    - “Log in”
+    - “Sign up”
+- Both buttons route to existing Google OAuth
+- Keep nav sticky and lightweight
+
+## 2. Hero Section (Above the fold)
+- Purpose: Hook creators emotionally in 5 seconds.
+- Content direction:
+    - Headline: bold, confident, creator-first
+    - Examples (adjust freely):
+        - “Create without guessing.”
+        - “Your content, decoded.”
+        - “Stop guessing what works. Start knowing.”
+- Subtext: Short, human, creator-friendly explanation: “Solvi helps you understand your style, spot what works, and turn ideas into content you actually want to post.”
+- Primary CTA: “Start with Solvi”
+- Secondary (optional): “See how it works”
+- Visual:
+    - Calm, aesthetic background
+    - Soft gradients / motion
+    - No dashboards, no charts
+
+## 3. Pain to Relief Section
+- Purpose: Mirror creators’ frustrations, then flip them into clarity.
+- Layout:
+    - 2-column or stacked cards
+    - Short punchy copy, no long paragraphs
+- Pain examples:
+    - “Ideas running dry”
+    - “Analytics but no answers”
+    - “Posting without direction”
+    - “Not sure what brands want”
+    - “Feeling behind the algorithm”
+- Relief framing:
+    - “Solvi shows you *why*”
+    - “Solvi highlights your strengths”
+    - “Solvi gives you a creative direction”
+    - “Solvi helps you build consistency”
+- Tone: Empathetic, confident, not preachy.
+
+## 4. What Solvi Does (Benefits)
+- Purpose: Translate features into creator outcomes.
+- Show as cards or steps:
+    - Understand your creator profile
+    - Reveal your content superpowers
+    - Spot what’s holding you back
+    - Turn insights into ideas
+    - Plan content with intention
+- Avoid:
+    - Technical jargon
+    - “AI-powered analytics” phrasing
+- Instead:
+    - “We watch patterns so you don’t have to”
+    - “We help you see what your audience already loves”
+
+
+## 5. The Solvi Flow (How it works)
+- Purpose: Make the journey feel easy and exciting.
+- 4-step flow:
+1. **Understand you**
+   “We learn your style, taste, and patterns”
+2. **Brainstorm ideas**
+   “Concepts that fit *you*, not templates”
+3. **Create together**
+   “Refine hooks, formats, and direction”
+4. **Plan ahead**
+   “Turn ideas into an actual posting rhythm”
+- Use:
+    - Icons
+    - Subtle motion
+    - Short copy
+
+
+## 6. Trust & Positioning Section
+- Purpose: Build confidence without social proof overload.
+- Ideas:
+    - “Built for creators, not dashboards”
+    - “No guessing. No spreadsheets.”
+    - “Your creative partner, not another tool”
+- Optional:
+    - Soft testimonial placeholders
+    - Creator-style language (not brand quotes)
+
+## 7. Final CTA Section (Bottom)
+- Purpose: Catch users when they’re convinced.
+- Content:
+    - Friendly, motivating line: “Ready to build content that actually feels like you?”
+    - CTA button: “Sign up”
+- Routes to existing OAuth
+
+
+#VISUAL & STYLE GUIDANCE
+- Match existing Solvi pages (Profile, Research, Generate, Plan)
+- Minimal UI
+- Soft gradients, calm motion
+- High contrast text
+- Generous spacing
+- Mobile-first responsiveness
+- Avoid:
+    - Over-illustration
+    - Analytics visuals
+    - Dense text blocks
+
+#TONE & VOICE
+- Bold
+- Funky
+- Creator-native
+- Confident but warm
+- Light Gen Z energy (no cringe, no slang overload)
+- Feels like: A creative friend who *gets it*, not a startup pitch.
+
+#EXPECTED OUTPUT
+- A clean, scrollable Landing page
+- Clear narrative from pain → clarity → action
+- Two visible Sign up / Log in CTAs
+- No broken routing
+- No onboarding logic included here
+
+This page should make creators think: “Okay… this feels made for me.”
+*/
