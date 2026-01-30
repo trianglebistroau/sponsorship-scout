@@ -160,25 +160,59 @@ importers:
         version: 18.3.1(react@18.3.1)
       react-hook-form:
         specifier: ^7.61.1
+<<<<<<< HEAD
         version: 7.71.1(react@18.3.1)
       react-markdown:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@18.3.27)(react@18.3.1)
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+        version: 7.69.0(react@19.2.3)
+=======
+        version: 7.70.0(react@19.2.3)
+      react-markdown:
+        specifier: ^10.1.0
+        version: 10.1.0(@types/react@18.3.27)(react@19.2.3)
+>>>>>>> 2731c18 (feat: chatbot with history + message renderer (#13))
+=======
+        version: 7.71.1(react@18.3.1)
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+        version: 7.71.1(react@18.3.1)
+      react-markdown:
+        specifier: ^10.1.0
+        version: 10.1.0(@types/react@18.3.27)(react@18.3.1)
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
       react-resizable-panels:
         specifier: ^2.1.9
         version: 2.1.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       recharts:
         specifier: ^2.15.4
+<<<<<<< HEAD
         version: 2.15.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+        version: 2.15.4(react-dom@18.3.1(react@19.2.3))(react@19.2.3)
+=======
+        version: 2.15.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
       rehype-raw:
         specifier: ^7.0.0
         version: 7.0.0
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
+<<<<<<< HEAD
 =======
         version: 2.15.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
       sonner:
         specifier: ^1.7.4
         version: 1.7.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -199,7 +233,7 @@ importers:
         version: 0.9.9(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       zod:
         specifier: ^4.1.9
-        version: 4.3.6
+        version: 4.3.5
     devDependencies:
       '@better-auth/cli':
         specifier: ^1.4.18
@@ -2156,6 +2190,7 @@ packages:
     resolution: {integrity: sha512-Ps3T8E8dZDam6fUyNiMkekK3XUsaUEik+idO9/YjPtfj2qruF8tFBXS7XhtE4iIXBLxhmLjP3SXpLhVf21I9Lw==}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@types/debug@4.1.12':
     resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
 
@@ -2168,12 +2203,23 @@ packages:
   '@types/estree-jsx@1.0.5':
     resolution: {integrity: sha512-52CcUVNFyfb1A2ALocQw/Dd1BQFNmSdkuC3BkZ6iqhdMfQz7JWOFRuJFloOzjk+6WijU56m9oKXFAXc7o3Towg==}
 =======
+=======
+  '@types/debug@4.1.12':
+    resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
+
+>>>>>>> 8007993 (create a landing page for Solvi)
   '@types/eslint-scope@3.7.7':
     resolution: {integrity: sha512-MzMFlSLBqNF2gcHWO0G1vP/YQyfvrxZ0bF+u7mzUdZ1/xK4A4sru+nraZz5i3iEIk1l1uyicaDVTB4QbbEkAYg==}
 
   '@types/eslint@9.6.1':
     resolution: {integrity: sha512-FXx2pKgId/WyYo2jXw63kk7/+TY7u7AziEJxJAnSFzHlqTAS3Ync6SvgYAN/k4/PQpnnVuzoMuVnByKK2qp0ag==}
+<<<<<<< HEAD
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+
+  '@types/estree-jsx@1.0.5':
+    resolution: {integrity: sha512-52CcUVNFyfb1A2ALocQw/Dd1BQFNmSdkuC3BkZ6iqhdMfQz7JWOFRuJFloOzjk+6WijU56m9oKXFAXc7o3Towg==}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
@@ -2185,20 +2231,39 @@ packages:
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   '@types/mdast@4.0.4':
     resolution: {integrity: sha512-kGaNbPh1k7AFzgpud/gMdvIm5xuECykRR+JnWKQno9TAXVa6WIVCGTPvYGekIDL4uwCZQSYbUxNBSb1aUo79oA==}
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+  '@types/node@22.19.3':
+    resolution: {integrity: sha512-1N9SBnWYOJTrNZCdh/yJE+t910Y128BoyY+zBLWhL3r0TYzlTmFdXrPwHL9DyFZmlEXNQQolTZh3KHV31QDhyA==}
+=======
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   '@types/node@22.19.7':
     resolution: {integrity: sha512-MciR4AKGHWl7xwxkBa6xUGxQJ4VBOmPTF7sL+iGzuahOFaO0jHCsuEfS80pan1ef4gWId1oWOweIhrDEYLuaOw==}
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
+<<<<<<< HEAD
 
   '@types/pg@8.16.0':
     resolution: {integrity: sha512-RmhMd/wD+CF8Dfo+cVIy3RR5cl8CyfXQ0tGgW6XBL8L4LM/UTEbNXYRbLwU6w+CgrKBNbrQWt4FUtTfaU5jSYQ==}
+=======
+<<<<<<< HEAD
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
 
   '@types/phoenix@1.6.7':
     resolution: {integrity: sha512-oN9ive//QSBkf19rfDv45M7eZPi0eEXylht2OLEXicu5b4KoQ1OzXIw+xDSGWxSxe1JmepRR/ZH283vsu518/Q==}
@@ -2283,9 +2348,19 @@ packages:
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+  '@ungap/structured-clone@1.3.0':
+    resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
+<<<<<<< HEAD
+
+=======
+=======
+=======
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
 
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   '@webassemblyjs/ast@1.14.1':
     resolution: {integrity: sha512-nuBEDgQfm1ccRp/8bCQrx1frohyufl4JlbMMZ4P1wpeOfDhF6FQkxZJ1b/e+PLwr6X1Nhw6OLme5usuBWYBvuQ==}
 
@@ -2342,6 +2417,13 @@ packages:
     engines: {node: '>=10.13.0'}
     peerDependencies:
       acorn: ^8.14.0
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -2466,10 +2548,15 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
   babel-plugin-macros@3.1.0:
     resolution: {integrity: sha512-Cg7TFGpIr01vOQNODXOOaGz2NpCU5gl8x1qJFbb6hbZxR7XrcE2vtbAsTAbJ7/xwJtUuJEw8K8Zr/AE0LHlesg==}
     engines: {node: '>=10', npm: '>=6'}
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
 =======
@@ -2477,6 +2564,14 @@ packages:
     resolution: {integrity: sha512-Cg7TFGpIr01vOQNODXOOaGz2NpCU5gl8x1qJFbb6hbZxR7XrcE2vtbAsTAbJ7/xwJtUuJEw8K8Zr/AE0LHlesg==}
     engines: {node: '>=10', npm: '>=6'}
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+  babel-plugin-macros@3.1.0:
+    resolution: {integrity: sha512-Cg7TFGpIr01vOQNODXOOaGz2NpCU5gl8x1qJFbb6hbZxR7XrcE2vtbAsTAbJ7/xwJtUuJEw8K8Zr/AE0LHlesg==}
+    engines: {node: '>=10', npm: '>=6'}
+
+  bail@2.0.2:
+    resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -2645,8 +2740,19 @@ packages:
     resolution: {integrity: sha512-QOSvevhslijgYwRx6Rv7zKdMF8lbRmx+uQGx2+vDc+KI/eBnsy9kit5aj23AgGu3pa4t9AgwbnXWqS+iOY+2aA==}
     engines: {node: '>= 6'}
 
+<<<<<<< HEAD
   caniuse-lite@1.0.30001766:
     resolution: {integrity: sha512-4C0lfJ0/YPjJQHagaE9x2Elb69CIqEPZeG0anQt9SIvIoOH4a4uaRl73IavyO+0qZh6MDLH//DrXThEYKHkmYA==}
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+  caniuse-lite@1.0.30001761:
+    resolution: {integrity: sha512-JF9ptu1vP2coz98+5051jZ4PwQgd2ni8A+gYSN7EA7dPKIMf0pDlSUxhdmVOaV3/fYK5uWBkgSXJaRLr4+3A6g==}
+=======
+  caniuse-lite@1.0.30001763:
+    resolution: {integrity: sha512-mh/dGtq56uN98LlNX9qdbKnzINhX0QzhiWBFEkFfsFO4QyCvL8YegrJAazCwXIeqkIob8BlZPGM3xdnY+sgmvQ==}
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
@@ -3102,6 +3208,7 @@ packages:
     resolution: {integrity: sha512-i6UzDscO/XfAcNYD75CfICkmfLedpyPDdozrLMmQc5ORaQcdMoc21OnlEylMIqI7U8eniKrPMxxtj8k0vhmJhA==}
     engines: {node: '>=14'}
 
+<<<<<<< HEAD
   end-of-stream@1.4.5:
     resolution: {integrity: sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==}
 
@@ -3109,17 +3216,30 @@ packages:
     resolution: {integrity: sha512-LgQMM4WXU3QI+SYgEc2liRgznaD5ojbmY3sb8LxyguVkIg5FxdpTkvk72te2R38/TGKxH634oLxXRGY6d7AP+Q==}
     engines: {node: '>=10.13.0'}
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   entities@6.0.1:
     resolution: {integrity: sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g==}
     engines: {node: '>=0.12'}
 =======
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   end-of-stream@1.4.5:
     resolution: {integrity: sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==}
 
   enhanced-resolve@5.18.4:
     resolution: {integrity: sha512-LgQMM4WXU3QI+SYgEc2liRgznaD5ojbmY3sb8LxyguVkIg5FxdpTkvk72te2R38/TGKxH634oLxXRGY6d7AP+Q==}
     engines: {node: '>=10.13.0'}
+<<<<<<< HEAD
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+
+  entities@6.0.1:
+    resolution: {integrity: sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g==}
+    engines: {node: '>=0.12'}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   environment@1.1.0:
     resolution: {integrity: sha512-xUtoPkMggbz0MPyPiIWr1Kp4aeWJjDZ6SMvURhimjdZgsRuDplF5/s9hcgGhyXMhs+6vpnuoiZ2kFiu3FMnS8Q==}
@@ -3182,14 +3302,32 @@ packages:
     engines: {node: '>=10'}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+  escape-string-regexp@5.0.0:
+    resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
+    engines: {node: '>=12'}
+<<<<<<< HEAD
+
+=======
+=======
+=======
   escape-string-regexp@5.0.0:
     resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
     engines: {node: '>=12'}
 
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   escodegen@2.1.0:
     resolution: {integrity: sha512-2NlIDTwUWJN0mRPQOdtQBzbUHvdGY2P1VXSyU83Q3xKxM7WHX2Ql8dKq782Q9TgQUNOLEzEYu9bzLNj1q88I5w==}
     engines: {node: '>=6.0'}
     hasBin: true
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
 
   eslint-plugin-react-hooks@5.2.0:
     resolution: {integrity: sha512-+f15FfK64YQwZdJNELETdn5ibXEUQmW1DZL6KXhNnc2heoy/sg9VJJeT7n8TlMWouzWqSWavFkIhHyIbIAEapg==}
@@ -3576,6 +3714,9 @@ packages:
     engines: {node: '>= 0.4'}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   hast-util-from-parse5@8.0.3:
     resolution: {integrity: sha512-3kxEVkEKt0zvcZ3hCRYI8rqrgwtlIOFMWkbclACvjlDw8Li9S2hk/d51OI0nr/gIpdMHNepwgOKqZ/sy0Clpyg==}
 
@@ -3597,18 +3738,30 @@ packages:
   hastscript@9.0.1:
     resolution: {integrity: sha512-g7df9rMFX/SPi34tyGCyUBREQoKkapwdY/T04Qn9TDWfHhAYt4/I0gMVirzK5wEzeUqIjEB+LXC/ypb7Aqno5w==}
 
+<<<<<<< HEAD
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
 
+=======
+<<<<<<< HEAD
+=======
+  hoist-non-react-statics@3.3.2:
+    resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
+
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   html-url-attributes@3.0.1:
     resolution: {integrity: sha512-ol6UPyBWqsrO6EJySPz2O7ZSr856WDrEzM5zMqp+FJJLGMW35cLYmmZnl0vztAZxRUoNZJFTCohfjuIJ8I4QBQ==}
 
   html-void-elements@3.0.0:
     resolution: {integrity: sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg==}
+<<<<<<< HEAD
 =======
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   https-proxy-agent@7.0.6:
     resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
@@ -3642,18 +3795,30 @@ packages:
     resolution: {integrity: sha512-JmXMZ6wuvDmLiHEml9ykzqO6lwFbof0GG4IkcGaENdCRDDmMVnny7s5HsIgHCbaq0w2MyPhDqkhTUgS2LU2PHA==}
     engines: {node: '>=0.8.19'}
 
+<<<<<<< HEAD
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
 
   ini@1.3.8:
     resolution: {integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==}
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   inline-style-parser@0.2.7:
     resolution: {integrity: sha512-Nb2ctOyNR8DqQoR0OwRG95uNWIC0C1lCgf5Naz5H6Ji72KZ8OcFZLz2P5sNgwlyoJ8Yif11oMuYs5pBQa86csA==}
 =======
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+  inherits@2.0.4:
+    resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
+
+  inline-style-parser@0.2.7:
+    resolution: {integrity: sha512-Nb2ctOyNR8DqQoR0OwRG95uNWIC0C1lCgf5Naz5H6Ji72KZ8OcFZLz2P5sNgwlyoJ8Yif11oMuYs5pBQa86csA==}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   input-otp@1.4.2:
     resolution: {integrity: sha512-l3jWwYNvrEa6NTCt7BECfCm48GvwuZzkoeG3gBL2w4CHeOXW3eKFmf9UNYkNfYc3mxMrthMnxjIE07MT0zLBQA==}
@@ -3965,15 +4130,27 @@ packages:
     resolution: {integrity: sha512-9ie8ItPR6tjY5uYJh8K/Zrv/RMZ5VOlOWvtZdEHYSTFKZfIBPQa9tOAEeAWhd+AnIneLJ22w5fjOYtoutpWq5w==}
     engines: {node: '>=18'}
 
+<<<<<<< HEAD
   long@5.3.2:
     resolution: {integrity: sha512-mNAgZ1GmyNhD7AuqnTG3/VQ26o760+ZYBPKjPvugO8+nLbYfX6TVpJPseBvopbdY+qpZ/lKUnmEc1LeZYS3QAA==}
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   longest-streak@3.1.0:
     resolution: {integrity: sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g==}
 =======
   long@5.3.2:
     resolution: {integrity: sha512-mNAgZ1GmyNhD7AuqnTG3/VQ26o760+ZYBPKjPvugO8+nLbYfX6TVpJPseBvopbdY+qpZ/lKUnmEc1LeZYS3QAA==}
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+  long@5.3.2:
+    resolution: {integrity: sha512-mNAgZ1GmyNhD7AuqnTG3/VQ26o760+ZYBPKjPvugO8+nLbYfX6TVpJPseBvopbdY+qpZ/lKUnmEc1LeZYS3QAA==}
+
+  longest-streak@3.1.0:
+    resolution: {integrity: sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g==}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
@@ -3995,21 +4172,36 @@ packages:
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
 
+<<<<<<< HEAD
   map-limit@0.0.1:
     resolution: {integrity: sha512-pJpcfLPnIF/Sk3taPW21G/RQsEEirGaFpCW3oXRwH9dnFHPHNGjNyvh++rdmC2fNqEaTw2MhYJraoJWAHx8kEg==}
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
 =======
   map-limit@0.0.1:
     resolution: {integrity: sha512-pJpcfLPnIF/Sk3taPW21G/RQsEEirGaFpCW3oXRwH9dnFHPHNGjNyvh++rdmC2fNqEaTw2MhYJraoJWAHx8kEg==}
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+  map-limit@0.0.1:
+    resolution: {integrity: sha512-pJpcfLPnIF/Sk3taPW21G/RQsEEirGaFpCW3oXRwH9dnFHPHNGjNyvh++rdmC2fNqEaTw2MhYJraoJWAHx8kEg==}
+
+  markdown-table@3.0.4:
+    resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   mdast-util-find-and-replace@3.0.2:
     resolution: {integrity: sha512-Tmd1Vg/m3Xz43afeNxDIhWRtFZgM2VLyaf4vSTYwudTyeuTneoL3qtWMA5jeLyz/O1vDJmmV4QuScFCA2tBPwg==}
 
@@ -4054,9 +4246,22 @@ packages:
 
   mdast-util-to-string@4.0.0:
     resolution: {integrity: sha512-0H44vDimn51F0YwvxSJSm0eCDOJTRlmN0R1yBh4HLj9wiV1Dn0QoXGbvFAWj2hSItVTlCmBF1hqKlIyUBVFLPg==}
+<<<<<<< HEAD
 
   merge-stream@2.0.0:
     resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}
+=======
+<<<<<<< HEAD
+=======
+  merge-stream@2.0.0:
+    resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+
+  merge-stream@2.0.0:
+    resolution: {integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==}
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
 
   merge2@1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
@@ -4348,6 +4553,7 @@ packages:
     engines: {node: '>=6'}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   parse-entities@4.0.2:
     resolution: {integrity: sha512-GG2AQYWoLgL877gQIKeRPGO1xF9+eG1ujIb5soS5gPvLQ1y2o8FL90w2QWNdf9I361Mpp7726c+lj3U0qK1uGw==}
 
@@ -4362,6 +4568,17 @@ packages:
     resolution: {integrity: sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg==}
     engines: {node: '>=8'}
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+  parse-entities@4.0.2:
+    resolution: {integrity: sha512-GG2AQYWoLgL877gQIKeRPGO1xF9+eG1ujIb5soS5gPvLQ1y2o8FL90w2QWNdf9I361Mpp7726c+lj3U0qK1uGw==}
+
+  parse-json@5.2.0:
+    resolution: {integrity: sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg==}
+    engines: {node: '>=8'}
+
+  parse5@7.3.0:
+    resolution: {integrity: sha512-IInvU7fabl34qmi9gY8XOVxhYyMyuH2xUNpb2q8/Y+7552KlejkRvqvD19nMoUW/uQGGbqNpA6Tufu5FL5BZgw==}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   path-exists@4.0.0:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
@@ -4562,15 +4779,28 @@ packages:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   property-information@7.1.0:
     resolution: {integrity: sha512-TwEZ+X+yCJmYfL7TPUOcvBZ4QfoT5YenQiJuX//0th53DE6w0xxLEtfK3iyryQFddXuvkIk51EEgrJQ0WJkOmQ==}
 
   protobufjs@7.5.4:
     resolution: {integrity: sha512-CvexbZtbov6jW2eXAvLukXjXUW1TzFaivC46BpWc/3BpcCysb5Vffu+B3XHMm8lVEuy2Mm4XGex8hBSg1yapPg==}
     engines: {node: '>=12.0.0'}
+<<<<<<< HEAD
 
   pump@3.0.3:
     resolution: {integrity: sha512-todwxLMY7/heScKmntwQG8CXVkWUOdYxIvY2s0VWAAMh/nd8SoYiRaKjlr7+iCs984f2P8zvrfWcDDYVb73NfA==}
+=======
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+  property-information@7.1.0:
+    resolution: {integrity: sha512-TwEZ+X+yCJmYfL7TPUOcvBZ4QfoT5YenQiJuX//0th53DE6w0xxLEtfK3iyryQFddXuvkIk51EEgrJQ0WJkOmQ==}
+
+  protobufjs@7.5.4:
+    resolution: {integrity: sha512-CvexbZtbov6jW2eXAvLukXjXUW1TzFaivC46BpWc/3BpcCysb5Vffu+B3XHMm8lVEuy2Mm4XGex8hBSg1yapPg==}
+    engines: {node: '>=12.0.0'}
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
 
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
@@ -4726,6 +4956,9 @@ packages:
     engines: {node: '>= 0.4'}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   rehype-raw@7.0.0:
     resolution: {integrity: sha512-/aE8hCfKlQeA8LmyeyQvQF3eBiLRGNlfBJEvWH7ivp9sBqs7TNqBL5X3v157rM4IFETqDnIOO+z5M/biZbo9Ww==}
 
@@ -4740,10 +4973,25 @@ packages:
 
   remark-stringify@11.0.0:
     resolution: {integrity: sha512-1OSmLd3awB/t8qdoEOMazZkNsfVTeY4fTsgzcQFdXNq8ToTN4ZGwrMnlda4K6smTFKD+GRV6O48i6Z4iKgPPpw==}
+<<<<<<< HEAD
 
   require-from-string@2.0.2:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
     engines: {node: '>=0.10.0'}
+=======
+<<<<<<< HEAD
+=======
+  require-from-string@2.0.2:
+    resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
+    engines: {node: '>=0.10.0'}
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+
+  require-from-string@2.0.2:
+    resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
+    engines: {node: '>=0.10.0'}
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
 
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
@@ -4905,6 +5153,16 @@ packages:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+  space-separated-tokens@2.0.2:
+    resolution: {integrity: sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==}
+=======
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   source-map-support@0.5.21:
     resolution: {integrity: sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==}
 
@@ -4916,6 +5174,7 @@ packages:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
 
+<<<<<<< HEAD
   space-separated-tokens@2.0.2:
     resolution: {integrity: sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==}
 
@@ -4923,11 +5182,26 @@ packages:
     resolution: {integrity: sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==}
     engines: {node: '>= 10.x'}
 
+=======
+<<<<<<< HEAD
+=======
+  space-separated-tokens@2.0.2:
+    resolution: {integrity: sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==}
+
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   stack-trace@0.0.9:
     resolution: {integrity: sha512-vjUc6sfgtgY0dxCdnc40mK6Oftjo9+2K8H/NG81TMhgL392FtiPA9tn9RLyTxXmTLPJPjF3VyzFp6bsWFLisMQ==}
 
   static-eval@2.1.1:
     resolution: {integrity: sha512-MgWpQ/ZjGieSVB3eOJVs4OA2LT/q1vx98KPCTTQPzq/aLr0YUXTsgryTXr4SLfR0ZfUUCiedM9n/ABeDIyy4mA==}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
 
   stop-iteration-iterator@1.1.0:
     resolution: {integrity: sha512-eLoXW/DHyl62zxY4SCaIgnRhuMr6ri4juEYARS8E6sCEqzKpOiE521Ucofdx+KnDZl5xmvGYaaKCk5FEOxJCoQ==}
@@ -4975,21 +5249,34 @@ packages:
     resolution: {integrity: sha512-UXSH262CSZY1tfu3G3Secr6uGLCFVPMhIqHjlgCUtCCcgihYc/xKs9djMTMUOb2j1mVSeU8EU6NWc/iQKU6Gfg==}
     engines: {node: '>= 0.4'}
 
+<<<<<<< HEAD
   string_decoder@0.10.31:
     resolution: {integrity: sha512-ev2QzSzWPYmy9GuqfIVildA4OdcGLeFZQrq5ys6RtiuF+RQQiZWr8TZNyAcuVXyQRYfEO+MsoB/1BuQVhOJuoQ==}
 
   string_decoder@1.1.1:
     resolution: {integrity: sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==}
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   stringify-entities@4.0.4:
     resolution: {integrity: sha512-IwfBptatlO+QCJUo19AqvrPNqlVMpW9YEL2LIVY+Rpv2qsjCGxaDLNRgeGsQWJhfItebuJhsGSLjaBbNSQ+ieg==}
 =======
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   string_decoder@0.10.31:
     resolution: {integrity: sha512-ev2QzSzWPYmy9GuqfIVildA4OdcGLeFZQrq5ys6RtiuF+RQQiZWr8TZNyAcuVXyQRYfEO+MsoB/1BuQVhOJuoQ==}
 
   string_decoder@1.1.1:
     resolution: {integrity: sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==}
+<<<<<<< HEAD
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+
+  stringify-entities@4.0.4:
+    resolution: {integrity: sha512-IwfBptatlO+QCJUo19AqvrPNqlVMpW9YEL2LIVY+Rpv2qsjCGxaDLNRgeGsQWJhfItebuJhsGSLjaBbNSQ+ieg==}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   strip-ansi@6.0.1:
     resolution: {integrity: sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==}
@@ -5307,10 +5594,15 @@ packages:
       yaml:
         optional: true
 
+<<<<<<< HEAD
   watchpack@2.5.1:
     resolution: {integrity: sha512-Zn5uXdcFNIA1+1Ei5McRd+iRzfhENPCe7LeABkJtNulSxjma+l7ltNx55BWZkRlwRnpOgHqxnjyaDgJnNXnqzg==}
     engines: {node: '>=10.13.0'}
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
 =======
@@ -5318,6 +5610,14 @@ packages:
     resolution: {integrity: sha512-Zn5uXdcFNIA1+1Ei5McRd+iRzfhENPCe7LeABkJtNulSxjma+l7ltNx55BWZkRlwRnpOgHqxnjyaDgJnNXnqzg==}
     engines: {node: '>=10.13.0'}
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+  watchpack@2.5.1:
+    resolution: {integrity: sha512-Zn5uXdcFNIA1+1Ei5McRd+iRzfhENPCe7LeABkJtNulSxjma+l7ltNx55BWZkRlwRnpOgHqxnjyaDgJnNXnqzg==}
+    engines: {node: '>=10.13.0'}
+
+  web-namespaces@2.0.1:
+    resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   web-streams-polyfill@3.3.3:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
@@ -5417,6 +5717,7 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
+<<<<<<< HEAD
   yocto-spinner@0.2.3:
     resolution: {integrity: sha512-sqBChb33loEnkoXte1bLg45bEBsOP9N1kzQh5JZNKj/0rik4zAPTNSAVPj3uQAdc6slYJ0Ksc403G2XgxsJQFQ==}
     engines: {node: '>=18.19'}
@@ -5427,6 +5728,16 @@ packages:
 
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+  zod@4.2.1:
+    resolution: {integrity: sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==}
+=======
+  zod@4.3.5:
+    resolution: {integrity: sha512-k7Nwx6vuWx1IJ9Bjuf4Zt1PEllcwe7cls3VNzm4CQ1/hgtFUK2bRNG3rvnpPUhFjmqJKAKtjV576KnUkHocg/g==}
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -7269,10 +7580,14 @@ snapshots:
   '@types/d3-timer@3.0.2': {}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   '@types/debug@4.1.12':
     dependencies:
       '@types/ms': 2.1.0
 
+<<<<<<< HEAD
   '@types/eslint-scope@3.7.7':
     dependencies:
       '@types/eslint': 9.6.1
@@ -7283,11 +7598,16 @@ snapshots:
       '@types/estree': 1.0.8
       '@types/json-schema': 7.0.15
 
+=======
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   '@types/estree-jsx@1.0.5':
     dependencies:
       '@types/estree': 1.0.8
 
 =======
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   '@types/eslint-scope@3.7.7':
     dependencies:
       '@types/eslint': 9.6.1
@@ -7298,7 +7618,14 @@ snapshots:
       '@types/estree': 1.0.8
       '@types/json-schema': 7.0.15
 
+<<<<<<< HEAD
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+  '@types/estree-jsx@1.0.5':
+    dependencies:
+      '@types/estree': 1.0.8
+
+>>>>>>> 8007993 (create a landing page for Solvi)
   '@types/estree@1.0.8': {}
 
   '@types/hast@3.0.4':
@@ -7439,8 +7766,17 @@ snapshots:
       eslint-visitor-keys: 4.2.1
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+  '@ungap/structured-clone@1.3.0': {}
+<<<<<<< HEAD
+
+=======
+=======
+=======
   '@ungap/structured-clone@1.3.0': {}
 
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   '@webassemblyjs/ast@1.14.1':
     dependencies:
       '@webassemblyjs/helper-numbers': 1.13.2
@@ -7524,6 +7860,13 @@ snapshots:
   acorn-import-phases@1.0.4(acorn@8.15.0):
     dependencies:
       acorn: 8.15.0
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
 
   acorn-jsx@5.3.2(acorn@8.15.0):
     dependencies:
@@ -7653,7 +7996,7 @@ snapshots:
   autoprefixer@10.4.23(postcss@8.5.6):
     dependencies:
       browserslist: 4.28.1
-      caniuse-lite: 1.0.30001766
+      caniuse-lite: 1.0.30001763
       fraction.js: 5.3.4
       picocolors: 1.1.1
       postcss: 8.5.6
@@ -7663,20 +8006,32 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
+<<<<<<< HEAD
   babel-plugin-macros@3.1.0:
     dependencies:
       '@babel/runtime': 7.28.6
       cosmiconfig: 7.1.0
       resolve: 1.22.11
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   bail@2.0.2: {}
 =======
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   babel-plugin-macros@3.1.0:
     dependencies:
       '@babel/runtime': 7.28.6
       cosmiconfig: 7.1.0
       resolve: 1.22.11
+<<<<<<< HEAD
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+
+  bail@2.0.2: {}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   balanced-match@1.0.2: {}
 
@@ -7783,7 +8138,7 @@ snapshots:
   browserslist@4.28.1:
     dependencies:
       baseline-browser-mapping: 2.9.18
-      caniuse-lite: 1.0.30001766
+      caniuse-lite: 1.0.30001763
       electron-to-chromium: 1.5.278
       node-releases: 2.0.27
       update-browserslist-db: 1.2.3(browserslist@4.28.1)
@@ -7858,6 +8213,8 @@ snapshots:
 =======
   caniuse-lite@1.0.30001766: {}
 >>>>>>> 5179db0 (Fix/deps (#16))
+
+  ccount@2.0.1: {}
 
   chalk@4.1.2:
     dependencies:
@@ -8203,6 +8560,7 @@ snapshots:
 
   empathic@2.0.0: {}
 
+<<<<<<< HEAD
   end-of-stream@1.4.5:
     dependencies:
       once: 1.4.0
@@ -8212,8 +8570,14 @@ snapshots:
       graceful-fs: 4.2.11
       tapable: 2.3.0
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   entities@6.0.1: {}
 =======
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   end-of-stream@1.4.5:
     dependencies:
       once: 1.4.0
@@ -8223,6 +8587,8 @@ snapshots:
       graceful-fs: 4.2.11
       tapable: 2.3.0
 >>>>>>> 5179db0 (Fix/deps (#16))
+
+  entities@6.0.1: {}
 
   environment@1.1.0: {}
 
@@ -8872,6 +9238,9 @@ snapshots:
       function-bind: 1.1.2
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   hast-util-from-parse5@8.0.3:
     dependencies:
       '@types/hast': 3.0.4
@@ -8945,10 +9314,14 @@ snapshots:
       property-information: 7.1.0
       space-separated-tokens: 2.0.2
 
+<<<<<<< HEAD
   hoist-non-react-statics@3.3.2:
     dependencies:
       react-is: 16.13.1
 
+=======
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   html-url-attributes@3.0.1: {}
 
   html-void-elements@3.0.0: {}
@@ -8957,6 +9330,15 @@ snapshots:
     dependencies:
       react-is: 16.13.1
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+  hoist-non-react-statics@3.3.2:
+    dependencies:
+      react-is: 16.13.1
+
+  html-url-attributes@3.0.1: {}
+
+  html-void-elements@3.0.0: {}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   https-proxy-agent@7.0.6:
     dependencies:
@@ -8982,10 +9364,23 @@ snapshots:
 
   imurmurhash@0.1.4: {}
 
+<<<<<<< HEAD
   inherits@2.0.4: {}
 
   ini@1.3.8: {}
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+  inline-style-parser@0.2.7: {}
+
+  input-otp@1.4.2(react-dom@18.3.1(react@19.2.3))(react@19.2.3):
+=======
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
+  inherits@2.0.4: {}
+
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   inline-style-parser@0.2.7: {}
 
   input-otp@1.4.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
@@ -9297,12 +9692,22 @@ snapshots:
       strip-ansi: 7.1.2
       wrap-ansi: 9.0.2
 
+<<<<<<< HEAD
   long@5.3.2: {}
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   longest-streak@3.1.0: {}
 =======
   long@5.3.2: {}
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+  long@5.3.2: {}
+
+  longest-streak@3.1.0: {}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   loose-envify@1.4.0:
     dependencies:
@@ -9336,6 +9741,9 @@ snapshots:
   math-intrinsics@1.1.0: {}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   mdast-util-find-and-replace@3.0.2:
     dependencies:
       '@types/mdast': 4.0.4
@@ -9488,6 +9896,8 @@ snapshots:
   mdast-util-to-string@4.0.0:
     dependencies:
       '@types/mdast': 4.0.4
+
+  merge-stream@2.0.0: {}
 
   merge-stream@2.0.0: {}
 
@@ -9751,7 +10161,7 @@ snapshots:
       '@next/env': 16.1.4
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.9.18
-      caniuse-lite: 1.0.30001766
+      caniuse-lite: 1.0.30001763
       postcss: 8.4.31
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -9883,6 +10293,9 @@ snapshots:
       callsites: 3.1.0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   parse-entities@4.0.2:
     dependencies:
       '@types/unist': 2.0.11
@@ -9893,6 +10306,7 @@ snapshots:
       is-decimal: 2.0.1
       is-hexadecimal: 2.0.1
 
+<<<<<<< HEAD
   parse-json@5.2.0:
     dependencies:
       '@babel/code-frame': 7.28.6
@@ -9900,17 +10314,29 @@ snapshots:
       json-parse-even-better-errors: 2.3.1
       lines-and-columns: 1.2.4
 
+=======
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   parse5@7.3.0:
     dependencies:
       entities: 6.0.1
 =======
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   parse-json@5.2.0:
     dependencies:
       '@babel/code-frame': 7.28.6
       error-ex: 1.3.4
       json-parse-even-better-errors: 2.3.1
       lines-and-columns: 1.2.4
+<<<<<<< HEAD
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+
+  parse5@7.3.0:
+    dependencies:
+      entities: 6.0.1
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   path-exists@4.0.0: {}
 
@@ -10087,8 +10513,17 @@ snapshots:
       react-is: 16.13.1
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+  property-information@7.1.0: {}
+<<<<<<< HEAD
+
+=======
+=======
+=======
   property-information@7.1.0: {}
 
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   protobufjs@7.5.4:
     dependencies:
       '@protobufjs/aspromise': 1.1.2
@@ -10103,11 +10538,18 @@ snapshots:
       '@protobufjs/utf8': 1.1.0
       '@types/node': 22.19.7
       long: 5.3.2
+<<<<<<< HEAD
 
   pump@3.0.3:
     dependencies:
       end-of-stream: 1.4.5
       once: 1.4.0
+=======
+<<<<<<< HEAD
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
 
   punycode@2.3.1: {}
 
@@ -10156,7 +10598,16 @@ snapshots:
 
   react-is@18.3.1: {}
 
+<<<<<<< HEAD
   react-markdown@10.1.0(@types/react@18.3.27)(react@18.3.1):
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+  react-markdown@10.1.0(@types/react@18.3.27)(react@19.2.3):
+=======
+  react-markdown@10.1.0(@types/react@18.3.27)(react@18.3.1):
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
     dependencies:
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.4
@@ -10165,7 +10616,15 @@ snapshots:
       hast-util-to-jsx-runtime: 2.3.6
       html-url-attributes: 3.0.1
       mdast-util-to-hast: 13.2.1
+<<<<<<< HEAD
       react: 18.3.1
+=======
+<<<<<<< HEAD
+      react: 19.2.3
+=======
+      react: 18.3.1
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
       remark-parse: 11.0.0
       remark-rehype: 11.1.2
       unified: 11.0.5
@@ -10174,7 +10633,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
   react-remove-scroll-bar@2.3.8(@types/react@18.3.27)(react@18.3.1):
+=======
+<<<<<<< HEAD
+  react-remove-scroll-bar@2.3.8(@types/react@18.3.27)(react@19.2.3):
+=======
+  react-remove-scroll-bar@2.3.8(@types/react@18.3.27)(react@18.3.1):
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+  react-remove-scroll-bar@2.3.8(@types/react@18.3.27)(react@18.3.1):
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
     dependencies:
       react: 18.3.1
       react-style-singleton: 2.2.3(@types/react@18.3.27)(react@18.3.1)
@@ -10302,6 +10772,9 @@ snapshots:
       set-function-name: 2.0.2
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   rehype-raw@7.0.0:
     dependencies:
       '@types/hast': 3.0.4
@@ -10341,8 +10814,19 @@ snapshots:
       '@types/mdast': 4.0.4
       mdast-util-to-markdown: 2.1.2
       unified: 11.0.5
+<<<<<<< HEAD
 
   require-from-string@2.0.2: {}
+=======
+<<<<<<< HEAD
+=======
+  require-from-string@2.0.2: {}
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+
+  require-from-string@2.0.2: {}
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
 
   resolve-from@4.0.0: {}
 
@@ -10576,6 +11060,15 @@ snapshots:
 
   source-map-js@1.2.1: {}
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+  space-separated-tokens@2.0.2: {}
+=======
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   source-map-support@0.5.21:
     dependencies:
       buffer-from: 1.1.2
@@ -10587,8 +11080,11 @@ snapshots:
 
   space-separated-tokens@2.0.2: {}
 
+<<<<<<< HEAD
   split2@4.2.0: {}
 
+=======
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   stack-trace@0.0.9: {}
 
   static-eval@2.1.1:
@@ -10671,23 +11167,38 @@ snapshots:
       define-properties: 1.2.1
       es-object-atoms: 1.1.1
 
+<<<<<<< HEAD
   string_decoder@0.10.31: {}
 
   string_decoder@1.1.1:
     dependencies:
       safe-buffer: 5.1.2
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   stringify-entities@4.0.4:
     dependencies:
       character-entities-html4: 2.1.0
       character-entities-legacy: 3.0.0
 =======
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   string_decoder@0.10.31: {}
 
   string_decoder@1.1.1:
     dependencies:
       safe-buffer: 5.1.2
+<<<<<<< HEAD
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+
+  stringify-entities@4.0.4:
+    dependencies:
+      character-entities-html4: 2.1.0
+      character-entities-legacy: 3.0.0
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   strip-ansi@6.0.1:
     dependencies:
@@ -10702,6 +11213,9 @@ snapshots:
   strip-json-comments@3.1.1: {}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   style-to-js@1.1.21:
     dependencies:
       style-to-object: 1.0.14
@@ -10710,7 +11224,18 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.7
 
+<<<<<<< HEAD
   styled-jsx@5.1.6(@babel/core@7.29.0)(react@18.3.1):
+=======
+<<<<<<< HEAD
+  styled-jsx@5.1.6(react@19.2.3):
+=======
+  styled-jsx@5.1.6(react@18.3.1):
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+  styled-jsx@5.1.6(react@18.3.1):
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
     dependencies:
       client-only: 0.0.1
       react: 18.3.1
@@ -11044,18 +11569,30 @@ snapshots:
       terser: 5.46.0
       yaml: 2.8.2
 
+<<<<<<< HEAD
   watchpack@2.5.1:
     dependencies:
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
 
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> e6a40d9 (create a landing page for Solvi)
   web-namespaces@2.0.1: {}
 =======
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
   watchpack@2.5.1:
     dependencies:
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
+<<<<<<< HEAD
 >>>>>>> 5179db0 (Fix/deps (#16))
+=======
+
+  web-namespaces@2.0.1: {}
+>>>>>>> 8007993 (create a landing page for Solvi)
 
   web-streams-polyfill@3.3.3: {}
 
@@ -11187,3 +11724,13 @@ snapshots:
   zod@4.3.6: {}
 
   zwitch@2.0.4: {}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 2731c18 (feat: chatbot with history + message renderer (#13))
+=======
+  zod@4.3.6: {}
+>>>>>>> 5179db0 (Fix/deps (#16))
+=======
+>>>>>>> 8007993 (create a landing page for Solvi)
+>>>>>>> e6a40d9 (create a landing page for Solvi)
