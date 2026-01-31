@@ -7,7 +7,7 @@ import remarkGfm from "remark-gfm";
 
 // -- Status Theme Mapping with Dark/Light mode support --
 const getStatusStyles = (
-  status: "ready" | "hidden" | "shown" | "committed" | "rejected",
+  status: "ready" | "generating" | "shown" | "committed" | "rejected",
   isDark: boolean
 ) => {
   const baseStyles = {
@@ -29,7 +29,7 @@ const getStatusStyles = (
       bg: isDark ? "rgba(20, 20, 20, 0.95)" : "rgba(255, 255, 255, 0.95)",
       label: isDark ? "rgba(255, 255, 255, 0.5)" : "rgba(0, 0, 0, 0.5)"
     },
-    hidden: {
+    generating: {
       border: isDark ? "rgba(100, 100, 100, 0.2)" : "rgba(150, 150, 150, 0.3)",
       glow: "transparent",
       bg: isDark ? "rgba(30, 30, 30, 0.8)" : "rgba(240, 240, 240, 0.8)",
@@ -49,7 +49,7 @@ const getStatusStyles = (
 // -- Styled Components --
 const Container = styled.div<{
   $uiStatus: "active" | "history" | "future";
-  $ideaStatus: "ready" | "hidden" | "shown" | "committed" | "rejected";
+  $ideaStatus: "ready" | "generating" | "shown" | "committed" | "rejected";
   $isFlipped: boolean;
   $isDark: boolean;
 }>`
@@ -60,7 +60,7 @@ const Container = styled.div<{
   transform-style: preserve-3d;
   transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   transform: ${props => props.$isFlipped ? "rotateY(180deg)" : "rotateY(0deg)"};
-  box-shadow: 0 20px 50px ${props => props.$isDark ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.2)"}, 
+  box-shadow: 0 20px 50px ${props => props.$isDark ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.2)"},
               0 0 30px ${props => getStatusStyles(props.$ideaStatus, props.$isDark).glow};
   cursor: ${props => props.$uiStatus === "active" ? "default" : "pointer"};
   pointer-events: ${props => (props.$uiStatus === "active" || props.$uiStatus === "history") ? "all" : "none"};
@@ -90,7 +90,7 @@ const MarkdownWrap = styled.div<{ $isDark: boolean }>`
 
 const Face = styled.div<{ 
   $variant: "front" | "back"; 
-  $ideaStatus: "ready" | "hidden" | "shown" | "committed" | "rejected";
+  $ideaStatus: "ready" | "generating" | "shown" | "committed" | "rejected";
   $isDark: boolean;
 }>`
   position: absolute;
@@ -193,7 +193,8 @@ export interface IdeaData {
   beats: string[];
   rationale: string;
   contentMd?: string;
-  status: "ready" | "hidden" | "shown" | "committed" | "rejected";
+  status: "ready" | "generating" | "shown" | "committed" | "rejected";
+  planId?: string;
 }
 
 interface CardProps {
@@ -247,13 +248,13 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
     setEditState({...editState, beats: newBeats});
   };
 
-  const isGenerating = data.status === "hidden";
+  const isGenerating = data.status === "generating";
   const styles = getStatusStyles(data.status, isDark);
 
   if (isGenerating) {
     return (
-      <Container $uiStatus={uiStatus} $ideaStatus="hidden" $isFlipped={false} $isDark={isDark}>
-        <Face $variant="front" $ideaStatus="hidden" $isDark={isDark} style={{ opacity: 0.5 }}>
+      <Container $uiStatus={uiStatus} $ideaStatus="generating" $isFlipped={false} $isDark={isDark}>
+        <Face $variant="front" $ideaStatus="generating" $isDark={isDark} style={{ opacity: 0.5 }}>
           <LoadingOverlay 
             $isDark={isDark}
             animate={{ backgroundPosition: ["100% 0", "-100% 0"] }}
