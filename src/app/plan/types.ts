@@ -1,4 +1,4 @@
-import type { FeedItemTags } from "../generate/types"
+import type { FeedItemTags } from "../test/types"
 
 export type SavedConcept = {
   id: string

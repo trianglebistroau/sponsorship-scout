@@ -1,10 +1,23 @@
 "use client";
+
 import styled from "@emotion/styled";
-import DotGrid from "../components/DotGrid";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
+
 import Card, { IdeaData } from "../components/Card";
-import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
-import React, { useState, useEffect, useRef } from "react";
+import DotGrid from "../components/DotGrid";
 import { generateNextCard } from "../lib/generateToCard";
+
+import {
+  loadDeck,
+  saveDeck,
+  loadDeckIndex,
+  saveDeckIndex,
+  upsertCommittedToPlan,
+} from "@/lib/planStore";
+
+const COMMIT_TARGET = 5;
 
 const Container = styled.div<{ $isDark: boolean }>`
   position: relative;
@@ -12,11 +25,22 @@ const Container = styled.div<{ $isDark: boolean }>`
   height: 100vh;
   overflow: hidden;
   perspective: 1200px;
-  background-color: ${props => props.$isDark ? "#0a0a0a" : "#e5e5e5"};
+  background-color: ${(props) => (props.$isDark ? "#0a0a0a" : "#e5e5e5")};
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background-color 0.3s ease;
+`;
+
+const DeckWrapper = styled(motion.div)`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-style: preserve-3d;
+  backdrop-filter: blur(3px) brightness(120%);
 `;
 
 function makePlaceholderCard(id: number, msg?: string): IdeaData {
@@ -32,23 +56,61 @@ function makePlaceholderCard(id: number, msg?: string): IdeaData {
   };
 }
 
+function isPlaceholder(idea: IdeaData) {
+  return idea.status === "ready" || idea.status === "generating";
+}
 
-const DeckWrapper = styled(motion.div)`
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transform-style: preserve-3d;
-  backdrop-filter: blur(3px) brightness(120%);
-`;
+/**
+ * Ensures:
+ * - deck is not empty
+ * - only ONE trailing placeholder
+ * - trailing placeholder is "ready" (not stuck in "generating" on refresh)
+ */
+function normalizeDeck(items: IdeaData[], takeId: () => number): IdeaData[] {
+  let copy = [...items];
+
+  // If empty, create one placeholder
+  if (copy.length === 0) {
+    copy.push(makePlaceholderCard(takeId()));
+    return copy;
+  }
+
+  // If any trailing "generating" placeholder exists (e.g. refresh mid-gen), reset it to ready
+  const last = copy[copy.length - 1];
+  if (last.status === "generating") {
+    copy[copy.length - 1] = {
+      ...last,
+      status: "ready",
+      title: "Ready to generate",
+      hook: "Press Next to generate a fresh idea.",
+      beats: ["Instant", "Uses your themes", "Costs 1 credit"],
+      contentMd:
+        "### Ready when you are\n\n- **Reject/Commit** the current one and I’ll generate a replacement.\n",
+    };
+  }
+
+  // Remove extra trailing placeholders (keep exactly one)
+  while (
+    copy.length >= 2 &&
+    isPlaceholder(copy[copy.length - 1]) &&
+    isPlaceholder(copy[copy.length - 2])
+  ) {
+    copy.pop();
+  }
+
+  // Ensure there is a trailing placeholder
+  if (!isPlaceholder(copy[copy.length - 1])) {
+    copy.push(makePlaceholderCard(takeId()));
+  }
+
+  return copy;
+}
 
 const DAILY_GEN_LIMIT = 6;
 const QUOTA_KEY = "idea_gen_quota_v1";
 
 type QuotaState = {
-  date: string;     // "YYYY-MM-DD"
+  date: string; // "YYYY-MM-DD"
   used: number;
 };
 
@@ -62,16 +124,12 @@ function todayKey(): string {
 
 function loadQuota(): QuotaState {
   if (typeof window === "undefined") return { date: todayKey(), used: 0 };
-
   try {
     const raw = localStorage.getItem(QUOTA_KEY);
     if (!raw) return { date: todayKey(), used: 0 };
     const parsed = JSON.parse(raw) as QuotaState;
-
-    // reset if it's a new day
     if (parsed.date !== todayKey()) return { date: todayKey(), used: 0 };
     if (typeof parsed.used !== "number") return { date: todayKey(), used: 0 };
-
     return parsed;
   } catch {
     return { date: todayKey(), used: 0 };
@@ -83,34 +141,38 @@ function saveQuota(q: QuotaState) {
   localStorage.setItem(QUOTA_KEY, JSON.stringify(q));
 }
 
-
 export default function DeckPage() {
-  const idCounter = useRef(1);           // positive ids for real cards
-  const placeholderCounter = useRef(-1); // negative ids for placeholders
+  const router = useRouter();
 
-  const takePlaceholderId = () => {
-    const id = placeholderCounter.current;
-    placeholderCounter.current -= 1;
-    return id;
-  };
+  // Global sequential id generator: 0,1,2,3...
+  const nextIdRef = useRef(0);
+  const takeId = () => nextIdRef.current++;
 
-  const [ideas, setIdeas] = useState<IdeaData[]>(() => [
-    makePlaceholderCard(takePlaceholderId()),
-  ]);
+  // Load deck from session storage and set nextIdRef to max+1
+  const [ideas, setIdeas] = useState<IdeaData[]>(() => {
+    const saved = loadDeck();
+    const maxId = saved.reduce((m, x) => Math.max(m, x.id ?? -1), -1);
+    nextIdRef.current = Math.max(0, maxId + 1);
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+    const base = saved.length ? saved : [makePlaceholderCard(takeId())];
+    return normalizeDeck(base, takeId);
+  });
+
+  // Load currentIndex and clamp later
+  const [currentIndex, setCurrentIndex] = useState<number>(() => {
+    const idx = loadDeckIndex();
+    return Number.isFinite(idx) ? idx : 0;
+  });
 
   const [isDark, setIsDark] = useState(true);
-
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // setup quota state to make sure user doesn't exceed daily limit
   const [quota, setQuota] = useState<QuotaState>(() => loadQuota());
-
   const remaining = Math.max(0, DAILY_GEN_LIMIT - quota.used);
   const quotaReached = remaining <= 0;
 
+  // Reset quota when day changes
   useEffect(() => {
     const id = window.setInterval(() => {
       setQuota((prev) => {
@@ -126,193 +188,64 @@ export default function DeckPage() {
     return () => window.clearInterval(id);
   }, []);
 
-  // TODO: replace these with real user data later
-  const USER_PROFILE = "Test User Profile";
-  const MACRO_THEMES = ["Technology", "Innovation", "Future Trends"];
-  const USER_PROMPT = "Generate 1 strong idea card for a tech sponsorship video.";
+  // Clamp currentIndex whenever ideas length changes
+  useEffect(() => {
+    setCurrentIndex((idx) => {
+      const max = Math.max(0, ideas.length - 1);
+      if (idx < 0) return 0;
+      if (idx > max) return max;
+      return idx;
+    });
+  }, [ideas.length]);
 
-  
-  async function generateIntoPlaceholderAndAdvance() {
-    if (loading) return;
+  // Persist deck + index in session storage
+  useEffect(() => {
+    saveDeck(ideas);
+  }, [ideas]);
 
-    if (quotaReached) {
-      setIdeas((prev) => {
-        const copy = [...prev];
-        const last = copy.length - 1;
-        const ph = copy[last];
-        if (ph?.status === "ready") {
-          copy[last] = { ...ph, hook: `Daily limit reached (${DAILY_GEN_LIMIT}/day). Come back tomorrow.` };
-        }
-        return copy;
-      });
-      setErrorMsg(`Daily limit reached (${DAILY_GEN_LIMIT}/day).`);
-      return;
+  useEffect(() => {
+    saveDeckIndex(currentIndex);
+  }, [currentIndex]);
+
+  // Export committed to plan store + redirect once when reaching target
+  const didRedirectRef = useRef(false);
+  useEffect(() => {
+    upsertCommittedToPlan(ideas);
+
+    const committedCount = ideas.filter((i) => i.status === "committed").length;
+    if (!didRedirectRef.current && committedCount >= COMMIT_TARGET) {
+      didRedirectRef.current = true;
+      router.push("/plan?from=deck");
     }
+  }, [ideas, router]);
 
-    const lastIndex = ideas.length - 1;
-    const hasReadyPlaceholder = lastIndex >= 0 && ideas[lastIndex]?.status === "ready";
-    const placeholderId = hasReadyPlaceholder ? ideas[lastIndex].id : takePlaceholderId();
+  // Detect theme (dark/light)
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    };
 
-    setIdeas((prev) => {
-      const copy = [...prev];
-      if (!hasReadyPlaceholder) {
-        copy.push(makePlaceholderCard(placeholderId));
-      }
-      const idx = copy.length - 1;
-      copy[idx] = {
-        ...copy[idx],
-        title: "Generating...",
-        hook: "Synthesizing a fresh idea...",
-        beats: [],
-        rationale: "",
-        contentMd: "",
-        status: "hidden",
-      };
-      return copy;
+    checkTheme();
+
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
     });
 
-    setLoading(true);
-    setErrorMsg(null);
-
-    try {
-      const nextId = idCounter.current++;
-
-      const generated = await generateNextCard({
-        user_profile: USER_PROFILE,
-        macro_themes: MACRO_THEMES,
-        user_prompt: USER_PROMPT,
-        nextId,
-      });
-
-      // ✅ increment quota here if you want (you currently aren’t)
-
-      setIdeas((prev) => {
-        const copy = prev.map((idea) =>
-          idea.id === placeholderId
-            ? { ...generated, id: idea.id, status: "shown" }
-            : idea
-        );
-        copy.push(makePlaceholderCard(takePlaceholderId()));
-        return copy;
-      });
-
-      setCurrentIndex((prev) => prev);
-    } catch (e: any) {
-      setIdeas((prev) => {
-        return prev.map((idea) =>
-          idea.id === placeholderId
-            ? {
-                ...idea,
-                title: "Ready to generate",
-                hook: e.message || "Failed to generate.",
-                status: "ready",
-              }
-            : idea
-        );
-      });
-      setErrorMsg(e.message || "Failed to generate.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-
-
-
-  // Fetch first idea on load (matches your integration doc flow)
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      setErrorMsg(null);
-      if (quotaReached) {
-        setErrorMsg(`Daily limit reached (${DAILY_GEN_LIMIT}/day). Come back tomorrow.`);
-        setIdeas([]);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const placeholderId = ideas[0]?.id ?? takePlaceholderId();
-        setIdeas((prev) => {
-          const copy = prev.length ? [...prev] : [makePlaceholderCard(placeholderId)];
-          copy[0] = {
-            ...copy[0],
-            title: "Generating...",
-            hook: "Synthesizing your first idea...",
-            beats: [],
-            rationale: "",
-            contentMd: "",
-            status: "hidden",
-          };
-          return copy;
-        });
-
-        const firstId = idCounter.current++;
-        const first = await generateNextCard({
-          user_profile: USER_PROFILE,
-          macro_themes: MACRO_THEMES,
-          user_prompt: USER_PROMPT,
-          nextId: firstId,
-        });
-
-        setIdeas((prev) => {
-          const copy = prev.map((idea) =>
-            idea.id === placeholderId
-              ? { ...first, id: idea.id, status: "shown" }
-              : idea
-          );
-          copy.push(makePlaceholderCard(takePlaceholderId()));
-          return copy;
-        });
-        setCurrentIndex(0);
-      } catch (e: any) {
-        setErrorMsg(e.message || "Failed to fetch initial idea.");
-      } finally {
-        setLoading(false);
-      }
-    })();
+    return () => observer.disconnect();
   }, []);
 
-
-  const ideasToRender =
-  ideas.length > 0
-    ? ideas
-    : [{
-        id: -1,
-        title: loading ? "Generating..." : "No ideas yet",
-        hook: errorMsg
-          ? `${errorMsg} (Remaining today: ${remaining})`
-          : loading
-            ? `Please wait (Remaining today: ${remaining})`
-            : `Remaining today: ${remaining}`,
-        beats: [],
-        rationale: "",
-        status: "shown",
-      } satisfies IdeaData];
-
-
-
+  // Motion
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const mouseXSpring = useSpring(mouseX, { stiffness: 40, damping: 20 });
   const mouseYSpring = useSpring(mouseY, { stiffness: 40, damping: 20 });
 
-  // Detect theme
-  useEffect(() => {
-    const checkTheme = () => {
-      setIsDark(document.documentElement.classList.contains('dark'));
-    };
-    
-    checkTheme();
-    
-    const observer = new MutationObserver(checkTheme);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-    
-    return () => observer.disconnect();
-  }, []);
+  const rotateX = useTransform(mouseYSpring, [-500, 500], [10, -10]);
+  const rotateY = useTransform(mouseXSpring, [-500, 500], [-10, 10]);
+  const bgX = useTransform(mouseXSpring, [-500, 500], [40, -40]);
+  const bgY = useTransform(mouseYSpring, [-500, 500], [40, -40]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const { innerWidth, innerHeight } = window;
@@ -320,65 +253,178 @@ export default function DeckPage() {
     mouseY.set(e.clientY - innerHeight / 2);
   };
 
-  const rotateX = useTransform(mouseYSpring, [-500, 500], [10, -10]);
-  const rotateY = useTransform(mouseXSpring, [-500, 500], [-10, 10]);
-  const bgX = useTransform(mouseXSpring, [-500, 500], [40, -40]);
-  const bgY = useTransform(mouseYSpring, [-500, 500], [40, -40]);
+  // TODO: replace with real user data later
+  const USER_PROFILE = "Test User Profile";
+  const MACRO_THEMES = ["Technology", "Innovation", "Future Trends"];
+  const USER_PROMPT = "Generate 1 strong idea card for a tech sponsorship video.";
+
+  async function generateIntoTrailingPlaceholder() {
+    if (loading) return;
+    if (quotaReached) return;
+
+    let targetId: number | null = null;
+    let targetIndex = -1;
+
+    // 1) Ensure a trailing placeholder exists, then mark it generating
+    setIdeas((prev) => {
+      const normalized = normalizeDeck(prev, takeId);
+      targetIndex = normalized.length - 1;
+      targetId = normalized[targetIndex].id;
+
+      normalized[targetIndex] = {
+        ...normalized[targetIndex],
+        title: "Generating...",
+        hook: "Synthesizing a fresh idea...",
+        beats: [],
+        rationale: "",
+        contentMd: "",
+        status: "generating",
+      };
+
+      return normalized;
+    });
+
+    // Move view to the placeholder we are generating into
+    if (targetIndex >= 0) setCurrentIndex(targetIndex);
+
+    setLoading(true);
+    setErrorMsg(null);
+
+    try {
+      // Use the placeholder id as the generator id (so it stays 0..n)
+      const generated = await generateNextCard({
+        user_profile: USER_PROFILE,
+        macro_themes: MACRO_THEMES,
+        user_prompt: USER_PROMPT,
+        nextId: targetId ?? 0,
+      });
+
+      // 2) Replace that placeholder by id, then append a fresh placeholder (new increasing id)
+      setIdeas((prev) => {
+        const replaced = prev.map((idea) =>
+          idea.id === targetId ? { ...generated, id: idea.id, status: "shown" } : idea
+        );
+
+        const withNewPlaceholder = [...replaced, makePlaceholderCard(takeId())];
+        return normalizeDeck(withNewPlaceholder, takeId);
+      });
+
+      // increment quota
+      setQuota((prev) => {
+        const t = todayKey();
+        const base = prev.date === t ? prev : { date: t, used: 0 };
+        const next = { ...base, used: base.used + 1 };
+        saveQuota(next);
+        return next;
+      });
+    } catch (e: any) {
+      setIdeas((prev) =>
+        prev.map((idea) =>
+          idea.id === targetId
+            ? {
+                ...idea,
+                title: "Ready to generate",
+                hook: e?.message || "Failed to generate.",
+                status: "ready",
+              }
+            : idea
+        )
+      );
+      setErrorMsg(e?.message || "Failed to generate.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Auto-generate first card ONLY if we don't already have a real one in session storage
+  useEffect(() => {
+    const hasReal = ideas.some((i) => !isPlaceholder(i));
+    if (hasReal) return;
+
+    if (quotaReached) {
+      setErrorMsg(`Daily limit reached (${DAILY_GEN_LIMIT}/day). Come back tomorrow.`);
+      return;
+    }
+
+    // Generate into the (only) placeholder on first load
+    generateIntoTrailingPlaceholder();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handlePrev = (index: number) => {
+    setCurrentIndex(index);
+  };
 
   const handleNext = async () => {
-    if (currentIndex < ideas.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-      if (ideas[currentIndex].status === "ready") {
-        ideas[currentIndex].status = "shown";
-        setIdeas([...ideas]);
-      }
+    const active = ideas[currentIndex];
+    if (!active) return;
+
+    // If you're on the placeholder, Next means "generate"
+    if (active.status === "ready") {
+      await generateIntoTrailingPlaceholder();
       return;
+    }
+
+    // Otherwise advance one step if possible
+    if (currentIndex < ideas.length - 1) {
+      setCurrentIndex((i) => i + 1);
     }
   };
 
-  const handlePrev = async (index: number) => {
-    setCurrentIndex(index);
-    
-  };
-
   const handleReject = async (id: number) => {
-    const placeholderIndex = ideas.length - 1;
+    setIdeas((prev) => prev.map((it) => (it.id === id ? { ...it, status: "rejected" } : it)));
 
-    setIdeas((prev) =>
-      prev.map((it) => (it.id === id ? { ...it, status: "rejected" } : it))
-    );
-
-    setCurrentIndex(placeholderIndex);
-    await generateIntoPlaceholderAndAdvance();
+    // Always generate into the trailing placeholder after reject
+    await generateIntoTrailingPlaceholder();
   };
-
 
   const onCommit = async (id: number) => {
-    const placeholderIndex = ideas.length - 1;
-    console.log("Committing id:", id);
+    // Compute stable planId once
+    const existingPlanId = ideas.find((it) => it.id === id)?.planId;
+    const planId = existingPlanId ?? crypto.randomUUID();
 
-    console.log("Ideas before commit:", ideas);
     setIdeas((prev) =>
-      prev.map((it) => (it.id === id ? { ...it, status: "committed" } : it))
+      prev.map((it) =>
+        it.id === id ? { ...it, status: "committed" as const, planId } : it
+      )
     );
 
-    // jump to placeholder and generate
-    setCurrentIndex(placeholderIndex);
-    await generateIntoPlaceholderAndAdvance();
+    // Generate the next one
+    await generateIntoTrailingPlaceholder();
   };
-
-
 
   const handleUpdate = (updated: IdeaData) => {
-    const newIdeas = [...ideas];
-    newIdeas[currentIndex] = updated;
-    setIdeas(newIdeas);
+    setIdeas((prev) => {
+      const copy = [...prev];
+      if (currentIndex >= 0 && currentIndex < copy.length) {
+        copy[currentIndex] = updated;
+      }
+      return copy;
+    });
   };
 
+  // Fallback render if needed
+  const ideasToRender =
+    ideas.length > 0
+      ? ideas
+      : ([
+          {
+            id: 0,
+            title: loading ? "Generating..." : "No ideas yet",
+            hook: errorMsg
+              ? `${errorMsg} (Remaining today: ${remaining})`
+              : loading
+              ? `Please wait (Remaining today: ${remaining})`
+              : `Remaining today: ${remaining}`,
+            beats: [],
+            rationale: "",
+            status: "shown",
+          } satisfies IdeaData,
+        ] as IdeaData[]);
 
   return (
     <Container $isDark={isDark} onMouseMove={handleMouseMove}>
-      <DotGrid style={{ x: bgX, y: bgY }}  />
+      <DotGrid style={{ x: bgX, y: bgY }} />
 
       <DeckWrapper>
         {ideasToRender.map((idea, index) => {
@@ -387,7 +433,7 @@ export default function DeckPage() {
           const isFuture = index > currentIndex;
           const offset = index - currentIndex;
 
-          const isPlaceholder = idea.status === "ready";
+          const isReadyPlaceholder = idea.status === "ready";
 
           return (
             <motion.div
@@ -399,31 +445,34 @@ export default function DeckPage() {
                 transformStyle: "preserve-3d",
                 rotateX: isActive ? rotateX : 0,
                 rotateY: isActive ? rotateY : 0,
-                cursor: isHistory ? "pointer" : "default"
+                cursor: isHistory ? "pointer" : "default",
               }}
               initial={false}
               animate={{
-                x: isHistory ? -550 + (offset * 40) :
-                   isFuture ? 550 + (offset * 40) : 0,
+                x: isHistory ? -550 + offset * 40 : isFuture ? 550 + offset * 40 : 0,
                 scale: isActive ? 1 : 0.85,
                 opacity: isActive ? 1 : isHistory ? 0.6 : 0.3,
-                rotateZ: isHistory ? -10 + (offset * 2) : isFuture ? 5 : 0,
+                rotateZ: isHistory ? -10 + offset * 2 : isFuture ? 5 : 0,
               }}
-              whileHover={isHistory ? {
-                x: -480 + (offset * 40),
-                opacity: 1,
-                scale: 0.9,
-                rotateZ: -5 + (offset * 2)
-              } : {}}
+              whileHover={
+                isHistory
+                  ? {
+                      x: -480 + offset * 40,
+                      opacity: 1,
+                      scale: 0.9,
+                      rotateZ: -5 + offset * 2,
+                    }
+                  : {}
+              }
               transition={{ type: "spring", stiffness: 260, damping: 20 }}
             >
               <Card
                 data={idea}
                 uiStatus={isActive ? "active" : isHistory ? "history" : "future"}
-                onUpdate={isPlaceholder ? () => {} : handleUpdate}
-                onCommit={isPlaceholder ? async () => {} : onCommit}
-                onReject={isPlaceholder ? async () => {} : handleReject}
-                onNext={isPlaceholder ? async () => {} : handleNext}
+                onUpdate={isReadyPlaceholder ? () => {} : handleUpdate}
+                onCommit={isReadyPlaceholder ? async () => {} : onCommit}
+                onReject={isReadyPlaceholder ? async () => {} : handleReject}
+                onNext={handleNext}
                 id={idea.id}
               />
             </motion.div>
