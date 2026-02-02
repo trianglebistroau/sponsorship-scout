@@ -6,7 +6,6 @@ import { GeneratorNav } from "@/components/navigation";
 
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
     const session = await auth.api.getSession({ headers: await headers() });
-    console.log("ProtectedLayout session:", session);
     if (!session) {
         redirect("/auth");
     }

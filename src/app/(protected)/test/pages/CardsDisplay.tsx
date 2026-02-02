@@ -256,14 +256,38 @@ export default function DeckPage() {
   // TODO: replace with real user data later
   const USER_PROFILE = "Test User Profile";
   const MACRO_THEMES = ["Technology", "Innovation", "Future Trends"];
-  const USER_PROMPT = "Generate 1 strong idea card for a tech sponsorship video.";
+  const USER_PROMPT = "Generate 1 strong idea card for a tech sponsorship video, but change up the style each time.";
+  const [userFeedback, setUserFeedback] = useState<string[]>([]);
 
-  async function generateIntoTrailingPlaceholder() {
+  async function generateIntoTrailingPlaceholder(extraFeedback?: string) {
     if (loading) return;
     if (quotaReached) return;
 
     let targetId: number | null = null;
     let targetIndex = -1;
+    const lastReal =
+      [...ideas]
+        .reverse()
+        .find((it) => it.status !== "ready" && it.status !== "generating");
+    const lastContext = lastReal
+      ? [
+          lastReal.title ? `PREV_TITLE: ${lastReal.title}` : "",
+          Array.isArray(lastReal.tags) && lastReal.tags.length
+            ? `PREV_TAGS: ${lastReal.tags.join(", ")}`
+            : "",
+          lastReal.hook ? `PREV_HOOK: ${lastReal.hook}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n")
+      : "";
+    const feedback = extraFeedback ? [...userFeedback, extraFeedback] : userFeedback;
+    const effectivePrompt = [USER_PROMPT, lastContext, ...feedback]
+      .filter(Boolean)
+      .join("\n");
+
+    if (extraFeedback) {
+      setUserFeedback((prev) => [...prev, extraFeedback]);
+    }
 
     // 1) Ensure a trailing placeholder exists, then mark it generating
     setIdeas((prev) => {
@@ -295,7 +319,7 @@ export default function DeckPage() {
       const generated = await generateNextCard({
         user_profile: USER_PROFILE,
         macro_themes: MACRO_THEMES,
-        user_prompt: USER_PROMPT,
+        user_prompt: effectivePrompt,
         nextId: targetId ?? 0,
       });
 
@@ -372,13 +396,17 @@ export default function DeckPage() {
   };
 
   const handleReject = async (id: number) => {
+    const rejected = ideas.find((it) => it.id === id);
+    const feedback = rejected?.title ? `user hate title: ${rejected.title}` : undefined;
     setIdeas((prev) => prev.map((it) => (it.id === id ? { ...it, status: "rejected" } : it)));
 
     // Always generate into the trailing placeholder after reject
-    await generateIntoTrailingPlaceholder();
+    await generateIntoTrailingPlaceholder(feedback);
   };
 
   const onCommit = async (id: number) => {
+    const committed = ideas.find((it) => it.id === id);
+    const feedback = committed?.title ? `user like title: ${committed.title}` : undefined;
     // Compute stable planId once
     const existingPlanId = ideas.find((it) => it.id === id)?.planId;
     const planId = existingPlanId ?? crypto.randomUUID();
@@ -390,7 +418,7 @@ export default function DeckPage() {
     );
 
     // Generate the next one
-    await generateIntoTrailingPlaceholder();
+    await generateIntoTrailingPlaceholder(feedback);
   };
 
   const handleUpdate = (updated: IdeaData) => {
