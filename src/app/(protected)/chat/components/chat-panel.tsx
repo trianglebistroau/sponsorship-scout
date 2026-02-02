@@ -22,7 +22,7 @@ import {
     deleteChatSession,
     streamMessage,
 } from "@/lib/chat-api"
-import { convertMarkdownToHtml } from "../../(protected)/generate/utils"
+import { convertMarkdownToHtml } from "../../generate/utils"
 
 type ChatMessage = {
   id: string

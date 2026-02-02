@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 import { GeneratorNav } from "@/components/navigation"
-import { fileTreeData } from "../(protected)/generate/data/file-tree"
-import { FileNode } from "../(protected)/generate/types"
+import { fileTreeData } from "../generate/data/file-tree"
+import { FileNode } from "../generate/types"
 import { ResearchChatPanel } from "./components/chat-panel"
 import { VibeGallery } from "./components/vibe-gallery"
 
@@ -27,7 +27,6 @@ export default function ResearchPage() {
   return (
     <main className="h-screen bg-background overflow-hidden">
       <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-6 px-4 py-6 lg:px-8">
-        <GeneratorNav />
         <div className="flex flex-1 flex-col gap-6 overflow-hidden lg:flex-row lg:gap-8">
           <div
             className={cn(
