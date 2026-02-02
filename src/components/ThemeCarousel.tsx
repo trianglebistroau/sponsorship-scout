@@ -7,9 +7,12 @@ const [current, setCurrent] = React.useState(0);
 const total = themes.length;
 const prevIndex = (current - 1 + total) % total;
 const nextIndex = (current + 1) % total;
+const stageRef = React.useRef<HTMLDivElement | null>(null);
+const [stageWidth, setStageWidth] = React.useState(0);
 
 const touchStartX = React.useRef<number | null>(null);
 const touchEndX = React.useRef<number | null>(null);
+const wheelLockRef = React.useRef(0);
 
 const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -29,6 +32,33 @@ const onTouchEnd = () => {
     touchStartX.current = null;
     touchEndX.current = null;
 };
+
+const onWheel = (e: React.WheelEvent) => {
+    if (total <= 1) return;
+    const now = Date.now();
+    if (now - wheelLockRef.current < 300) return;
+    const dominant = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    if (Math.abs(dominant) < 8) return;
+    e.preventDefault();
+    wheelLockRef.current = now;
+    if (dominant > 0) {
+    setCurrent((c) => (c + 1) % total);
+    } else {
+    setCurrent((c) => (c - 1 + total) % total);
+    }
+};
+
+React.useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+    const rect = entries[0]?.contentRect;
+    if (rect) setStageWidth(rect.width);
+    });
+    ro.observe(el);
+    setStageWidth(el.clientWidth);
+    return () => ro.disconnect();
+}, []);
 
 // Keyboard nav when focused
 const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -50,6 +80,7 @@ return (
     onTouchStart={onTouchStart}
     onTouchMove={onTouchMove}
     onTouchEnd={onTouchEnd}
+    onWheel={onWheel}
     className="relative max-w-5xl md:max-w-6xl mx-auto flex items-center justify-center py-16 md:py-24 min-h-[260px] md:min-h-[320px]"
     style={{ perspective: 1000 }}
     aria-roledescription="carousel"
@@ -63,7 +94,7 @@ return (
         <ArrowLeft className="h-5 w-5" />
     </button> */}
 
-    <div className="relative mx-4 w-full max-w-2xl h-[250px] md:h-[360px]">
+    <div ref={stageRef} className="relative mx-4 w-full max-w-2xl h-[250px] md:h-[360px]">
         {themes.map((t, i) => {
         if (![prevIndex, current, nextIndex].includes(i)) return null;
 
@@ -72,15 +103,16 @@ return (
         let scale = 1;
         let zIndex = 10;
         let opacity = 1;
+        const offset = Math.max(160, Math.min(280, Math.round(stageWidth * 0.28)));
 
         if (i === prevIndex) {
-            translateX = -220;
+            translateX = -offset;
             rotateY = 18;
             scale = 0.6;
             zIndex = 5;
             opacity = 0.45;
         } else if (i === nextIndex) {
-            translateX = 240;
+            translateX = offset;
             rotateY = -18;
             scale = 0.6;
             zIndex = 5;
@@ -94,18 +126,19 @@ return (
         }
 
         const transformStyle: React.CSSProperties = {
-            transform: `translateX(${translateX}px) rotateY(${rotateY}deg) scale(${scale})`,
+            transform: `translateX(-50%) translateX(${translateX}px) rotateY(${rotateY}deg) scale(${scale})`,
             transition: "transform 1000ms cubic-bezier(.2,.9,.2,1), opacity 600ms",
             zIndex,
             opacity,
             willChange: "transform, opacity",
+            width: Math.max(260, Math.min(520, Math.round(stageWidth * 0.78))),
         };
 
         return (
 
             <Card
             key={t.title}
-            className="absolute top-8 left-4 md:left-24 w-[86%] md:w-[68%] max-w-[520px] cursor-pointer"
+            className="absolute top-8 left-1/2 cursor-pointer"
             style={transformStyle}
             onClick={() => {
                 if (i !== current) setCurrent(i);
@@ -125,13 +158,11 @@ return (
         );
         })}
         
-        <span className="absolute bottom-2 flex space-x-2 justify-center w-full text-center">
+        {/* <span className="absolute bottom-2 flex space-x-2 justify-center w-full text-center">
             {current}
             {current+1}
-            {/* <span className="text-muted-foreground"> / {total}</span> */}
             {current}
-
-        </span>
+        </span> */}
     </div>
 
 
