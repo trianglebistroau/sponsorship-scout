@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 import { GeneratorNav } from "@/components/navigation"
-import { fileTreeData } from "../generate/data/file-tree"
-import { FileNode } from "../generate/types"
+import { fileTreeData } from "../(protected)/generate/data/file-tree"
+import { FileNode } from "../(protected)/generate/types"
 import { ResearchChatPanel } from "./components/chat-panel"
 import { VibeGallery } from "./components/vibe-gallery"
 

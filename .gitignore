@@ -2,6 +2,9 @@
 .next
 next-env.d.ts
 dist
+.env
+
+pnpm-lock.yaml
 
 # Logs
 logs

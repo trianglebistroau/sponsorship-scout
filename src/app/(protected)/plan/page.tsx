@@ -3,7 +3,6 @@
 import { format } from "date-fns"
 import * as React from "react"
 
-import { GeneratorNav } from "@/components/navigation"
 import { fileTreeData } from "../generate/data/file-tree"
 import { buildFileMap } from "../generate/utils"
 import { PlannerCalendar } from "./components/planner-calendar"
@@ -125,7 +124,6 @@ export default function PlanPage() {
   return (
     <main className="h-screen bg-background overflow-hidden">
       <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-6 px-4 py-6 lg:px-8">
-        <GeneratorNav />
 
         <div className="flex flex-1 flex-col gap-6 overflow-hidden lg:flex-row">
           <div className="flex h-full flex-1 flex-col lg:basis-[70%]">

@@ -65,11 +65,18 @@ export function VibePicker({
 
         if (mentionMode && onSelectVibe) {
           return (
-            <button
+            <div
               key={node.id}
-              type="button"
-              className="w-full text-left"
-              onClick={() => onSelectVibe(node)}
+              role="button"
+              tabIndex={0}
+              className="w-full text-left cursor-pointer"
+              onClick={() => onSelectVibe?.(node)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSelectVibe?.(node);
+                }
+              }}
             >
               <FileListItem
                 file={node}
@@ -83,7 +90,7 @@ export function VibePicker({
                   />
                 }
               />
-            </button>
+            </div>
           )
         }
 
