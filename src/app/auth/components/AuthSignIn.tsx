@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
-type User = { id: string; email?: string } | null;
-
-export default function AuthSignIn({ onSuccess }: { onSuccess?: (u: User) => void }) {
+export default function AuthSignIn() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -13,50 +14,57 @@ export default function AuthSignIn({ onSuccess }: { onSuccess?: (u: User) => voi
   const submit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setErr(null);
+
     if (!email || !password) {
       setErr("Please fill email and password.");
       return;
     }
+
     setBusy(true);
-    try {
-    //   const r = await apiPost("/auth/login", { email, password }, { mock: true });
-    //   onSuccess?.(r.user ?? { id: r.user?.id ?? "mock", email: r.user?.email ?? email });
-    } catch (e: any) {
-    //   setErr(e?.message ?? "Sign in failed");
-    } finally {
-      setBusy(false);
+    const { error } = await authClient.signIn.email({
+      email,
+      password,
+      callbackURL: "/dashboard",
+    });
+    setBusy(false);
+
+    if (error) {
+      setErr(error.message ?? "Sign in failed");
+      return;
     }
+
+    router.push("/profile");
   };
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <label className="block text-xs text-gray-600">Email</label>
+      <label className="block text-xs">Email</label>
       <input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         className="w-full px-3 py-2 border rounded text-sm"
         placeholder="you@example.com"
-        aria-label="Email"
       />
 
-      <label className="block text-xs text-gray-600">Password</label>
+      <label className="block text-xs">Password</label>
       <input
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         className="w-full px-3 py-2 border rounded text-sm"
         placeholder="••••••••"
-        aria-label="Password"
       />
 
       {err && <div className="text-sm text-red-600">{err}</div>}
 
-      <div className="flex gap-2">
-        <button type="submit" disabled={busy} className="flex-1 py-2 rounded bg-blue-600 text-white text-sm">
-          {busy ? "Signing in..." : "Sign in"}
-        </button>
-      </div>
+      <button
+        type="submit"
+        disabled={busy}
+        className="w-full py-2 rounded text-sm"
+      >
+        {busy ? "Signing in..." : "Sign in"}
+      </button>
     </form>
   );
 }

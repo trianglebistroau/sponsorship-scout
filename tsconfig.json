@@ -41,7 +41,7 @@
     "./src",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+, "src/app/(protected)/profile"  ],
   "exclude": [
     "./node_modules",
     "./dist"

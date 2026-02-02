@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { GeneratorNav } from "@/components/navigation";
 
 import {ThemesCarousel} from "@/components/ThemeCarousel";
 
@@ -195,7 +194,6 @@ export default function ProfilePage() {
   return (
     <main className="h-screen bg-background overflow-hidden">
       <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-6 px-4 py-6 lg:px-8">
-        <GeneratorNav />
 
         <div className="flex h-full flex-col gap-6 overflow-y-auto lg:min-h-0">
           {/* Top Profile Bio Section */}

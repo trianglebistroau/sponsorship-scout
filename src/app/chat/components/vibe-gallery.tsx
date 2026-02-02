@@ -1,14 +1,14 @@
 "use client"
 
-import * as React from "react"
 import { ChevronLeft, ChevronRight, Search } from "lucide-react"
+import * as React from "react"
 
+import { VibePicker } from "@/app/(protected)/generate/components/vibe-picker"
+import { FileNode } from "@/app/(protected)/generate/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Input } from "@/components/ui/input"
-import { FileNode } from "@/app/generate/types"
-import { VibePicker } from "@/app/generate/components/vibe-picker"
 
 type VibeGalleryProps = {
   sections: FileNode[]

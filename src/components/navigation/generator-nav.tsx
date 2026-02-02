@@ -9,8 +9,10 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu"
+import { SignOutButton } from "@/components/SignOut"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
+
 
 const navItems = [
   { label: "Profile", href: "/profile" },
@@ -56,7 +58,8 @@ export function GeneratorNav() {
           })}
         </NavigationMenuList>
       </NavigationMenu>
-      <div className="flex w-full justify-end lg:flex-1">
+      <div className="flex w-full items-center justify-end gap-3 lg:flex-1">
+        <SignOutButton />
         <ThemeToggle />
       </div>
     </div>
