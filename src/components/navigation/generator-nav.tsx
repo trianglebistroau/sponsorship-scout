@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils"
 const navItems = [
   { label: "Profile", href: "/profile" },
   { label: "Chat", href: "/chat" },
-  { label: "Generate", href: "/test" },
+  { label: "Generate", href: "/generate" },
   { label: "Plan", href: "/plan" },
 ]
 
