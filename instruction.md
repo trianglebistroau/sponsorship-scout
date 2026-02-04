@@ -1445,3 +1445,217 @@ Solvi positions itself as: A creative partner that understands your style, learn
 
 This page should make creators think: “Okay… this feels made for me.”
 */
+
+
+# Follow up Landing
+/*
+#GOAL
+Refine and simplify the existing Solvi Landing Page by removing redundant sections and tightening the narrative flow.
+
+The landing page should feel:
+- Cleaner
+- More intentional
+- More creator-first
+- Less explainer-heavy
+
+We want creators to quickly understand:
+“What is Solvi?”
+“How does it help me?”
+“What do I do here?”
+
+Without over-selling or over-explaining.
+
+#TASK 
+KEY CHANGES REQUIRED
+
+## 1. REMOVE the “Pain to Relief” section entirely
+- Delete this section and all related copy/components
+- Do NOT replace it with another problem-focused section
+- The page should no longer dwell on pain points explicitly
+- Trust creators to recognize themselves without being told
+
+Result:
+- Less emotional friction
+- Faster time-to-understanding
+- Cleaner scroll experience
+
+## 2. MERGE “What Solvi Does” + “The Solvi Flow (How It Works)”
+
+### New unified section name:
+Use something creator-friendly and simple, for example:
+- “How Solvi Works”
+- “Your Flow with Solvi”
+- “The Solvi Way”
+Choose one that best fits existing tone)
+
+### Placement
+- Move this merged section directly **after the Hero section**
+- This should become the primary explainer of the product
+
+### Structure of the merged section
+Present as a **4-step flow**, each step being a concise snapshot.
+
+Each step should:
+- Be short (1 headline + 1 short description)
+- Focus on outcome, not features
+- Feel intuitive and creator-native
+
+Use information already present in:
+- “What Solvi Does”
+- “The Solvi Flow”
+
+### Suggested flow content (directional, not prescriptive)
+
+**Step 1: Understand You**
+- Learn the creator’s style, taste, patterns, and strengths
+- Position Solvi as observing + listening, not judging
+
+**Step 2: Spark Ideas**
+- Turn insights into content concepts that fit *them*
+- Emphasise “not templates” and “not generic”
+
+**Step 3: Create with Direction**
+- Help refine hooks, formats, themes, and creative angles
+- Frame this as collaboration, not instruction
+
+**Step 4: Plan Ahead**
+- Turn ideas into a realistic content rhythm
+- Emphasise clarity, momentum, and confidence
+
+Keep copy:
+- Short
+- Clear
+- Skimmable
+- Calm but confident
+
+
+### Visual guidance for this merged section
+- Use icons or subtle visual markers per step
+- Keep layout airy and evenly spaced
+- Avoid cards that feel too boxed-in
+- No analytics visuals or charts
+- Mobile-first friendly
+
+
+## 3. REMOVE the “Trust & Positioning” section
+- Delete this section completely
+- Rationale:
+    - Trust should already be established through tone and clarity
+    - The page should end with confidence, not reassurance
+
+
+## WHAT SHOULD REMAIN UNCHANGED
+- Navigation bar (logo + Log in / Sign up)
+- Hero section (headline, subtext, primary CTA)
+- Final CTA section at the bottom (Sign up / Log in)
+- Routing to existing Google OAuth
+- Overall visual style and colour system
+
+
+#TONE & STYLE REMINDER
+- Bold but not loud
+- Creator-friendly, not startup-y
+- Confident, calm, modern
+- Gen Z–aware but not slang-heavy
+- Feels like a creative partner, not a pitch deck
+
+#EXPECTED OUTPUT
+- Shorter landing page
+- Clearer product story
+- Faster scroll-to-understanding
+- No redundant sections
+- No over-explaining
+
+The page should now feel: “I get it. I want to try this.”
+*/
+
+# Change How Solvi Works
+/*
+#GOAL
+Refine the “How Solvi Works” section so it visually matches the original intent:
+- Horizontal flow
+- Boxed stages
+- Clean, skimmable
+- No numbered steps
+
+This section should feel:
+- Structured but light
+- Directional, not instructional
+- Like a creative flow, not a checklist
+
+Creators should be able to scan it in 5 seconds and instantly get how Solvi fits into their process.
+
+#PROBLEM (CURRENT STATE)
+- The flow is rendered vertically
+- Steps are stacked top-to-bottom
+- Each step shows a visible number (1, 2, 3, 4)
+- This feels more like documentation than a creative product
+
+#TASKS
+## 1. CHANGE LAYOUT TO HORIZONTAL
+- Render the 4 steps in a single horizontal row on desktop
+- Each step should live inside its own subtle container (card / soft box)
+- All cards should have equal width and height
+- Space them evenly across the section
+
+Responsive behavior:
+- Desktop: horizontal row
+- Tablet: 2 x 2 grid
+- Mobile: vertical stack (natural scroll)
+
+## 2. REMOVE STEP NUMBERS COMPLETELY
+- Remove numeric indicators (1, 2, 3, 4)
+- Do NOT replace with alternative numbering
+- Let hierarchy be communicated via:
+    - Icon
+    - Title
+    - Layout position
+
+This should feel like a flow, not a sequence you must follow rigidly.
+
+## 3. CARD STRUCTURE (PER STEP)
+Each box should include:
+- A small, expressive icon at the top
+- A short, bold title (e.g. “Understand You”)
+- One concise description line (max 2 lines)
+
+Avoid:
+- Bullet points
+- Long paragraphs
+- Feature-heavy language
+
+## 4. VISUAL STYLE GUIDANCE
+- Use existing colour system and typography
+- Cards should feel soft, not heavy
+    - Rounded corners
+    - Light border or subtle background tint
+- No shadows that feel “dashboard-y”
+- Icons should use accent colours already present in the app
+
+## 5. ALIGNMENT & SPACING
+- Section should feel centered and balanced
+- Avoid edge-to-edge stretching
+- Maintain generous vertical spacing above and below this section
+- Headline remains centered above the flow
+
+## DO NOT CHANGE
+- Section content meaning
+- Copy tone
+- Icon metaphors (unless already inconsistent)
+- Hero section
+- CTA buttons
+- Auth routing
+
+#TONE CHECK
+This section should feel like: “I can see myself using this.”
+Not: “Here’s how the system works.”
+
+#EXPECTED RESULT
+- Horizontal, boxed flow
+- Clean, modern, creator-first
+- No numbers
+- Instantly understandable
+- Visually aligned with Profile / Generate / Plan pages
+
+If it feels like a product walkthrough, simplify again.
+*/
