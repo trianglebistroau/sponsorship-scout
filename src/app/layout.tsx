@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body className="bg-background text-foreground antialiased">
         <ThemeProvider>
-          <div id="root">{children}</div>
+          {children}
         </ThemeProvider>
       </body>
     </html>

@@ -1,14 +1,15 @@
 "use client"
 
-import * as React from "react"
+import { Check, Upload, X } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { Upload, X, Check } from "lucide-react"
+import * as React from "react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { useMutation } from "@tanstack/react-query"
 
 type MessageType = "system" | "user"
 
@@ -80,6 +81,34 @@ export default function ConversationPage() {
   const [proposedGoals, setProposedGoals] = React.useState<string[]>([])
   const [editableGoals, setEditableGoals] = React.useState<string[]>([])
   const [isEditingGoals, setIsEditingGoals] = React.useState(false)
+
+  const uploadTasteVideo = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('userName', userName)
+      formData.append('category', 'taste-videos')
+
+      const response = await fetch('/api/v1/bucketUpload', {
+        method: 'PUT',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('Upload failed')
+      }
+
+      return response.json()
+    },
+  });
+
+  const uploadAllTasteVideos = async () => {
+    await Promise.all(
+      tasteVideos.map((file) =>
+        uploadTasteVideo.mutateAsync(file)
+      )
+    );
+  };
 
   // Auto-scroll to bottom when messages change
   React.useEffect(() => {
@@ -753,7 +782,7 @@ export default function ConversationPage() {
                 className="hidden"
               />
               {tasteVideos.length > 0 && (
-                <Button onClick={handleTasteAnalyze}>
+                <Button onClick={uploadAllTasteVideos}>
                   Analyze
                 </Button>
               )}
