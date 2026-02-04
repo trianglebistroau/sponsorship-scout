@@ -1,13 +1,13 @@
 // src/app/conversation/ConversationUI.tsx
 "use client"
 
+import { Check, Plus, Upload, X } from "lucide-react"
 import * as React from "react"
-import { Upload, X, Check, Plus } from "lucide-react"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 
@@ -39,6 +39,7 @@ description: string
 export type FlowStage =
 | "welcome"
 | "awaiting-name"
+| "awaiting-tiktok-username"
 | "awaiting-taste-videos"
 | "analyzing-taste"
 | "awaiting-taste-validation"
@@ -133,6 +134,7 @@ isLoading: boolean
 
 // handlers (from ConversationPage)
 handleNameSubmit: () => void
+handleTiktokUsernameSubmit: () => void
 handleTasteUpload: (files: FileList | null) => void
 handleTasteAnalyze: () => void
 handleTasteValidation: (isCorrect: boolean) => void
@@ -175,6 +177,7 @@ const {
     isLoading,
 
     handleNameSubmit,
+    handleTiktokUsernameSubmit,
     handleTasteUpload,
     handleTasteAnalyze,
     handleTasteValidation,
@@ -214,6 +217,24 @@ switch (currentStage) {
             autoFocus
         />
         <Button onClick={handleNameSubmit} size="icon" className="shrink-0">
+            <Check className="w-4 h-4" />
+        </Button>
+        </div>
+    )
+
+    case "awaiting-tiktok-username":
+    return (
+        <div className="flex gap-2">
+        <Input
+            ref={inputRef}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="@username"
+            className="flex-1"
+            autoFocus
+        />
+        <Button onClick={handleTiktokUsernameSubmit} size="icon" className="shrink-0">
             <Check className="w-4 h-4" />
         </Button>
         </div>

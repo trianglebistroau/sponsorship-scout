@@ -1,21 +1,21 @@
 // src/app/conversation/ConversationPage.tsx
 "use client"
 
-import React, { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import React from "react"
 
 import { cn } from "@/lib/utils"
 import {
-Message,
-FlowStage,
-TasteAnalysis,
-Superpower,
-GrowthZone,
-MessagesList,
-AnalysisBlock,
-SuperpowerBlock,
-GrowthZoneBlock,
-RenderInputArea,
+    AnalysisBlock,
+    FlowStage,
+    GrowthZone,
+    GrowthZoneBlock,
+    Message,
+    MessagesList,
+    RenderInputArea,
+    Superpower,
+    SuperpowerBlock,
+    TasteAnalysis,
 } from "./conversationUI"
 
 import { Check } from "lucide-react"
@@ -35,6 +35,7 @@ const [isLoading, setIsLoading] = React.useState(false)
 
 // User data
 const [userName, setUserName] = React.useState("")
+const [tiktokUsername, setTiktokUsername] = React.useState("")
 const [tasteVideos, setTasteVideos] = React.useState<File[]>([])
 const [tasteAnalysis, setTasteAnalysis] = React.useState<TasteAnalysis | null>(null)
 const [bestVideos, setBestVideos] = React.useState<File[]>([])
@@ -100,6 +101,26 @@ setIsLoading(false)
 const handleNameSubmit = () => {
 if (!inputValue.trim()) return
 setUserName(inputValue)
+addUserMessage(inputValue)
+setInputValue("")
+setTimeout(() => {
+    addSystemMessage(
+    <div className="space-y-3">
+        <p className="text-base leading-relaxed">Nice to meet you, {inputValue}.</p>
+        <p className="text-base leading-relaxed font-medium">What's your TikTok username?</p>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+        (We'll use this to analyze your content)
+        </p>
+    </div>
+    )
+    setCurrentStage("awaiting-tiktok-username")
+}, 67)
+}
+
+/* 2: TikTok username */
+const handleTiktokUsernameSubmit = () => {
+if (!inputValue.trim()) return
+setTiktokUsername(inputValue)
 addUserMessage(inputValue)
 setInputValue("")
 setTimeout(() => {
@@ -549,6 +570,9 @@ if (e.key === "Enter" && !e.shiftKey) {
     case "awaiting-name":
         handleNameSubmit()
         break
+    case "awaiting-tiktok-username":
+        handleTiktokUsernameSubmit()
+        break
     case "taste-clarification":
         handleTasteClarification()
         break
@@ -631,6 +655,7 @@ return (
                 isEditingGoals={isEditingGoals}
                 isLoading={isLoading}
                 handleNameSubmit={handleNameSubmit}
+                handleTiktokUsernameSubmit={handleTiktokUsernameSubmit}
                 handleTasteUpload={handleTasteUpload}
                 handleTasteAnalyze={handleTasteAnalyze}
                 handleTasteValidation={handleTasteValidation}
