@@ -1,711 +1,705 @@
-// src/app/conversation/ConversationPage.tsx
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-import React from "react"
-
-import { cn } from "@/lib/utils"
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-    AnalysisBlock,
-    FlowStage,
-    GrowthZone,
-    GrowthZoneBlock,
-    Message,
-    MessagesList,
-    RenderInputArea,
-    Superpower,
-    SuperpowerBlock,
-    TasteAnalysis,
-} from "./conversationUI"
+  confirmOnboarding,
+  createOnboardingSession,
+  sendOnboardingMessage,
+  submitOnboardingVideos,
+  type OnboardingStage,
+} from "@/lib/onboarding-rest";
+import { uploadThreeVideosToGCS } from "@/lib/gcsUpload";
+import { subscribeOnboardingEvents, type OnboardingEventRow } from "@/lib/onboardingEvents";
 
-import { useMutation } from "@tanstack/react-query"
-import { Check } from "lucide-react"
+// ---- UI helpers (keep minimal / replace with your own components) ----
+type ChatMsg = { role: "user" | "assistant"; content: React.ReactNode; ts: number };
+
+type TasteAnalysis = { tone: string; energy: string; formatBias: string };
+type Superpower = { title?: string; description?: string; evidence?: string };
+type GrowthZone = { title?: string; description?: string; suggestion?: string };
+
+type Stage =
+  | "awaiting-name"
+  | "awaiting-taste-videos"
+  | "analyzing-taste"
+  | "awaiting-taste-validation"
+  | "taste-clarification"
+  | "awaiting-best-videos"
+  | "analyzing-best"
+  | "superpowers-clarification"
+  | "awaiting-superpowers-validation"
+  | "awaiting-growth-videos"
+  | "analyzing-growth"
+  | "awaiting-growth-validation"
+    | "growth-clarification"
+  | "goal-setting"
+  | "completion";
+
+  
+function Card(props: { children: React.ReactNode }) {
+  return <div className="rounded-2xl border border-border bg-background p-4 shadow-sm">{props.children}</div>;
+}
+function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "outline" }) {
+  const variant = props.variant ?? "primary";
+  const base =
+    "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed";
+  const cls =
+    variant === "primary"
+      ? `${base} bg-foreground text-background hover:opacity-90`
+      : `${base} border border-border hover:bg-muted`;
+  return (
+    <button {...props} className={`${cls} ${props.className ?? ""}`}>
+      {props.children}
+    </button>
+  );
+}
+function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <input
+      {...props}
+      className={`w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-foreground/20 ${
+        props.className ?? ""
+      }`}
+    />
+  );
+}
+function AnalysisBlock(props: { title: string; content: string }) {
+  return (
+    <div className="rounded-xl border border-border p-3">
+      <div className="text-xs font-semibold text-muted-foreground">{props.title}</div>
+      <div className="mt-1 text-sm leading-relaxed">{props.content || "—"}</div>
+    </div>
+  );
+}
+function Pill(props: { children: React.ReactNode }) {
+  return <span className="inline-flex items-center rounded-full border border-border px-2 py-1 text-xs">{props.children}</span>;
+}
 
 export default function ConversationPage() {
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [stage, setStage] = useState<Stage>("awaiting-name");
+  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [input, setInput] = useState("");
 
-    
-const router = useRouter()
-const messagesEndRef = React.useRef<HTMLDivElement | null>(null)
-const inputRef = React.useRef<HTMLInputElement | null>(null)
-const textareaRef = React.useRef<HTMLTextAreaElement | null>(null)
+  const [userName, setUserName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-const [messages, setMessages] = React.useState<Message[]>([])
-const [currentStage, setCurrentStage] = React.useState<FlowStage>("welcome")
-const [inputValue, setInputValue] = React.useState("")
-const [isLoading, setIsLoading] = React.useState(false)
+  const [tasteFiles, setTasteFiles] = useState<File[]>([]);
+  const [bestFiles, setBestFiles] = useState<File[]>([]);
+  const [growthFiles, setGrowthFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<{ uploaded: number; total: number } | null>(null);
 
-// User data
-const [userName, setUserName] = React.useState("")
-const [tiktokUsername, setTiktokUsername] = React.useState("")
-const [tasteVideos, setTasteVideos] = React.useState<File[]>([])
-const [tasteAnalysis, setTasteAnalysis] = React.useState<TasteAnalysis | null>(null)
-const [bestVideos, setBestVideos] = React.useState<File[]>([])
-const [superpowers, setSuperpowers] = React.useState<Superpower[]>([])
-const [growthVideos, setGrowthVideos] = React.useState<File[]>([])
-const [growthZones, setGrowthZones] = React.useState<GrowthZone[]>([])
-const [proposedGoals, setProposedGoals] = React.useState<string[]>([])
-const [editableGoals, setEditableGoals] = React.useState<string[]>([])
-const [isEditingGoals, setIsEditingGoals] = React.useState(false);
+  const [tasteAnalysis, setTasteAnalysis] = useState<TasteAnalysis | null>(null);
+  const [superpowers, setSuperpowers] = useState<Superpower[] | null>(null);
+  const [growthZones, setGrowthZones] = useState<GrowthZone[] | null>(null);
 
-const uploadAllTasteVideos = async (files: FileList | null) => {
-    if (!files) return
-    const fileArray = Array.from(files)
-    setTasteVideos((prev) => [...prev, ...fileArray])
-    
-    await Promise.all(
-      fileArray.map((file) =>
-        uploadTasteVideo.mutateAsync(file)
-      )
-    );
-  };
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
-//Upload event handlers
-const uploadTasteVideo = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('userName', userName)
-      formData.append('category', 'taste-videos')
+  const subscribedRef = useRef<string | null>(null);
 
-      const response = await fetch('/api/v1/bucketUpload', {
-        method: 'PUT',
-        body: formData,
-      })
+  const seenEventIdsRef = useRef<Set<number>>(new Set());
 
-      if (!response.ok) {
-        throw new Error('Upload failed')
+    const tasteConfirmedRef = useRef(false);
+    const superpowersConfirmedRef = useRef(false);
+    const growthConfirmedRef = useRef(false);
+
+  const stageHint = useMemo(() => {
+  if (stage === "awaiting-name") return "Type your name";
+  if (stage === "taste-clarification") return "Tell me what’s off";
+  if (stage === "superpowers-clarification") return "What’s off about the performance analysis?";
+  if (stage === "growth-clarification") return "What’s off about the growth zones?";
+  return "";
+}, [stage]);
+
+
+    useEffect(() => {
+    if (!sessionId) return;
+    if (subscribedRef.current === sessionId) return;
+    subscribedRef.current = sessionId;
+
+    const unsub = subscribeOnboardingEvents({ sessionId, onInsert: handleEvent });
+    return () => {
+        unsub?.();
+        subscribedRef.current = null;
+    };
+    }, [sessionId]);
+
+  const addAssistant = (content: React.ReactNode) =>
+    setMessages((m) => [...m, { role: "assistant", content, ts: Date.now() }]);
+  const addUser = (content: React.ReactNode) => setMessages((m) => [...m, { role: "user", content, ts: Date.now() }]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages.length]);
+
+  // boot prompt
+  useEffect(() => {
+    if (messages.length === 0) {
+      addAssistant(
+        <div className="space-y-2">
+          <p className="text-sm font-semibold">Let’s build your creator profile.</p>
+          <p className="text-sm text-muted-foreground">What name should I call you?</p>
+        </div>
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Create/reuse session
+  useEffect(() => {
+    let cancelled = false;
+
+    async function boot() {
+      try {
+        setIsLoading(true);
+        const cached = typeof window !== "undefined" ? localStorage.getItem("onboarding_session_id") : null;
+        if (cached) {
+          if (!cancelled) setSessionId(cached);
+          return;
+        }
+        const created = await createOnboardingSession();
+        if (cancelled) return;
+        setSessionId(created.session_id);
+        localStorage.setItem("onboarding_session_id", created.session_id);
+      } catch (e) {
+        console.error(e);
+        addAssistant(<p className="text-sm text-red-600">Failed to create session.</p>);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    boot();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Supabase event handler
+  const handleEvent = (row: OnboardingEventRow) => {
+    const type = row.type;
+    const payload = row.payload ?? {};
+
+    if (row?.id && seenEventIdsRef.current.has(row.id)) return;
+    if (row?.id) seenEventIdsRef.current.add(row.id);
+
+    if (type === "assistant_message") {
+    const text = String(payload?.content ?? "");
+    addAssistant(<p className="text-sm whitespace-pre-wrap">{text}</p>);
+
+    if (text.includes("Now let's look at what actually PERFORMS")) {
+        setStage("awaiting-best-videos");
+    }
+    return;
+    }
+
+    if (type === "analysis_update") {
+      const analysisType = payload?.analysis_type as string;
+      const data = payload?.data ?? {};
+
+      if (analysisType === "taste") {
+        const ta: TasteAnalysis = {
+            tone: data.tone ?? data.tone_summary ?? "",
+            energy: data.energy ?? data.energy_summary ?? "",
+            formatBias: data.formatBias ?? data.format_bias ?? data.format_bias_summary ?? "",
+
+        };
+        setTasteAnalysis(ta);
+
+        if (!tasteConfirmedRef.current) {
+            setStage("awaiting-taste-validation");
+        }
+        return;
+        }
+
+
+      if (analysisType === "performance") {
+        const items: Superpower[] =
+          Array.isArray(data?.superpowers) ? data.superpowers : Array.isArray(data) ? data : [];
+        setSuperpowers(items);
+        if (!superpowersConfirmedRef.current) {
+            setStage("awaiting-superpowers-validation");
+        }
+        return;
       }
 
-      return response.json()
-    },
-  });
-
-React.useEffect(() => {
-messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-}, [messages])
-
-React.useEffect(() => {
-if (currentStage === "welcome") {
-    setTimeout(() => {
-    addSystemMessage(
-        <div className="space-y-3">
-        <p className="text-base leading-relaxed">Hey — welcome to Solvi.</p>
-        <p className="text-base leading-relaxed">Before we make anything, I want to understand you.</p>
-        <p className="text-base leading-relaxed font-medium">What should I call you?</p>
-        </div>
-    )
-    setCurrentStage("awaiting-name")
-    }, 500)
-}
-}, [])
-
-React.useEffect(() => {
-if (currentStage === "completion") {
-    const timer = setTimeout(() => {
-    router.push("/profile/2hungryguys")
-    }, 2000)
-    return () => clearTimeout(timer)
-}
-}, [currentStage, router])
-
-
-const addSystemMessage = (content: React.ReactNode) => {
-setMessages((prev) => [
-    ...prev,
-    { id: `system-${Date.now()}`, type: "system", content, timestamp: new Date() },
-])
-}
-
-const addUserMessage = (content: React.ReactNode) => {
-setMessages((prev) => [
-    ...prev,
-    { id: `user-${Date.now()}`, type: "user", content, timestamp: new Date() },
-])
-}
-
-const simulateAnalysis = async (duration: number = 2500) => {
-setIsLoading(true)
-await new Promise((resolve) => setTimeout(resolve, duration))
-setIsLoading(false)
-}
-
-/* --------------------------- STEP HANDLERS -------------------------- */
-/* 1: name */
-const handleNameSubmit = () => {
-if (!inputValue.trim()) return
-setUserName(inputValue)
-addUserMessage(inputValue)
-setInputValue("")
-setTimeout(() => {
-    addSystemMessage(
-    <div className="space-y-3">
-        <p className="text-base leading-relaxed">Nice to meet you, {inputValue}.</p>
-        <p className="text-base leading-relaxed font-medium">What's your TikTok username?</p>
-        <p className="text-sm leading-relaxed text-muted-foreground">
-        (We'll use this to analyze your content)
-        </p>
-    </div>
-    )
-    setCurrentStage("awaiting-tiktok-username")
-}, 67)
-}
-
-/* 2: TikTok username */
-const handleTiktokUsernameSubmit = () => {
-if (!inputValue.trim()) return
-setTiktokUsername(inputValue)
-addUserMessage(inputValue)
-setInputValue("")
-setTimeout(() => {
-    addSystemMessage(
-    <div className="space-y-3">
-        <h2 className="text-xl font-semibold">Your taste says a lot.</h2>
-        <p className="text-base leading-relaxed">
-        Drop 3 videos that feel <em>most you</em>.
-        </p>
-        <p className="text-sm leading-relaxed text-muted-foreground">
-        They can be yours — or creators that really inspire you.
-        </p>
-    </div>
-    )
-    setCurrentStage("awaiting-taste-videos")
-}, 67)
-}
-
-const handleTasteAnalyze = async () => {
-if (tasteVideos.length === 0) return
-
-addUserMessage(
-    <div className="flex flex-wrap gap-2">
-    {tasteVideos.map((file, idx) => (
-        <div key={idx} className="flex items-center gap-2 text-sm">
-        <Check className="w-4 h-4" />
-        <span>{file.name}</span>
-        </div>
-    ))}
-    </div>
-)
-
-setCurrentStage("analyzing-taste")
-
-const loadingMessages = [
-    "Reading the room 👀",
-    "Scanning for main-character energy…",
-    "Looking for patterns your audience loves…",
-    "Peeking under the hood of your content 🛠️",
-]
-const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)]
-
-setTimeout(() => {
-    addSystemMessage(<div className="space-y-3"><p className="text-base leading-relaxed">{randomMessage}</p></div>)
-}, 600)
-
-await simulateAnalysis(3000)
-
-// Mock analysis
-const mockAnalysis: TasteAnalysis = {
-    tone: "Playful yet intentional — balances humor with sincerity.",
-    energy: "Mid-to-high energy. Quick cuts, upbeat pacing, conversational delivery.",
-    formatBias: "Short-form narrative hooks. Visual storytelling over talking heads.",
-}
-setTasteAnalysis(mockAnalysis)
-
-setTimeout(() => {
-    addSystemMessage(
-    <div className="space-y-4">
-        <p className="text-base leading-relaxed">Here's what I'm picking up from your taste:</p>
-        <AnalysisBlock title="Tone" content={mockAnalysis.tone} />
-        <AnalysisBlock title="Energy" content={mockAnalysis.energy} />
-        <AnalysisBlock title="Format Bias" content={mockAnalysis.formatBias} />
-        <p className="text-base leading-relaxed font-medium pt-2">Am I reading this right?</p>
-    </div>
-    )
-    setCurrentStage("awaiting-taste-validation")
-}, 67)
-}
-
-/* 3: taste validation */
-const handleTasteValidation = (isCorrect: boolean) => {
-if (isCorrect) {
-    addUserMessage("Yes")
-    setTimeout(() => {
-    proceedToBestVideos()
-    }, 67)
-} else {
-    addUserMessage("Not really")
-    setTimeout(() => {
-    addSystemMessage(
-        <div className="space-y-3">
-        <p className="text-base leading-relaxed">Got it. Tell me more about what you're going for.</p>
-        </div>
-    )
-    setCurrentStage("taste-clarification")
-    }, 67)
-}
-}
-
-const handleTasteClarification = () => {
-if (!inputValue.trim()) return
-
-addUserMessage(inputValue)
-setInputValue("")
-
-const updatedAnalysis: TasteAnalysis = {
-    tone: "Updated: " + (tasteAnalysis?.tone || ""),
-    energy: "Updated: " + (tasteAnalysis?.energy || ""),
-    formatBias: "Updated: " + (tasteAnalysis?.formatBias || ""),
-}
-setTasteAnalysis(updatedAnalysis)
-
-setTimeout(() => {
-    addSystemMessage(
-    <div className="space-y-4">
-        <p className="text-base leading-relaxed">Got it. Here's the refined read:</p>
-        <AnalysisBlock title="Tone" content={updatedAnalysis.tone} />
-        <AnalysisBlock title="Energy" content={updatedAnalysis.energy} />
-        <AnalysisBlock title="Format Bias" content={updatedAnalysis.formatBias} />
-        <p className="text-base leading-relaxed font-medium pt-2">That better?</p>
-    </div>
-    )
-    setCurrentStage("awaiting-taste-validation")
-}, 67)
-}
-
-const proceedToBestVideos = () => {
-setTimeout(() => {
-    addSystemMessage(
-    <div className="space-y-3">
-        <p className="text-base leading-relaxed">Now drop 3 videos that performed best for you.</p>
-    </div>
-    )
-    setCurrentStage("awaiting-best-videos")
-}, 67)
-}
-
-/* 4: best performing videos */
-const handleBestUpload = (files: FileList | null) => {
-if (!files) return
-const fileArray = Array.from(files)
-setBestVideos((prev) => [...prev, ...fileArray])
-}
-
-const handleBestAnalyze = async () => {
-if (bestVideos.length === 0) return
-
-addUserMessage(
-    <div className="flex flex-wrap gap-2">
-    {bestVideos.map((file, idx) => (
-        <div key={idx} className="flex items-center gap-2 text-sm">
-        <Check className="w-4 h-4" />
-        <span>{file.name}</span>
-        </div>
-    ))}
-    </div>
-)
-
-setCurrentStage("analyzing-superpowers")
-
-const loadingMessages = [
-    "Connecting the dots (and the vibes)…",
-    "Reading between the frames…",
-    "Scanning for main-character energy…",
-    "Looking for patterns that pop…",
-]
-const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)]
-
-setTimeout(() => {
-    addSystemMessage(<div className="space-y-3"><p className="text-base leading-relaxed">{randomMessage}</p></div>)
-}, 600)
-
-await simulateAnalysis(3000)
-
-const mockSuperpowers: Superpower[] = [
-    {
-    title: "Strong hooks in the first 2 seconds",
-    description: "You grab attention immediately with visual curiosity or a provocative statement.",
-    },
-    {
-    title: "Consistent themes viewers return for",
-    description: "Clear content pillars around productivity, creativity, and behind-the-scenes insights.",
-    },
-    {
-    title: "Clear emotional promise",
-    description: "Viewers know what feeling they'll get — whether it's inspiration, validation, or clarity.",
-    },
-]
-setSuperpowers(mockSuperpowers)
-
-setTimeout(() => {
-    addSystemMessage(
-    <div className="space-y-4">
-        <p className="text-base leading-relaxed">Here's where you naturally shine:</p>
-        {mockSuperpowers.map((sp, idx) => (
-        <SuperpowerBlock key={idx} {...sp} />
-        ))}
-        <p className="text-base leading-relaxed font-medium pt-2">Does this feel accurate?</p>
-    </div>
-    )
-    setCurrentStage("awaiting-superpowers-validation")
-}, 67)
-}
-
-/* 5: superpowers validation */
-const handleSuperpowersValidation = (isCorrect: boolean) => {
-if (isCorrect) {
-    addUserMessage("Yes")
-    proceedToGrowthVideos()
-
-} else {
-    addUserMessage("No")
-    setTimeout(() => {
-    addSystemMessage(
-        <div className="space-y-3">
-        <p className="text-base leading-relaxed">Tell me more — what am I missing?</p>
-        </div>
-    )
-    setCurrentStage("superpowers-clarification")
-    }, 67)
-}
-}
-
-const handleSuperpowersClarification = () => {
-if (!inputValue.trim()) return
-
-addUserMessage(inputValue)
-setInputValue("")
-
-const updatedSuperpowers: Superpower[] = superpowers.map((sp, _) => {
-    return { ...sp, title: "Updated: " + sp.title }
-})
-
-setSuperpowers(updatedSuperpowers)
-
-setTimeout(() => {
-    addSystemMessage(
-    <div className="space-y-4">
-        <p className="text-base leading-relaxed">Updated. Here's where you shine:</p>
-        {updatedSuperpowers.map((sp, idx) => (
-        <SuperpowerBlock key={idx} {...sp} />
-        ))}
-        <p className="text-base leading-relaxed font-medium pt-2">That track better?</p>
-    </div>
-    )
-    setCurrentStage("awaiting-superpowers-validation")
-}, 67)
-}
-
-const proceedToGrowthVideos = () => {
-setTimeout(() => {
-    addSystemMessage(
-    <div className="space-y-3">
-        <p className="text-base leading-relaxed">Want to look at what didn't land?</p>
-        <p className="text-base leading-relaxed">Drop 3 videos that felt off or underperformed.</p>
-    </div>
-    )
-    setCurrentStage("awaiting-growth-videos")
-}, 67)
-}
-
-/* 6: growth videos */
-const handleGrowthUpload = (files: FileList | null) => {
-if (!files) return
-const fileArray = Array.from(files)
-setGrowthVideos((prev) => [...prev, ...fileArray])
-}
-
-const handleGrowthAnalyze = async () => {
-if (growthVideos.length === 0) return
-
-addUserMessage(
-    <div className="flex flex-wrap gap-2">
-    {growthVideos.map((file, idx) => (
-        <div key={idx} className="flex items-center gap-2 text-sm">
-        <Check className="w-4 h-4" />
-        <span>{file.name}</span>
-        </div>
-    ))}
-    </div>
-)
-
-setCurrentStage("analyzing-growth")
-
-const loadingMessages = ["Reading the room 👀", "Spotting the gaps…", "Looking for unlock potential…", "Connecting the dots 🧠"]
-const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)]
-
-setTimeout(() => {
-    addSystemMessage(<div className="space-y-3"><p className="text-base leading-relaxed">{randomMessage}</p></div>)
-}, 600)
-
-await simulateAnalysis(3000)
-
-const mockGrowthZones: GrowthZone[] = [
-    {
-    title: "Hooks don't match the promise",
-    description: "Opening grabs attention, but the payoff doesn't align with expectations.",
-    },
-    {
-    title: "Format may not fit audience expectations",
-    description: "Experimental formats feel disconnected from your core style.",
-    },
-    {
-    title: "Timing or pacing issues",
-    description: "Some videos lose momentum midway or rush the conclusion.",
-    },
-]
-setGrowthZones(mockGrowthZones)
-
-setTimeout(() => {
-    addSystemMessage(
-    <div className="space-y-4">
-        <p className="text-base leading-relaxed">Here's what I'm seeing:</p>
-        {mockGrowthZones.map((gz, idx) => (
-        <GrowthZoneBlock key={idx} {...gz} />
-        ))}
-        <p className="text-base leading-relaxed font-medium pt-2">Was I close?</p>
-    </div>
-    )
-    setCurrentStage("awaiting-growth-validation")
-}, 67)
-}
-
-/* 7: growth validation */
-const handleGrowthValidation = (isCorrect: boolean) => {
-if (isCorrect) {
-    addUserMessage("Yes")
-    proceedToGoalProposal()
-} else {
-    addUserMessage("No")
-    setTimeout(() => {
-    addSystemMessage(
-        <div className="space-y-3">
-        <p className="text-base leading-relaxed">Tell me what you're seeing instead.</p>
-        </div>
-    )
-    setCurrentStage("growth-clarification")
-    }, 67)
-}
-}
-
-const handleGrowthClarification = () => {
-if (!inputValue.trim()) return
-
-addUserMessage(inputValue)
-setInputValue("")
-
-const updatedGrowthZones: GrowthZone[] = growthZones.map((gz,_) => {
-    return ({...gz, title: "Updated: " + gz.title})
-})
-setGrowthZones(updatedGrowthZones)
-
-setTimeout(() => {
-    addSystemMessage(
-    <div className="space-y-4">
-        <p className="text-base leading-relaxed">Updated growth zones:</p>
-        {updatedGrowthZones.map((gz, idx) => (
-        <GrowthZoneBlock key={idx} {...gz} />
-        ))}
-        <p className="text-base leading-relaxed font-medium pt-2">Does this capture it?</p>
-    </div>
-    )
-    setCurrentStage("awaiting-growth-validation")
-}, 67)
-}
-
-const proceedToGoalProposal = () => {
-const goals = [
-    "Build a consistent content system that aligns with your natural strengths",
-    "Refine hooks and pacing to improve viewer retention",
-    "Experiment with formats that feel authentic while expanding reach",
-]
-setProposedGoals(goals)
-setEditableGoals(goals)
-
-setTimeout(() => {
-    addSystemMessage(
-    <div className="space-y-4" id="goal-proposal-message">
-        <p className="text-base leading-relaxed">Based on everything, here's what I think you're working toward:</p>
-        <ul className="space-y-2 pl-4">
-        {goals.map((goal, idx) => (
-            <li key={idx} className="text-base leading-relaxed list-disc">
-            {goal}
-            </li>
-        ))}
-        </ul>
-        <p className="text-base leading-relaxed font-medium pt-2">This track?</p>
-    </div>
-    )
-    setCurrentStage("goal-proposal")
-}, 67)
-}
-
-/* 8: goals */
-const handleGoalConfirmation = (confirmed: boolean) => {
-if (confirmed) {
-    addUserMessage("Confirmed")
-    setTimeout(() => {
-    addSystemMessage(
-        <div className="space-y-3">
-        <p className="text-base leading-relaxed">Great — I've saved the goals (static demo).</p>
-        <p className="text-sm text-muted-foreground">You can still add more goals directly here if you'd like.</p>
-        </div>
-    );
-    }, 600);
-} else {
-    setIsEditingGoals(true)
-    setCurrentStage("goal-editing")
-}
-}
-
-const addEditableGoal = () => {
-    setEditableGoals((prev) => [...prev, ""]);
-};
-
-const removeEditableGoal = (index) => {
-    setEditableGoals((prev) => prev.filter((_, i) => i !== index));
-};
-
-const handleGoalEditComplete = () => {
-    const cleaned = editableGoals.map((g) => g.trim()).filter(Boolean);
-    setProposedGoals(cleaned);
-    addUserMessage("Updated goals");
-    setIsEditingGoals(false);
-    setTimeout(() => {
-        addSystemMessage(
-            <div className="space-y-4">
-            <p className="text-base leading-relaxed">Updated. Here's what we've got:</p>
-            <ul className="space-y-2 pl-4">
-                {cleaned.map((goal, idx) => (
-                <li key={idx} className="text-base leading-relaxed list-disc">
-                    {goal}
-                </li>
-                ))}
-            </ul>
-            <p className="text-base leading-relaxed font-medium pt-2">That better?</p>
-            </div>
-        );
-    setCurrentStage("goal-proposal");
-    }, 67);
-};
-
-
-/* ------------------------- keyboard handling ------------------------ */
-const handleKeyPress = (e: React.KeyboardEvent) => {
-if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault()
-    switch (currentStage) {
-    case "awaiting-name":
-        handleNameSubmit()
-        break
-    case "awaiting-tiktok-username":
-        handleTiktokUsernameSubmit()
-        break
-    case "taste-clarification":
-        handleTasteClarification()
-        break
-    case "superpowers-clarification":
-        handleSuperpowersClarification()
-        break
-    case "growth-clarification":
-        handleGrowthClarification()
-        break
-    case "goal-editing":
-        handleGoalEditComplete()
-        break
+      if (analysisType === "low_performance") {
+        const items: GrowthZone[] =
+          Array.isArray(data?.growth_zones) ? data.growth_zones : Array.isArray(data) ? data : [];
+        setGrowthZones(items);
+        if (!growthConfirmedRef.current) {
+            setStage("awaiting-growth-validation");
+        }
+        return;
+      }
     }
-}
-}
 
-/* ---------------------------- rendering ---------------------------- */
-return (
-<main className="min-h-screen bg-background">
-    {/* <div className="flex w-full justify-end lg:flex-1">
-        <ThemeToggle />
-    </div> */}
-    {/* Full-Screen Final Processing */}
-    {currentStage === "final-processing" && (
-    <div className="h-screen flex items-center justify-center px-4">
-        <div className="text-center space-y-8">
-        <div className="relative inline-block">
-            <div className="w-20 h-20 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-        <div className="space-y-3">
-            <p className="text-2xl font-semibold">Connecting the dots 🧠✨</p>
-            <p className="text-base text-muted-foreground">Turning chaos into clarity…</p>
-        </div>
-        </div>
-    </div>
-    )}
-
-    {/* Full-Screen Completion */}
-    {currentStage === "completion" && (
-    <div className="h-screen flex items-center justify-center px-4">
-        <div className="text-center space-y-6">
-        <div className="text-6xl mb-4">✨</div>
+    if (type === "complete") {
+      addAssistant(
         <div className="space-y-2">
-            <p className="text-3xl font-bold">Sorted. You're in.</p>
-            <p className="text-lg text-muted-foreground">This is your space now.</p>
+          <p className="text-sm font-semibold">All set ✅</p>
+          <p className="text-sm text-muted-foreground">Your onboarding profile is ready.</p>
         </div>
-        </div>
-    </div>
-    )}
+      );
+      setStage("completion");
+      return;
+    }
 
-    {/* Chat Interface */}
-    {currentStage !== "final-processing" && currentStage !== "completion" && (
-        <div className="h-screen flex items-center justify-center px-4">
-          <div className="w-full max-w-2xl h-full max-h-[90vh] flex flex-col py-8">
-            {/* Chat Feed */}
-            <div className="flex-1 overflow-y-auto space-y-6 mb-6 px-2">
-            <MessagesList
-            messages={messages}
-            cnWrapper={(pos) => cn("flex", pos)}
-            />
-            <div ref={messagesEndRef} />
+    if (type === "error") {
+      addAssistant(
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-red-600">Something went wrong</p>
+          <p className="text-sm text-muted-foreground">{payload?.message ?? "Unknown error"}</p>
         </div>
+      );
+    }
+  };
 
-        {/* Input Area */}
-        {currentStage !== "analyzing-taste" &&
-            currentStage !== "analyzing-superpowers" &&
-            currentStage !== "analyzing-growth" && (
-            <div className="px-2">
-                <RenderInputArea
-                // ... (rest of your props remain exactly the same)
-                currentStage={currentStage}
-                inputValue={inputValue}
-                setInputValue={setInputValue}
-                inputRef={inputRef}
-                textareaRef={textareaRef}
-                tasteVideos={tasteVideos}
-                bestVideos={bestVideos}
-                growthVideos={growthVideos}
-                editableGoals={editableGoals}
-                isEditingGoals={isEditingGoals}
-                isLoading={isLoading}
-                handleNameSubmit={handleNameSubmit}
-                handleTiktokUsernameSubmit={handleTiktokUsernameSubmit}
-                handleTasteUpload={uploadAllTasteVideos}
-                handleTasteAnalyze={handleTasteAnalyze}
-                handleTasteValidation={handleTasteValidation}
-                handleTasteClarification={handleTasteClarification}
-                handleBestUpload={handleBestUpload}
-                handleBestAnalyze={handleBestAnalyze}
-                handleSuperpowersValidation={handleSuperpowersValidation}
-                handleSuperpowersClarification={handleSuperpowersClarification}
-                handleGrowthUpload={handleGrowthUpload}
-                handleGrowthAnalyze={handleGrowthAnalyze}
-                handleGrowthValidation={handleGrowthValidation}
-                handleGrowthClarification={handleGrowthClarification}
-                handleGoalConfirmation={handleGoalConfirmation}
-                setEditableGoals={setEditableGoals}
-                handleGoalEditComplete={handleGoalEditComplete}
-                handleKeyPress={handleKeyPress}
-                addEditableGoal={addEditableGoal}
-                removeEditableGoal={removeEditableGoal}
-                />
+
+  // ---- actions ----
+  const onSubmitName = async () => {
+    if (!sessionId) return;
+    const name = input.trim();
+    if (!name) return;
+
+    setUserName(name);
+    addUser(<p className="text-sm">{name}</p>);
+    setInput("");
+
+    setIsLoading(true);
+    try {
+      await sendOnboardingMessage(sessionId, name);
+    } catch (e) {
+      console.error(e);
+      addAssistant(<p className="text-sm text-red-600">Failed to send name.</p>);
+    } finally {
+      setIsLoading(false);
+    }
+
+    addAssistant(
+      <div className="space-y-2">
+        <p className="text-sm font-semibold">Step 1: Your taste</p>
+        <p className="text-sm text-muted-foreground">Upload 3 videos that feel most “you”.</p>
+      </div>
+    );
+    setStage("awaiting-taste-videos");
+  };
+
+  async function uploadAndAnalyze(stageName: OnboardingStage, files: File[]) {
+    if (!sessionId) return;
+
+    setIsLoading(true);
+    setUploadProgress({ uploaded: 0, total: 3 });
+
+    try {
+      const gcsUris = await uploadThreeVideosToGCS({
+        files,
+        sessionId,
+        stage: stageName,
+        userName,
+        onProgress: setUploadProgress,
+      });
+
+      await submitOnboardingVideos(sessionId, stageName, gcsUris);
+    } finally {
+      setUploadProgress(null);
+      setIsLoading(false);
+    }
+  }
+
+  const startTaste = async () => {
+    if (tasteFiles.length < 3 || !sessionId) return;
+    setStage("analyzing-taste");
+    try {
+      await uploadAndAnalyze("taste", tasteFiles);
+    } catch (e) {
+      console.error(e);
+      addAssistant(<p className="text-sm text-red-600">Taste upload/analyze failed.</p>);
+      setStage("awaiting-taste-videos");
+    }
+  };
+
+  const confirmTaste = async (ok: boolean) => {
+    if (!sessionId) return;
+
+    addUser(<p className="text-sm">{ok ? "Yes" : "Not really"}</p>);
+
+    if (!ok) {
+        // ✅ Important: do NOT call backend yet
+        addAssistant(<p className="text-sm text-muted-foreground">Tell me what’s off so I can refine it.</p>);
+        setStage("taste-clarification");
+        return;
+    }
+
+    // ok === true: call backend
+    setIsLoading(true);
+    
+    try {
+        await confirmOnboarding(sessionId, "true");
+    } catch (e) {
+        console.error(e);
+        addAssistant(<p className="text-sm text-red-600">Confirm failed.</p>);
+    } finally {
+        setIsLoading(false);
+    }
+
+    tasteConfirmedRef.current = true;
+    setStage("analyzing-best");
+    };
+
+
+  const submitTasteClarification = async () => {
+    if (!sessionId) return;
+    const msg = input.trim();
+    if (!msg) return;
+
+    addUser(<p className="text-sm">{msg}</p>);
+    setInput("");
+
+    setIsLoading(true);
+    try {
+      await confirmOnboarding(sessionId, "false", msg);
+    } catch (e) {
+      console.error(e);
+      addAssistant(<p className="text-sm text-red-600">Failed to send clarification.</p>);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const startBest = async () => {
+    if (bestFiles.length < 3 || !sessionId) return;
+    setStage("analyzing-best");
+    try {
+      await uploadAndAnalyze("performance", bestFiles);
+    } catch (e) {
+      console.error(e);
+      addAssistant(<p className="text-sm text-red-600">Best upload/analyze failed.</p>);
+      setStage("awaiting-best-videos");
+    }
+  };
+
+const confirmSuperpowers = async (ok: boolean) => {
+  if (!sessionId) return;
+
+  addUser(<p className="text-sm">{ok ? "Yes" : "Not really"}</p>);
+
+  if (!ok) {
+    // ✅ do NOT call backend yet
+    addAssistant(
+      <p className="text-sm text-muted-foreground">
+        Got it — what feels off? (hooks, topics, retention, engagement). One sentence is enough.
+      </p>
+    );
+    setStage("superpowers-clarification");
+    return;
+  }
+
+  // ok === true: call backend to proceed
+  setIsLoading(true);
+  try {
+    await confirmOnboarding(sessionId, "true");
+  } catch (e) {
+    console.error(e);
+    addAssistant(<p className="text-sm text-red-600">Confirm failed.</p>);
+    return;
+  } finally {
+    setIsLoading(false);
+  }
+
+    superpowersConfirmedRef.current = true;
+    setStage("awaiting-growth-videos");
+};
+const submitSuperpowersClarification = async () => {
+  if (!sessionId) return;
+  const msg = input.trim();
+  if (!msg) return;
+
+  addUser(<p className="text-sm">{msg}</p>);
+  setInput("");
+
+  setIsLoading(true);
+  try {
+    await confirmOnboarding(sessionId, "false", msg);
+  } catch (e) {
+    console.error(e);
+    addAssistant(<p className="text-sm text-red-600">Failed to send clarification.</p>);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+
+  const startGrowth = async () => {
+    if (growthFiles.length < 3 || !sessionId) return;
+    setStage("analyzing-growth");
+    try {
+      await uploadAndAnalyze("low_performance", growthFiles);
+    } catch (e) {
+      console.error(e);
+      addAssistant(<p className="text-sm text-red-600">Growth upload/analyze failed.</p>);
+      setStage("awaiting-growth-videos");
+    }
+  };
+
+const confirmGrowth = async (ok: boolean) => {
+  if (!sessionId) return;
+
+  addUser(<p className="text-sm">{ok ? "Yes" : "Not really"}</p>);
+
+  if (!ok) {
+    // ✅ do NOT call backend yet
+    addAssistant(
+      <p className="text-sm text-muted-foreground">
+        Tell me what’s off about these growth zones (what you think the real issue is), and I’ll refine.
+      </p>
+    );
+    setStage("growth-clarification");
+    return;
+  }
+
+  setIsLoading(true);
+  try {
+    await confirmOnboarding(sessionId, "true");
+  } catch (e) {
+    console.error(e);
+    addAssistant(<p className="text-sm text-red-600">Confirm failed.</p>);
+    return;
+  } finally {
+    setIsLoading(false);
+  }
+
+growthConfirmedRef.current = true;
+  setStage("goal-setting");
+};
+
+const submitGrowthClarification = async () => {
+  if (!sessionId) return;
+  const msg = input.trim();
+  if (!msg) return;
+
+  addUser(<p className="text-sm">{msg}</p>);
+  setInput("");
+
+  setIsLoading(true);
+  try {
+    await confirmOnboarding(sessionId, "false", msg);
+  } catch (e) {
+    console.error(e);
+    addAssistant(<p className="text-sm text-red-600">Failed to send clarification.</p>);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+
+  return (
+    <div className="mx-auto flex h-[calc(100vh-40px)] max-w-3xl flex-col gap-4 p-4">
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <div className="text-sm font-semibold">Conversation</div>
+          <div className="text-xs text-muted-foreground">
+            {sessionId ? <span>Session: {sessionId.slice(0, 8)}…</span> : <span>Creating session…</span>}
+            {"Stage: " + stage}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {isLoading ? <Pill>working…</Pill> : <Pill>ready</Pill>}
+          {uploadProgress ? (
+            <Pill>
+              uploading {uploadProgress.uploaded}/{uploadProgress.total}
+            </Pill>
+          ) : null}
+        </div>
+      </div>
+
+      <Card>
+        <div className="h-[60vh] overflow-y-auto space-y-3 pr-1">
+          {messages.map((m, idx) => (
+            <div key={idx} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${m.role === "user" ? "bg-foreground text-background" : "bg-muted"}`}>
+                {m.content}
+              </div>
             </div>
-            )}
+          ))}
+          <div ref={bottomRef} />
         </div>
+      </Card>
+
+      <Card>
+        {stage === "awaiting-name" && (
+          <div className="flex gap-2">
+            <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder={stageHint} />
+            <Button disabled={!sessionId || isLoading || !input.trim()} onClick={onSubmitName}>
+              Send
+            </Button>
+          </div>
+        )}
+
+        {stage === "awaiting-taste-videos" && (
+          <div className="space-y-3">
+            <div className="text-sm font-semibold">Upload 3 taste videos</div>
+            <input type="file" accept="video/*" multiple onChange={(e) => setTasteFiles(Array.from(e.target.files ?? []).slice(0, 3))} />
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-muted-foreground">{tasteFiles.length}/3 selected</div>
+              <Button disabled={!sessionId || tasteFiles.length < 3 || isLoading} onClick={startTaste}>
+                Upload & Analyze
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {stage === "analyzing-taste" && (
+          <div className="space-y-2">
+            <div className="text-sm font-semibold">Analyzing taste…</div>
+            <div className="text-xs text-muted-foreground">Waiting for Supabase events.</div>
+          </div>
+        )}
+
+        {stage === "awaiting-taste-validation" && (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" disabled={isLoading} onClick={() => confirmTaste(false)}>
+              Not really
+            </Button>
+            <Button disabled={isLoading} onClick={() => confirmTaste(true)}>
+              Yes
+            </Button>
+          </div>
+        )}
+
+        {stage === "taste-clarification" && (
+          <div className="space-y-2">
+            <div className="text-sm font-semibold">Clarify your taste</div>
+            <div className="flex gap-2">
+              <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder={stageHint} />
+              <Button disabled={!sessionId || isLoading || !input.trim()} onClick={submitTasteClarification}>
+                Send
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {stage === "awaiting-best-videos" && (
+          <div className="space-y-3">
+            <div className="text-sm font-semibold">Upload 3 best-performing videos</div>
+            <input type="file" accept="video/*" multiple onChange={(e) => setBestFiles(Array.from(e.target.files ?? []).slice(0, 3))} />
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-muted-foreground">{bestFiles.length}/3 selected</div>
+              <Button disabled={!sessionId || bestFiles.length < 3 || isLoading} onClick={startBest}>
+                Upload & Analyze
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {stage === "analyzing-best" && (
+          <div className="space-y-2">
+            <div className="text-sm font-semibold">Analyzing performance…</div>
+            <div className="text-xs text-muted-foreground">Waiting for Supabase events.</div>
+          </div>
+        )}
+
+        {stage === "awaiting-superpowers-validation" && (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" disabled={isLoading} onClick={() => confirmSuperpowers(false)}>
+              Not really
+            </Button>
+            <Button disabled={isLoading} onClick={() => confirmSuperpowers(true)}>
+              Yes
+            </Button>
+          </div>
+        )}
+
+        {stage === "awaiting-growth-videos" && (
+          <div className="space-y-3">
+            <div className="text-sm font-semibold">Upload 3 low-performing videos</div>
+            <input type="file" accept="video/*" multiple onChange={(e) => setGrowthFiles(Array.from(e.target.files ?? []).slice(0, 3))} />
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-muted-foreground">{growthFiles.length}/3 selected</div>
+              <Button disabled={!sessionId || growthFiles.length < 3 || isLoading} onClick={startGrowth}>
+                Upload & Analyze
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {stage === "analyzing-growth" && (
+          <div className="space-y-2">
+            <div className="text-sm font-semibold">Analyzing growth zones…</div>
+            <div className="text-xs text-muted-foreground">Waiting for Supabase events.</div>
+          </div>
+        )}
+
+        {stage === "superpowers-clarification" && (
+        <div className="space-y-2">
+            <div className="text-sm font-semibold">Clarify what’s off</div>
+            <div className="flex gap-2">
+            <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder={stageHint} />
+            <Button disabled={!sessionId || isLoading || !input.trim()} onClick={submitSuperpowersClarification}>
+                Send
+            </Button>
+            </div>
+        </div>
+        )}
+
+        {stage === "growth-clarification" && (
+        <div className="space-y-2">
+            <div className="text-sm font-semibold">Clarify what’s off</div>
+            <div className="flex gap-2">
+            <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder={stageHint} />
+            <Button disabled={!sessionId || isLoading || !input.trim()} onClick={submitGrowthClarification}>
+                Send
+            </Button>
+            </div>
+        </div>
+        )}
+
+
+        {stage === "awaiting-growth-validation" && (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" disabled={isLoading} onClick={() => confirmGrowth(false)}>
+              Not really
+            </Button>
+            <Button disabled={isLoading} onClick={() => confirmGrowth(true)}>
+              Yes
+            </Button>
+          </div>
+        )}
+
+        {stage === "goal-setting" && (
+          <div className="space-y-2">
+            <div className="text-sm font-semibold">Finalizing…</div>
+            <div className="text-xs text-muted-foreground">Backend will emit a “complete” event when done.</div>
+          </div>
+        )}
+
+        {stage === "completion" && (
+          <div className="space-y-2">
+            <div className="text-sm font-semibold">Complete ✅</div>
+            <div className="text-xs text-muted-foreground">Route to dashboard/profile next.</div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  localStorage.removeItem("onboarding_session_id");
+                  window.location.reload();
+                }}
+              >
+                Restart
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      <div className="text-xs text-muted-foreground">
+        {tasteAnalysis ? <span className="mr-3">taste✅</span> : <span className="mr-3">taste—</span>}
+        {superpowers ? <span className="mr-3">best✅</span> : <span className="mr-3">best—</span>}
+        {growthZones ? <span className="mr-3">growth✅</span> : <span className="mr-3">growth—</span>}
+      </div>
     </div>
-    )}
-</main>
-)
+  );
 }

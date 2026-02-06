@@ -132,6 +132,22 @@ editableGoals: string[]
 isEditingGoals: boolean
 isLoading: boolean
 
+tasteGcsUris: string[]
+bestGcsUris: string[]
+growthGcsUris: string[]
+
+tasteUrisText: string
+setTasteUrisText: (v: string) => void
+bestUrisText: string
+setBestUrisText: (v: string) => void
+growthUrisText: string
+setGrowthUrisText: (v: string) => void
+
+addTasteUrisFromText: () => void
+addBestUrisFromText: () => void
+addGrowthUrisFromText: () => void
+
+
 // handlers (from ConversationPage)
 handleNameSubmit: () => void
 handleTiktokUsernameSubmit: () => void

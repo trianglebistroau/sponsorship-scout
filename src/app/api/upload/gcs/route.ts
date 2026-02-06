@@ -15,6 +15,7 @@ const storage = new Storage({
   credentials: JSON.parse(saJson),
 });
 
+// Allowed onboarding stages (match ad-crawler /videos/submit)
 const ALLOWED_STAGES = new Set(["taste", "performance", "low_performance"]);
 
 function slugify(input: string) {
@@ -33,17 +34,10 @@ function safeFileName(name: string) {
 }
 
 function safePath(input: string) {
+  // avoid leading slashes, weird traversal, etc.
   const p = input.trim().replace(/^\/+/, "");
   if (!p || p.includes("..")) return null;
   return p;
-}
-
-function normalizeStage(raw: unknown): string {
-  const s = typeof raw === "string" ? slugify(raw) : "";
-  // Backwards compat: your FE may send "best" / "growth" etc. Map if needed.
-  if (s === "best") return "performance";
-  if (s === "growth") return "low_performance";
-  return s;
 }
 
 export async function PUT(req: Request) {
@@ -58,31 +52,42 @@ export async function PUT(req: Request) {
       );
     }
 
-    // ✅ Backwards compatible: accept either stage or category
-    const stageRaw = form.get("stage") ?? form.get("category");
-    const stage = normalizeStage(stageRaw);
-
-    // ✅ Recommended: include sessionId so path maps to LangGraph thread
+    // Required for onboarding mapping
     const sessionIdRaw = form.get("sessionId");
-    const sessionId =
-      typeof sessionIdRaw === "string" && sessionIdRaw.trim()
-        ? sessionIdRaw.trim()
-        : "anonymous-session";
+    const stageRaw = form.get("stage"); // taste | performance | low_performance
 
-    // Optional extras
+    // Optional, purely for path readability
     const userNameRaw = form.get("userName");
+    const stageIndexRaw = form.get("stageIndex"); // "0" | "1" | "2" etc
+
+    // Optional: allow caller to provide exact objectPath
     const objectPathRaw = form.get("objectPath");
-    const stageIndexRaw = form.get("stageIndex");
+
+    const sessionId =
+      typeof sessionIdRaw === "string" && sessionIdRaw.trim() ? sessionIdRaw.trim() : null;
+
+    const stage =
+      typeof stageRaw === "string" && stageRaw.trim() ? slugify(stageRaw) : null;
+
+    if (!sessionId) {
+      return NextResponse.json({ ok: false, error: "Missing sessionId" }, { status: 400 });
+    }
+    if (!stage || !ALLOWED_STAGES.has(stage)) {
+      return NextResponse.json(
+        { ok: false, error: `Invalid stage. Must be one of: ${Array.from(ALLOWED_STAGES).join(", ")}` },
+        { status: 400 }
+      );
+    }
 
     const userName =
-      typeof userNameRaw === "string" && userNameRaw.trim() ? slugify(userNameRaw) : "anonymous";
+      typeof userNameRaw === "string" && userNameRaw.trim()
+        ? slugify(userNameRaw)
+        : "anonymous";
 
     const stageIndex =
-      typeof stageIndexRaw === "string" && stageIndexRaw.trim() ? slugify(stageIndexRaw) : "";
-
-    // If stage isn’t valid, you can either reject OR allow "misc".
-    // I recommend allowing misc so your current FE doesn't break.
-    const finalStage = ALLOWED_STAGES.has(stage) ? stage : "misc";
+      typeof stageIndexRaw === "string" && stageIndexRaw.trim()
+        ? slugify(stageIndexRaw)
+        : "";
 
     let objectPath: string | null = null;
 
@@ -96,19 +101,17 @@ export async function PUT(req: Request) {
       const rand = crypto.randomBytes(8).toString("hex");
       const filename = safeFileName(file.name);
 
-      // ✅ Path includes session + stage for onboarding
-      objectPath = `onboarding/${sessionId}/${finalStage}/${userName}/${ts}-${stageIndex}-${rand}-${filename}`;
-    }
-
-    if (objectPath.includes("..")) {
-      return NextResponse.json({ ok: false, error: "Invalid objectPath" }, { status: 400 });
+      // ✅ IMPORTANT: include sessionId + stage in object path
+      // This makes it trivial for FE to send gs://... to ad-crawler for the right session/stage.
+      objectPath = `onboarding/${sessionId}/${stage}/${userName}/${ts}-${stageIndex}-${rand}-${filename}`;
     }
 
     const contentType = file.type || "application/octet-stream";
     const bytes = Buffer.from(await file.arrayBuffer());
 
-    // Optional size guardrail (helps avoid server route crashes)
-    const maxBytes = 200 * 1024 * 1024; // 200MB
+    // Guardrail: don't accept huge uploads via server route (optional but recommended)
+    // Example: 200MB max. Adjust as needed.
+    const maxBytes = 200 * 1024 * 1024;
     if (bytes.length > maxBytes) {
       return NextResponse.json(
         { ok: false, error: `File too large for server upload route (>${maxBytes} bytes)` },
@@ -134,12 +137,11 @@ export async function PUT(req: Request) {
       objectPath,
       contentType,
       size: bytes.length,
-      // include debug fields so FE can keep them if needed
       sessionId,
-      stage: finalStage,
+      stage,
     });
   } catch (e: any) {
-    console.error("bucketUpload error:", e);
+    console.error("gcs upload error:", e);
     return NextResponse.json({ ok: false, error: String(e?.message ?? e) }, { status: 500 });
   }
 }
