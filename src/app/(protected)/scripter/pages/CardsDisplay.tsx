@@ -5,14 +5,16 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 
+import { authClient } from "@/lib/auth-client";
+import { fetchUserByEmail } from "@/lib/user-data";
 import Card, { IdeaData } from "../components/Card";
 import DotGrid from "../components/DotGrid";
 import { generateNextCard } from "../lib/generateToCard";
 
 import {
   loadDeck,
-  saveDeck,
   loadDeckIndex,
+  saveDeck,
   saveDeckIndex,
   upsertCommittedToPlan,
 } from "@/lib/planStore";
@@ -253,15 +255,88 @@ export default function DeckPage() {
     mouseY.set(e.clientY - innerHeight / 2);
   };
 
-  // TODO: replace with real user data later
-  const USER_PROFILE = "Test User Profile";
-  const MACRO_THEMES = ["Technology", "Innovation", "Future Trends"];
+  // User profile data from database
+  const [userProfile, setUserProfile] = useState<string>("");
+  const [macroThemes, setMacroThemes] = useState<string>("");
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  
   const USER_PROMPT = "Generate 1 strong idea card for a tech sponsorship video, but change up the style each time.";
   const [userFeedback, setUserFeedback] = useState<string[]>([]);
+
+  // Load user profile data on mount
+  useEffect(() => {
+    async function loadUserProfile() {
+      try {
+        const session = await authClient.getSession();
+        console.log("🔐 User session:", session);
+        if (!session?.data?.user?.email) {
+          console.error("No user session found");
+          setIsLoadingProfile(false);
+          return;
+        }
+
+        const userData = await fetchUserByEmail(session.data.user.email);
+        
+        const profileData = userData.recommendation_json?.data ?? userData.recommendation_json;
+
+        if (profileData) {
+          // Extract USER_PROFILE: combine creative_dna fields into a string
+          const creativeDna = profileData.creative_dna || {};
+          const superpowers = profileData.superpowers || {};
+          const growthZone = profileData.growth_zone || {};
+          
+      
+          
+          const profileParts = [
+            creativeDna.archetype && `Archetype: ${creativeDna.archetype}`,
+            creativeDna.personality && `Personality: ${creativeDna.personality}`,
+            creativeDna.goals && `Goals: ${creativeDna.goals}`,
+            creativeDna.audience_tags?.length && `Audience: ${creativeDna.audience_tags.join(", ")}`,
+            superpowers.pathway && `Pathway: ${superpowers.pathway}`,
+            superpowers.superpowers && `Superpowers: ${Object.entries(superpowers.superpowers).map(([k, v]) => `${k} (${v})`).join("; ")}`,
+            growthZone.missed_potential && `Missed Potential: ${growthZone.missed_potential}`,
+            growthZone.low_performers && `Low Performers: ${growthZone.low_performers}`,
+          ].filter(Boolean);
+
+          const userProfileString = profileParts.join(" | ") || "Creative content creator";
+          setUserProfile(userProfileString);
+
+          // Extract MACRO_THEMES: get theme titles as a comma-separated string
+          const themes = profileData.themes || [];
+          
+          const themesSummary = themes.map((t: any) => 
+            `${t.title}: ${t.summary}`
+          ).join(" | ");
+          
+          const macroThemesString = themesSummary || "General content creation themes";
+          setMacroThemes(macroThemesString);
+        } else {
+          setUserProfile("Creative content creator");
+          setMacroThemes("General content creation themes");
+        }
+      } catch (error: any) {
+        console.error("Error details:", error?.details);
+        console.error("Error message:", error?.message);
+        
+        // Set fallback values
+        setUserProfile("Creative content creator");
+        setMacroThemes("General content creation themes");
+        console.log("🔄 Using fallback values");
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    }
+
+    loadUserProfile();
+  }, []);
 
   async function generateIntoTrailingPlaceholder(extraFeedback?: string) {
     if (loading) return;
     if (quotaReached) return;
+    if (isLoadingProfile || !userProfile || !macroThemes) {
+      setErrorMsg("Loading your profile data...");
+      return;
+    }
 
     let targetId: number | null = null;
     let targetIndex = -1;
@@ -317,8 +392,8 @@ export default function DeckPage() {
     try {
       // Use the placeholder id as the generator id (so it stays 0..n)
       const generated = await generateNextCard({
-        user_profile: USER_PROFILE,
-        macro_themes: MACRO_THEMES,
+        user_profile: userProfile,
+        macro_themes: macroThemes.split(" | ").filter(Boolean),
         user_prompt: effectivePrompt,
         nextId: targetId ?? 0,
       });

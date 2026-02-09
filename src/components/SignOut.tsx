@@ -15,7 +15,7 @@ export function SignOutButton() {
       variant="outline"
       size="sm"
       onClick={() => {
-        // Clean up localStorage
+        // Clean up sessionStorage
         sessionStorage.removeItem("onboarding_session_id");
         // Reset Zustand user store
         clearStore();

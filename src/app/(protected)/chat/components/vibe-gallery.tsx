@@ -3,8 +3,8 @@
 import { ChevronLeft, ChevronRight, Search } from "lucide-react"
 import * as React from "react"
 
-import { VibePicker } from "@/app/(protected)/generate/components/vibe-picker"
-import { FileNode } from "@/app/(protected)/generate/types"
+import { VibePicker } from "@/app/(protected)/scripter/components/vibe-picker"
+import { FileNode } from "@/app/(protected)/scripter/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"

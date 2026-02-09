@@ -3,16 +3,16 @@
 import { format } from "date-fns"
 import * as React from "react"
 
-import { fileTreeData } from "../generate/data/file-tree"
-import { buildFileMap } from "../generate/utils"
+import { fileTreeData } from "../scripter/data/file-tree"
+import { buildFileMap } from "../scripter/utils"
 import { PlannerCalendar } from "./components/planner-calendar"
 import { SavedConceptsPanel } from "./components/saved-concepts-panel"
 import type { SavedConcept } from "./types"
 
 import {
-  loadPlanConcepts,
-  savePlanConcepts,
-  subscribePlanItems,
+    loadPlanConcepts,
+    savePlanConcepts,
+    subscribePlanItems,
 } from "@/lib/planStore"
 
 export default function PlanPage() {

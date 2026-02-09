@@ -21,8 +21,8 @@ export function GeneratorNav() {
 
   const navItems = [
     { label: "Profile", href: username ? `/profile/${username}` : "/profile" },
-    { label: "Chat", href: "/chat" },
-    { label: "Generate", href: "/generate" },
+    // { label: "Chat", href: "/chat" },
+    { label: "Scripter", href: "/scripter" },
     { label: "Plan", href: "/plan" },
   ]
 

@@ -130,6 +130,10 @@ const Face = styled.div<{
   padding: 2rem;
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
   border: 1px solid ${props => getStatusStyles(props.$ideaStatus, props.$isDark).border};
   background: ${props => props.$variant === "back" 
     ? (props.$isDark ? "linear-gradient(145deg, #1a1a1a, #2a2a2a)" : "linear-gradient(145deg, #f5f5f5, #e5e5e5)")
@@ -395,88 +399,85 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
 
   return (
     <Container $uiStatus={uiStatus} $ideaStatus={data.status} $isFlipped={isFlipped} $isDark={isDark}>
-      <Face $variant="front" $ideaStatus={data.status} $isDark={isDark} style={{ overflow: 'hidden', gap: 0 }}>
+      <Face $variant="front" $ideaStatus={data.status} $isDark={isDark}>
         {data.status === "committed" && <StatusBadge color="#4ade80" $isDark={isDark}>Committed</StatusBadge>}
         {data.status === "rejected" && <StatusBadge color="#f87171" $isDark={isDark}>Rejected</StatusBadge>}
 
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingRight: '0.25rem' }}>
-          <div>
-            <Label color={styles.label}>Concept</Label>
-            <h2 style={{ margin: "0.25rem 0 0.35rem", fontSize: "1.55rem", lineHeight: 1.15 }}>
-              {data.title}
-            </h2>
+        <div>
+          <Label color={styles.label}>Concept</Label>
+          <h2 style={{ margin: "0.25rem 0 0.35rem", fontSize: "1.55rem", lineHeight: 1.15 }}>
+            {data.title}
+          </h2>
 
-            <MetaRow>
-              {data.estimatedLength ? (
-                <Pill $isDark={isDark} $tone="accent"> {data.estimatedLength}</Pill>
-              ) : null}
+          <MetaRow>
+            {data.estimatedLength ? (
+              <Pill $isDark={isDark} $tone="accent"> {data.estimatedLength}</Pill>
+            ) : null}
 
-              {Array.isArray(data.tags) && data.tags.length ? (
-                data.tags.slice(0, 8).map((t) => <Pill key={t} $isDark={isDark}>#{t}</Pill>)
-              ) : (
-                <Pill $isDark={isDark}>No tags</Pill>
-              )}
-            </MetaRow>
-          </div>
-
-          <Section>
-            <Label color={styles.label}>Hook</Label>
-            <HookBox $isDark={isDark}>{data.hook}</HookBox>
-          </Section>
-
-          {data.beats?.length ? (
-            <Section>
-              <Label color={styles.label}>Beats</Label>
-              <MetaRow>
-                {data.beats.slice(0, 6).map((b, i) => (
-                  <Pill key={`${b}-${i}`} $isDark={isDark}>{b}</Pill>
-                ))}
-              </MetaRow>
-            </Section>
-          ) : null}
-
-          <Section>
-            <Label color={styles.label}>Script outline</Label>
-
-            {showFullOutline ? (
-              <>
-                <MarkdownWrap $isDark={isDark}>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {data.contentMd ?? "*No details available.*"}
-                  </ReactMarkdown>
-                </MarkdownWrap>
-                <OutlineActions>
-                  <Button $isDark={isDark} onClick={() => setShowFullOutline(false)}>
-                    Hide full outline
-                  </Button>
-                </OutlineActions>
-              </>
+            {Array.isArray(data.tags) && data.tags.length ? (
+              data.tags.slice(0, 8).map((t) => <Pill key={t} $isDark={isDark}>#{t}</Pill>)
             ) : (
-              <>
-                <OutlinePreview $isDark={isDark}>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {outlinePreview}
-                  </ReactMarkdown>
-                </OutlinePreview>
-                <OutlineActions>
-                  <Button variant="ghost" $isDark={isDark} onClick={() => setShowFullOutline(true)}>
-                    View full outline
-                  </Button>
-                </OutlineActions>
-              </>
+              <Pill $isDark={isDark}>No tags</Pill>
             )}
+          </MetaRow>
+        
+
+        <Section>
+          <Label color={styles.label}>Hook</Label>
+          <HookBox $isDark={isDark}>{data.hook}</HookBox>
+        </Section>
+
+        {data.beats?.length ? (
+          <Section>
+            <Label color={styles.label}>Beats</Label>
+            <MetaRow>
+              {data.beats.slice(0, 6).map((b, i) => (
+                <Pill key={`${b}-${i}`} $isDark={isDark}>{b}</Pill>
+              ))}
+            </MetaRow>
           </Section>
+        ) : null}
+
+        <Section>
+          <Label color={styles.label}>Script outline</Label>
+
+          {showFullOutline ? (
+            <>
+              <MarkdownWrap $isDark={isDark}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {data.contentMd ?? "*No details available.*"}
+                </ReactMarkdown>
+              </MarkdownWrap>
+              <OutlineActions>
+                <Button $isDark={isDark} onClick={() => setShowFullOutline(false)}>
+                  Hide full outline
+                </Button>
+              </OutlineActions>
+            </>
+          ) : (
+            <>
+              <OutlinePreview $isDark={isDark}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {outlinePreview}
+                </ReactMarkdown>
+              </OutlinePreview>
+              <OutlineActions>
+                <Button variant="ghost" $isDark={isDark} onClick={() => setShowFullOutline(true)}>
+                  View full outline
+                </Button>
+              </OutlineActions>
+            </>
+          )}
+        </Section>
         </div>
 
         {uiStatus === "active" && (
-          <div style={{ flexShrink: 0, paddingTop: '1rem', position: 'sticky' }}>
-            <ButtonGroup style={{ marginTop: 0 }}>
-              <Button variant="primary" $isDark={isDark} onClick={() => onCommit(id)}>Commit</Button>
-              <Button $isDark={isDark} onClick={() => setisFlipped(true)}>Edit</Button>
-              <Button $isDark={isDark} onClick={() => onReject(id)}>Reject</Button>
-              <Button $isDark={isDark} onClick={onNext}>Next</Button>
-            </ButtonGroup>
-          </div>
+          <ButtonGroup>
+            <Button variant="primary" $isDark={isDark} onClick={() => onCommit(id)}>Commit</Button>
+            <Button $isDark={isDark} onClick={() => setisFlipped(true)}>Edit</Button>
+            <Button $isDark={isDark} onClick={() => onReject(id)}>Reject</Button>
+            <Button $isDark={isDark} onClick={onNext}>Next</Button>
+          </ButtonGroup>
         )}
 
         {uiStatus === "history" && (

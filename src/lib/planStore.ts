@@ -1,5 +1,5 @@
 // src/lib/planStore.ts
-import type { FeedItemTags } from "@/app/(protected)/generate/types"
+import type { FeedItemTags } from "@/app/(protected)/scripter/types"
 import type { SavedConcept } from "@/app/plan/types"
 
 export const DECK_KEY = "idea_deck_v1"

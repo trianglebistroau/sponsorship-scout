@@ -1,6 +1,6 @@
-import type { IdeaData } from "../components/Card";
 import { createGenerateSession } from "@/lib/generate-api";
 import { GenerateWebSocket } from "@/lib/generate-websocket";
+import type { IdeaData } from "../components/Card";
 
 type VideoIdea = {
   title: string;
@@ -80,8 +80,6 @@ export async function generateNextCard(params: {
 
   return await new Promise<IdeaData>((resolve, reject) => {
     let structuredIdea: VideoIdea | null = null;
-
-    console.log("askdaiud")
 
     const ws = new GenerateWebSocket({
       sessionId: session_id,

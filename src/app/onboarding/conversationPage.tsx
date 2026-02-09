@@ -4,16 +4,19 @@ import { uploadThreeVideosToGCS } from "@/lib/gcsUpload";
 import {
     confirmOnboarding,
     createOnboardingSession,
+    getOnboardingState,
     sendOnboardingMessage,
+    startOnboardingSession,
     submitOnboardingVideos,
     type OnboardingStage,
+    type OnboardingStateSnapshot,
 } from "@/lib/onboarding-rest";
-import { subscribeOnboardingEvents, type OnboardingEventRow } from "@/lib/onboardingEvents";
 import { createOrUpdateUser } from "@/lib/user-data";
 import { useUserStore } from "@/store/user-store";
-import { useRouter } from "next/navigation";
+import { subscribeOnboardingEvents, type OnboardingEventRow } from "@/lib/onboardingEvents";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { useRouter } from "next/navigation";
 
 // ---- UI helpers (keep minimal / replace with your own components) ----
 type ChatMsg = { role: "user" | "assistant"; content: React.ReactNode; ts: number };
@@ -21,7 +24,7 @@ type ChatMsg = { role: "user" | "assistant"; content: React.ReactNode; ts: numbe
 type TasteAnalysis = { tone: string; energy: string; formatBias: string };
 type Superpower = { title?: string; description?: string; evidence?: string };
 type GrowthZone = { title?: string; description?: string; suggestion?: string };
-type Goal = { title?: string; description?: string };
+// type Goal = { title?: string; description?: string };
 
 type Stage =
     | "awaiting-name"
@@ -78,9 +81,38 @@ function Pill(props: { children: React.ReactNode }) {
 return <span className="inline-flex items-center rounded-full border border-border px-2 py-1 text-xs">{props.children}</span>;
 }
 
+function deriveStageFromSnapshot(s: { values: OnboardingStateSnapshot["values"] }): Stage {
+  const v = s.values;
+
+  if (v.is_complete) return "completion";
+  if (!v.user_name) return "awaiting-name";
+
+  // Taste
+  if (v.taste_video_count < 3) return "awaiting-taste-videos";
+  if (!v.taste_has_analysis) return "analyzing-taste";
+  if (!v.taste_confirmed) return "awaiting-taste-validation";
+
+  // Performance
+  if (v.performance_video_count < 3) return "awaiting-best-videos";
+  if (!v.performance_has_analysis) return "analyzing-best";
+  if (!v.performance_confirmed) return "awaiting-superpowers-validation";
+
+  // Low-performance / growth
+  if (v.low_performance_video_count < 3) return "awaiting-growth-videos";
+  if (!v.low_performance_has_analysis) return "analyzing-growth";
+  if (!v.low_performance_confirmed) return "awaiting-growth-validation";
+
+  // Goal
+  if (!v.goal_confirmed) return "awaiting-goal-confirmation";
+
+  return "goal-finalizing";
+}
+
 export default function ConversationPage() {
 const router = useRouter();
+
 const { email: userEmail } = useUserStore();
+
 const [sessionId, setSessionId] = useState<string | null>(null);
 const [stage, setStage] = useState<Stage>("awaiting-name");
 const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -101,6 +133,7 @@ const [growthZones, setGrowthZones] = useState<GrowthZone[] | null>(null);
 const bottomRef = useRef<HTMLDivElement | null>(null);
 
 const subscribedRef = useRef<string | null>(null);
+const startSentRef = useRef<string | null>(null);
 
 const seenEventIdsRef = useRef<Set<number>>(new Set());
 
@@ -125,15 +158,36 @@ return "";
 
     useEffect(() => {
     if (!sessionId) return;
+
+    // avoid re-subscribing for same sessionId
     if (subscribedRef.current === sessionId) return;
     subscribedRef.current = sessionId;
 
-    const unsub = subscribeOnboardingEvents({ sessionId, onInsert: handleEvent });
+    const unsub = subscribeOnboardingEvents({
+      sessionId,
+      onInsert: handleEvent,
+      onStatus: (status) => {
+        // Supabase v2 statuses: SUBSCRIBED, CHANNEL_ERROR, TIMED_OUT, CLOSED
+        if (status === "SUBSCRIBED") {
+          // StrictMode-safe: only start once per sessionId
+          if (startSentRef.current !== sessionId) {
+            startSentRef.current = sessionId;
+            startOnboardingSession(sessionId).catch(console.error);
+          }
+        }
+
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("Onboarding realtime failed:", status);
+        }
+      },
+    });
+
     return () => {
-        unsub?.();
-        subscribedRef.current = null;
+      unsub?.();
+      // allow resubscribe if session changes
+      if (subscribedRef.current === sessionId) subscribedRef.current = null;
     };
-    }, [sessionId]);
+  }, [sessionId]);
 
 const addAssistant = (content: React.ReactNode) =>
     setMessages((m) => [...m, { role: "assistant", content, ts: Date.now() }]);
@@ -152,17 +206,50 @@ useEffect(() => {
     try {
         setIsLoading(true);
         const cached = typeof window !== "undefined" ? sessionStorage.getItem("onboarding_session_id") : null;
+        
         if (cached) {
-        if (!cancelled) setSessionId(cached);
+        // Try to resume
+        const snap = await getOnboardingState(cached);
+
+        if (cancelled) return;
+
+        setSessionId(cached);
+
+        // Restore stage
+        setStage(deriveStageFromSnapshot(snap));
+
+        // Restore chat history (from checkpoint)
+        setMessages(
+          (snap.messages || []).map((m) => ({
+            role: m.role === "assistant" ? "assistant" : "user",
+            content:
+              m.role === "assistant" ? (
+                <div className="text-sm whitespace-pre-wrap">
+                  <ReactMarkdown>{String(m.content ?? "")}</ReactMarkdown>
+                </div>
+              ) : (
+                <div className="text-sm whitespace-pre-wrap">{String(m.content ?? "")}</div>
+              ),
+            ts: m.timestamp ? Date.parse(m.timestamp) : Date.now(),
+          }))
+        );
+
+        // If finished, clear sessionStorage so next visit starts fresh
+        if (snap.values?.is_complete) {
+          sessionStorage.removeItem("onboarding_session_id");
+        }
+
         return;
         }
+        
+        // No cached session -> create new
         const created = await createOnboardingSession();
         if (cancelled) return;
         setSessionId(created.session_id);
         sessionStorage.setItem("onboarding_session_id", created.session_id);
     } catch (e) {
         console.error(e);
-        addAssistant(<p className="text-sm text-red-600">Failed to create session.</p>);
+        addAssistant(<p className="text-sm text-red-600">Failed to create/resume session.</p>);
     } finally {
         if (!cancelled) setIsLoading(false);
     }
@@ -651,7 +738,17 @@ return (
     <Card>
         {stage === "awaiting-name" && (
         <div className="flex gap-2">
-            <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder={stageHint} />
+            <Input 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && sessionId && !isLoading && input.trim()) {
+                  e.preventDefault();
+                  onSubmitName();
+                }
+              }}
+              placeholder={stageHint} 
+            />
             <Button disabled={!sessionId || isLoading || !input.trim()} onClick={onSubmitName}>
             Send
             </Button>
@@ -693,7 +790,17 @@ return (
         <div className="space-y-2">
             <div className="text-sm font-semibold">Clarify your taste</div>
             <div className="flex gap-2">
-            <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder={stageHint} />
+            <Input 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && sessionId && !isLoading && input.trim()) {
+                  e.preventDefault();
+                  submitTasteClarification();
+                }
+              }}
+              placeholder={stageHint} 
+            />
             <Button disabled={!sessionId || isLoading || !input.trim()} onClick={submitTasteClarification}>
                 Send
             </Button>
@@ -756,7 +863,17 @@ return (
         <div className="space-y-2">
             <div className="text-sm font-semibold">Clarify what’s off</div>
             <div className="flex gap-2">
-            <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder={stageHint} />
+            <Input 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && sessionId && !isLoading && input.trim()) {
+                  e.preventDefault();
+                  submitSuperpowersClarification();
+                }
+              }}
+              placeholder={stageHint} 
+            />
             <Button disabled={!sessionId || isLoading || !input.trim()} onClick={submitSuperpowersClarification}>
                 Send
             </Button>
@@ -768,7 +885,17 @@ return (
         <div className="space-y-2">
             <div className="text-sm font-semibold">Clarify what’s off</div>
             <div className="flex gap-2">
-            <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder={stageHint} />
+            <Input 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && sessionId && !isLoading && input.trim()) {
+                  e.preventDefault();
+                  submitGrowthClarification();
+                }
+              }}
+              placeholder={stageHint} 
+            />
             <Button disabled={!sessionId || isLoading || !input.trim()} onClick={submitGrowthClarification}>
                 Send
             </Button>
@@ -817,7 +944,17 @@ return (
         <div className="space-y-2">
             <div className="text-sm font-semibold">Refine direction</div>
             <div className="flex gap-2">
-            <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder={stageHint} />
+            <Input 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && sessionId && !isLoading && input.trim()) {
+                  e.preventDefault();
+                  submitGoalRefinement();
+                }
+              }}
+              placeholder={stageHint} 
+            />
             <Button disabled={!sessionId || isLoading || !input.trim()} onClick={submitGoalRefinement}>
                 Send
             </Button>
@@ -829,7 +966,17 @@ return (
         <div className="space-y-2">
             <div className="text-sm font-semibold">Add a goal</div>
             <div className="flex gap-2">
-            <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder={stageHint} />
+            <Input 
+              value={input} 
+              onChange={(e) => setInput(e.target.value)} 
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && sessionId && !isLoading && input.trim()) {
+                  e.preventDefault();
+                  submitGoalAdjust();
+                }
+              }}
+              placeholder={stageHint} 
+            />
             <Button disabled={!sessionId || isLoading || !input.trim()} onClick={submitGoalAdjust}>
                 Add
             </Button>

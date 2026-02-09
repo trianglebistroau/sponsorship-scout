@@ -12,31 +12,28 @@ export type OnboardingEventRow = {
 export function subscribeOnboardingEvents(params: {
   sessionId: string;
   onInsert: (row: OnboardingEventRow) => void;
+  onStatus?: (status: string) => void;
 }) {
-    console.log("subscribeOnboardingEvents", params.sessionId);
-    console.log("sessionId raw:", JSON.stringify(params.sessionId));
-    const channel = supabase
-        .channel(`onboarding_events:${params.sessionId}`)
-        .on(
-        "postgres_changes",
-        {
-            event: "INSERT",
-            schema: "public",
-            table: "onboarding_events",
-            filter: `session_id=eq.${params.sessionId}`,
-        },
-        (payload) => {
-            console.log("sessionId raw:", JSON.stringify(params.sessionId));
-            console.log("onboarding event", payload.new);
-            if (!payload.new) return;
-            params.onInsert(payload.new as any);
-        }
-        )
-        .subscribe(
-            (status) => {
-                console.log("onboarding event channel status", status);
-            }
-        );
+  console.log("subscribeOnboardingEvents", params.sessionId);
+  const channel = supabase
+    .channel(`onboarding:${params.sessionId}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "onboarding_events",
+        filter: `session_id=eq.${params.sessionId}`,
+      },
+      (payload) => {
+        if (!payload.new) return;
+        params.onInsert(payload.new as any);
+      }
+    )
+    .subscribe((status) => {
+      console.log("[realtime]", status, "sessionId=", params.sessionId);
+      params.onStatus?.(status);
+    });
 
     return () => {
         supabase.removeChannel(channel);
