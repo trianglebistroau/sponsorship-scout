@@ -28,7 +28,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
 
-import type { FileNode, TagCategory } from "../../test/types"
+import type { FileNode, TagCategory } from "../../scripter/types"
 import type { SavedConcept } from "../types"
 
 type SavedConceptsPanelProps = {

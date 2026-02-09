@@ -1,4 +1,4 @@
-import type { FeedItemTags } from "../test/types"
+import type { FeedItemTags } from "../scripter/types"
 
 export type SavedConcept = {
   id: string

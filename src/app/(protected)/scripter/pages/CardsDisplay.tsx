@@ -54,7 +54,7 @@ function makePlaceholderCard(id: number, msg?: string): IdeaData {
     rationale: "",
     contentMd:
       "### Ready when you are\n\n- **Reject/Commit** the current one and I’ll generate a replacement.\n",
-    status: "ready",
+    status: "ready" as const,
   };
 }
 
@@ -401,7 +401,7 @@ export default function DeckPage() {
       // 2) Replace that placeholder by id, then append a fresh placeholder (new increasing id)
       setIdeas((prev) => {
         const replaced = prev.map((idea) =>
-          idea.id === targetId ? { ...generated, id: idea.id, status: "shown" } : idea
+          idea.id === targetId ? { ...generated, id: idea.id, status: "shown" as const } : idea
         );
 
         const withNewPlaceholder = [...replaced, makePlaceholderCard(takeId())];
