@@ -10,16 +10,15 @@ const nextConfig = {
   basePath: process.env.NEXT_PUBLIC_BASE_PATH, // Sets the base path for the application.,
   reactStrictMode: true,
   async rewrites() {
-    // /api/v1/* is handled by the catch-all proxy at src/app/api/v1/[...path]/route.ts
-    // Only proxy WebSocket upgrades via rewrites.
+    const rewrites = [];
+    // WebSocket upgrades only — /api/v1/onboarding/* is handled by dedicated
+    // route handlers in src/app/api/v1/onboarding/*/route.ts which have
+    // a long timeout for Gemini video analysis.
     const wsBase = process.env.BACKEND_URL_PROD || process.env.BACKEND_URL_DEV;
-    if (!wsBase || !wsBase.startsWith('http')) return [];
-    return [
-      {
-        source: '/ws/:path*',
-        destination: `${wsBase}/ws/:path*`,
-      },
-    ]
+    if (wsBase && wsBase.startsWith('http')) {
+      rewrites.push({ source: '/ws/:path*', destination: `${wsBase}/ws/:path*` });
+    }
+    return rewrites;
   },
   images: {
     remotePatterns: [

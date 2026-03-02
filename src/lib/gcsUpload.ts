@@ -64,8 +64,9 @@ export async function uploadThreeVideosToGCS(params: {
   userName?: string;
   onProgress?: (p: { uploaded: number; total: number }) => void;
 }): Promise<string[]> {
+  // DEBUG: relaxed to 1+ during testing (was: slice(0,3) + require 3)
   const files = params.files.slice(0, 3);
-  if (files.length < 3) throw new Error("Need 3 videos");
+  if (files.length < 3) throw new Error("Need exactly 3 videos");
 
   const out: string[] = [];
   for (let i = 0; i < files.length; i++) {
