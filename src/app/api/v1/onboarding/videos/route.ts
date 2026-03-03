@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 // No timeout cap — Gemini video analysis can take 60 s+
-export const maxDuration = 500;
+export const maxDuration = 300;
 
 const backendUrl =
   process.env.NODE_ENV === "production"
