@@ -177,13 +177,14 @@ function VideoPicker({
 export default function ConversationPage() {
   const router = useRouter();
   const { email: userEmail } = useUserStore();
+  
 
   // UI step
   const [step, setStep] = useState<AppStep>("upload");
   const [errorMsg, setErrorMsg] = useState<string>("");
 
   // Username
-  const [username, setUsername] = useState<string>("");
+  const { username, setUsername } = useUserStore();
 
   // Files
   const [tasteFiles, setTasteFiles] = useState<File[]>([]);
