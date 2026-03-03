@@ -1,44 +1,66 @@
-After onboarding is completed, we need to create new entry on User table on supabase
+ok i need you to rewrite for me the onboarding/conversation page logic, instead of using websocket to depending on langgraph backend, we will be using only 2, 
 
-with
 
-username, email and recommendation_json
+@app.post("/api/v1/onboarding/videos", response_model=AnalyzeVideosResponse)
+async def analyze_onboarding_videos(request: AnalyzeVideosRequest):
+    """
+    Analyze a list of videos using the specified mode.
 
-recommendation_json will hold the output of the API call which generate 
+    Args:
+        request: video_urls (list of TikTok/YouTube URLs or Gemini file IDs)
+                 mode ("taste", "performance", or "low_performance")
 
-```
-{
-  "data": {
-    "username": "Chang",
-    "growth_zone": {
-      "low_performers": "Generic emotional venting and linear 'recording vs. the song' journeys are currently underperforming because they lack specific stakes or a 'lesson learned.' Content that relies on slow audio fade-ins or remains in a static frame for more than 5 seconds leads to immediate viewer fatigue and high drop-off rates.",
-      "missed_potential": "Chang has a significant opportunity to scale by replacing åçstatic POV text overlays with immediate visual pattern interrupts and rapid-fire movement. By tightening the 'Context Gap' in the first 3 seconds and ensuring every video has a clear narrative climax or high-energy payoff, he can convert casual scrollers into long-term students of his craft."
-    },
-    "superpowers": {
-      "pathway": "Dynamic Narrative Education",
-      "superpowers": {
-        "Rhythmic Precision": "An innate ability to synchronize fast-paced visual cuts and sound design to create a compelling, high-energy flow.",
-        "Immersive Perspective": "Expert use of fisheye and wide-angle lenses to bring viewers directly into the 'messy' creative process.",
-        "The Transformation Hook": "Mastery of the 'How-To' promise, instantly signaling high value and clarity to the viewer."
-      }
-    },
-    "creative_dna": {
-      "goals": "Chang aims to dominate the 'Bedroom to Billboard' niche by creating high-value, 60-second music production tutorials that achieve over 40% retention. His primary objective is to transform complex professional workflows into digestible, rhythmic content that fosters a community of inspired artists who save his work for its educational utility and relatable emotional honesty.",
-      "archetype": "The Relatable Creative Mentor",
-      "personality": "A playful and empathetic technician who balances professional-grade skills with a casual, low-ego, and charmingly unpolished delivery.",
-      "audience_tags": [
-        "Aspiring Artists",
-        "Music Producers",
-        "DIY Creators",
-        "Process Nerds",
-        "Visual Storytellers"
-      ]
-    }
-  }
-}
-```
+    Returns:
+        Plain-text analysis result from Gemini
+    """
+    if not request.video_urls:
+        raise HTTPException(status_code=400, detail="video_urls must not be empty")
 
-this is done after we route to the /profile page after completing Onboarding (conversation)
+    try:
+        result = await analyze_videos(request.video_urls, request.mode)
+        return AnalyzeVideosResponse(mode=request.mode, analysis=result)
+    except Exception as e:
+        logger.error(f"Video analysis error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Video analysis failed: {str(e)}")
 
-new routing structure for profile page will now rely on User table
-with route format `/profile/{username}` (please do this inside (protected) routing group). With username, we can query the User table and get the relevant payload JSON
+
+@app.post("/api/v1/onboarding/profile", response_model=ProfileSynthesisResponse)
+async def synthesize_creator_profile(request: ProfileSynthesisRequest):
+    """
+    Synthesize a CreatorProfileNew directly from pre-computed analysis data.
+    Reuses the PROFILE_MODULE initialized at server startup.
+    """
+    if not request.username:
+        raise HTTPException(status_code=400, detail="username must not be empty")
+    if not request.taste_profile:
+        raise HTTPException(status_code=400, detail="taste_profile must not be empty")
+
+    if PROFILE_MODULE is None:
+        raise HTTPException(status_code=503, detail="Profile synthesis module not initialized")
+
+    try:
+        taste_json = json.dumps(request.taste_profile)
+        performance_json = json.dumps(request.performance_insights) if request.performance_insights else "{}"
+        low_performance_json = json.dumps(request.low_performance_insights) if request.low_performance_insights else "{}"
+        goal_json = json.dumps(request.creative_goal) if request.creative_goal else "{}"
+
+        result = PROFILE_MODULE(
+            username=request.username,
+            taste_profile=taste_json,
+            performance_insights=performance_json,
+            low_performance_insights=low_performance_json,
+            creative_goal=goal_json,
+        )
+        profile_dict = json.loads(result.creator_profile)
+        profile = CreatorProfileNew(**profile_dict)
+        return ProfileSynthesisResponse(username=request.username, profile=profile.model_dump())
+    except Exception as e:
+        logger.error(f"Profile synthesis error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Profile synthesis failed: {str(e)}")
+
+next we have a flow like this:
+1. user gets to upload all 3 types of videos (  3 vids per types), taste, low and performance synotaniously, all these will be send to the backend to analyse 
+2. while backend is analysing we can have a loading screen, waiting
+3. until the analyse is finished, we need to send the new data back to the backend for profile, then when creating a new profile, transfer them back when they wanted
+
+we will not be using any chatbot here, we just want a simple step to analyse users profile.
