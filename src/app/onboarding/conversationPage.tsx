@@ -183,8 +183,9 @@ export default function ConversationPage() {
   const [step, setStep] = useState<AppStep>("upload");
   const [errorMsg, setErrorMsg] = useState<string>("");
 
-  // Username
-  const { username, setUsername } = useUserStore();
+
+  const { username: rawUsername, setUsername } = useUserStore();
+  const username = rawUsername ?? "";
 
   // Files
   const [tasteFiles, setTasteFiles] = useState<File[]>([]);
