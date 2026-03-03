@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 200;
+export const maxDuration = 300;
 
 const backendUrl =
   process.env.NODE_ENV === "production"
