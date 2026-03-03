@@ -108,7 +108,7 @@ function normalizeDeck(items: IdeaData[], takeId: () => number): IdeaData[] {
   return copy;
 }
 
-const DAILY_GEN_LIMIT = 6;
+const DAILY_GEN_LIMIT = 1000;
 const QUOTA_KEY = "idea_gen_quota_v1";
 
 type QuotaState = {
@@ -149,6 +149,8 @@ export default function DeckPage() {
   // Global sequential id generator: 0,1,2,3...
   const nextIdRef = useRef(0);
   const takeId = () => nextIdRef.current++;
+  /** Persists the active LangGraph thread_id across generations. */
+  const sessionIdRef = useRef<string | null>(null);
 
   // Load deck from session storage and set nextIdRef to max+1
   const [ideas, setIdeas] = useState<IdeaData[]>(() => {
@@ -172,7 +174,7 @@ export default function DeckPage() {
 
   const [quota, setQuota] = useState<QuotaState>(() => loadQuota());
   const remaining = Math.max(0, DAILY_GEN_LIMIT - quota.used);
-  const quotaReached = remaining <= 0;
+  const quotaReached = 0;
 
   // Reset quota when day changes
   useEffect(() => {
@@ -307,7 +309,7 @@ export default function DeckPage() {
           // Extract MACRO_THEMES: get theme titles as a comma-separated string
           const themes = profileData.themes || [];
           
-          const themesSummary = themes.map((t: any) => 
+          const themesSummary = themes.map((t: any) =>
             `${t.title}: ${t.summary}`
           ).join(" | ");
           
@@ -333,8 +335,11 @@ export default function DeckPage() {
     loadUserProfile();
   }, []);
 
-  async function generateIntoTrailingPlaceholder(extraFeedback?: string) {
-    console.log("Generating into trailing placeholder with extra feedback:", extraFeedback);
+  async function generateIntoTrailingPlaceholder(
+    reason: "new" | "reject" | "commit" = "new",
+    extraFeedback?: string
+  ) {
+    console.log("Generating into trailing placeholder with extra feedback:", extraFeedback, "reason:", reason);
     if (loading) return;
     if (quotaReached) return;
     if (isLoadingProfile || !userProfile || !macroThemes) {
@@ -368,6 +373,24 @@ export default function DeckPage() {
       setUserFeedback((prev) => [...prev, extraFeedback]);
     }
 
+    // Determine session context
+    const currentSessionId = sessionIdRef.current;
+    let threadId: string | undefined;
+    let resume: boolean | undefined;
+    let currentFeedback: string | undefined;
+
+    if (currentSessionId && (reason === "reject" || reason === "commit")) {
+      // Continue the same LangGraph thread with feedback
+      threadId = currentSessionId;
+      resume = true;
+      currentFeedback = extraFeedback;
+    } else {
+      // New session
+      threadId = undefined;
+      resume = undefined;
+      currentFeedback = undefined;
+    }
+
     // 1) Ensure a trailing placeholder exists, then mark it generating
     setIdeas((prev) => {
       const normalized = normalizeDeck(prev, takeId);
@@ -396,12 +419,19 @@ export default function DeckPage() {
     console.log("Generating with params:");
     try {
       // Use the placeholder id as the generator id (so it stays 0..n)
-      const generated = await generateNextCard({
+      const { card: generated, sessionId: returnedSessionId } = await generateNextCard({
         user_profile: userProfile,
         macro_themes: macroThemes.split(" | ").filter(Boolean),
         user_prompt: effectivePrompt,
         nextId: targetId ?? 0,
+        threadId,
+        resume,
+        currentFeedback,
       });
+
+      // Save the session_id for future resume calls
+      sessionIdRef.current = returnedSessionId;
+      console.log("[session] Saved session_id:", returnedSessionId);
 
       // 2) Replace that placeholder by id, then append a fresh placeholder (new increasing id)
       setIdeas((prev) => {
@@ -471,7 +501,7 @@ export default function DeckPage() {
 
     // If you're on the placeholder, Next means "generate"
     if (active.status === "ready") {
-      await generateIntoTrailingPlaceholder();
+      await generateIntoTrailingPlaceholder("new");
       return;
     }
 
@@ -483,17 +513,15 @@ export default function DeckPage() {
 
   const handleReject = async (id: number) => {
     const rejected = ideas.find((it) => it.id === id);
-    const feedback = rejected?.title ? `user hate title: ${rejected.title}` : undefined;
+    const feedback = `user hates the ${rejected?.title ?? id} idea`;
     setIdeas((prev) => prev.map((it) => (it.id === id ? { ...it, status: "rejected" } : it)));
 
-    // Always generate into the trailing placeholder after reject
-    await generateIntoTrailingPlaceholder(feedback);
+    await generateIntoTrailingPlaceholder("reject", feedback);
   };
 
   const onCommit = async (id: number) => {
     const committed = ideas.find((it) => it.id === id);
-    const feedback = committed?.title ? `user like title: ${committed.title}` : undefined;
-    // Compute stable planId once
+    const feedback = `user likes the ${committed?.title ?? id} idea`;
     const existingPlanId = ideas.find((it) => it.id === id)?.planId;
     const planId = existingPlanId ?? crypto.randomUUID();
 
@@ -503,8 +531,7 @@ export default function DeckPage() {
       )
     );
 
-    // Generate the next one
-    await generateIntoTrailingPlaceholder(feedback);
+    await generateIntoTrailingPlaceholder("commit", feedback);
   };
 
   const handleUpdate = (updated: IdeaData) => {
