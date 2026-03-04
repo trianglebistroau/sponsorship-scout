@@ -56,8 +56,8 @@ export function SavedConceptsPanel({
     <Card className="flex h-full flex-col">
       <CardHeader>
         <div className="space-y-1">
-          <CardTitle>Starred Concepts</CardTitle>
-          <CardDescription>{concepts.length} ideas ready to schedule</CardDescription>
+          <CardTitle>Ready to Drop</CardTitle>
+          <CardDescription>{concepts.length} waiting for a drop day</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-0">
@@ -180,11 +180,11 @@ function ConceptListItem({
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <Badge variant={concept.plannedDate ? "secondary" : "outline"} className="text-xs">
-                  {concept.plannedDate ? "Scheduled" : "Unplanned"}
+                  {concept.plannedDate ? "Locked In" : "No Date Yet"}
                 </Badge>
                 {concept.reminder && (
                   <Badge variant="secondary" className="text-xs">
-                    Reminder set
+                    Reminder On
                   </Badge>
                 )}
               </div>
@@ -220,10 +220,10 @@ function ConceptListItem({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="text-sm text-left">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Publishing date
+              Drop Date
             </p>
             <p className="text-foreground">
-              {concept.plannedDate ? format(concept.plannedDate, "MMM do") : "Not planned yet"}
+              {concept.plannedDate ? format(concept.plannedDate, "MMM do") : "Not locked in yet"}
             </p>
           </div>
           <div className="flex flex-nowrap items-center justify-end gap-2">
@@ -231,7 +231,7 @@ function ConceptListItem({
               <PopoverTrigger asChild>
                 <Button size="sm" variant="outline" className="gap-2">
                   <CalendarIcon className="h-4 w-4" />
-                  {concept.plannedDate ? "Reschedule" : "Plan date"}
+                  {concept.plannedDate ? "Move Drop" : "Lock It In"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
@@ -256,7 +256,7 @@ function ConceptListItem({
                         setOpen(false)
                       }}
                     >
-                      Cancel schedule
+                      Clear Date
                     </Button>
                   ) : null}
                 </div>
@@ -277,11 +277,11 @@ function ConceptListItem({
               <PopoverContent className="w-80" align="end">
                 <div className="space-y-3">
                   <div>
-                    <h4 className="text-sm font-semibold text-foreground">Best posting window</h4>
-                    <p className="text-xs text-muted-foreground mt-1"> </p>
+                    <h4 className="text-sm font-semibold text-foreground">Pre-Drop Checklist</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Things to wrap up before it goes live</p>
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-foreground">checklist to do</h4>
+                    <h4 className="text-sm font-semibold text-foreground">Tasks</h4>
                     <span>
                       {concept.checklists?.map((item, index) => (
                         <p key={index} className="text-xs text-muted-foreground mt-1 flex items-center justify-between">
@@ -315,10 +315,10 @@ function ConceptListItem({
                   >
                     <CalendarIcon className="h-4 w-4" />
                   </Button>
-                    <span className="p-5">{concept.reminder ? "Reminder set." : "want to set a reminder?"}</span>
+                    <span className="p-5">{concept.reminder ? "You'll get pinged." : "Remind me before it drops?"}</span>
                   <div className="pt-2 border-t">
                     <p className="text-xs text-muted-foreground italic">
-                      Based on your formats + past saves
+                      Based on your series + past drops
                     </p>
                   </div>
                 </div>
@@ -339,8 +339,8 @@ function ConceptListItem({
       >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Edit concept</DialogTitle>
-            <DialogDescription>Keep descriptions tight before you publish.</DialogDescription>
+            <DialogTitle>Edit This Drop</DialogTitle>
+            <DialogDescription>Tighten it up before you go live.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
