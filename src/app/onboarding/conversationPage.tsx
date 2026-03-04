@@ -231,6 +231,8 @@ export default function ConversationPage() {
       userName: username.trim(),
     });
 
+    console.log(`[${mode}] Uploaded video URLs:`, gcsUris);
+
     setStatus("analyzing");
     const result = await analyzeVideos(gcsUris, mode);
     console.log("Analysis result from :", result as AnalysisResult);

@@ -3,13 +3,43 @@ import type { OnboardingStage } from "./onboarding-rest";
 
 type SignedUrlOk = {
   ok: true;
-  signedUrl: { url: string; fields: Record<string, string> };
+  signedUrl: string; // plain PUT URL
   gcsUri: string;
   objectPath: string;
   contentType: string;
 };
 
 type UploadErr = { ok: false; error: string };
+
+/** PUT the raw file bytes to GCS with exponential-backoff retries. */
+async function putWithRetry(
+  signedUrl: string,
+  file: File,
+  contentType: string,
+  maxAttempts = 3
+): Promise<void> {
+  let lastErr: Error = new Error("Upload failed");
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const res = await fetch(signedUrl, {
+        method: "PUT",
+        headers: { "Content-Type": contentType },
+        body: file,
+      });
+      if (res.ok) return; // 200 — upload complete
+      const text = await res.text().catch(() => "");
+      lastErr = new Error(`GCS upload failed (${res.status}): ${text}`);
+    } catch (e) {
+      lastErr = e instanceof Error ? e : new Error(String(e));
+    }
+    if (attempt < maxAttempts - 1) {
+      // Exponential backoff: 1 s, 2 s
+      await new Promise((r) => setTimeout(r, 1_000 * 2 ** attempt));
+      console.warn(`[gcsUpload] Retrying upload (attempt ${attempt + 2}/${maxAttempts})…`);
+    }
+  }
+  throw lastErr;
+}
 
 export async function uploadOneVideoToGCS(params: {
   file: File;
@@ -18,7 +48,7 @@ export async function uploadOneVideoToGCS(params: {
   stageIndex: number;
   userName?: string;
 }): Promise<string> {
-  // Step 1: Ask the API for a signed URL (tiny JSON request, no file bytes)
+  // Step 1: Ask our API for a signed PUT URL (tiny JSON round-trip, no file bytes)
   const metaRes = await fetch("/api/upload/gcs", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -38,23 +68,16 @@ export async function uploadOneVideoToGCS(params: {
     throw new Error(msg);
   }
 
-  const { url, fields } = (meta as SignedUrlOk).signedUrl;
+  const { signedUrl, contentType, gcsUri } = meta as SignedUrlOk;
 
-  // Step 2: Upload the file directly to GCS using the signed POST policy
-  // This bypasses Vercel's 4.5 MB serverless body limit entirely.
-  const fd = new FormData();
-  for (const [key, value] of Object.entries(fields)) {
-    fd.append(key, value);
-  }
-  fd.append("file", params.file); // must be last per GCS signed-POST spec
+  console.log(`[gcsUpload] Uploading "${params.file.name}" → ${gcsUri}`);
 
-  const uploadRes = await fetch(url, { method: "POST", body: fd });
-  if (!uploadRes.ok) {
-    const text = await uploadRes.text().catch(() => "");
-    throw new Error(`GCS upload failed (${uploadRes.status}): ${text}`);
-  }
+  // Step 2: PUT the raw file bytes directly to GCS (bypasses Vercel's 4.5 MB limit).
+  // Retries up to 3 times with exponential backoff before throwing.
+  await putWithRetry(signedUrl, params.file, contentType);
 
-  return (meta as SignedUrlOk).gcsUri;
+  console.log(`[gcsUpload] Upload complete: ${gcsUri}`);
+  return gcsUri;
 }
 
 export async function uploadThreeVideosToGCS(params: {

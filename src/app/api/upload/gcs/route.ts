@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
 import { Storage } from "@google-cloud/storage";
 import crypto from "crypto";
+import { NextResponse } from "next/server";
 
 const bucketName = process.env.GCS_BUCKET;
 const projectId = process.env.GCP_PROJECT_ID;
@@ -99,20 +99,21 @@ export async function POST(req: Request) {
     const bucket = storage.bucket(bucketName);
     const gcsFile = bucket.file(objectPath);
 
-    // Generate a signed URL valid for 15 minutes — client uploads directly to GCS
-    const [signedUrl] = await gcsFile.generateSignedPostPolicyV4({
+    // Generate a signed PUT URL valid for 15 minutes.
+    // The browser PUTs the raw file bytes directly to GCS — no multipart form,
+    // no CORS preflight mismatch with POST policy.
+    const [signedUrl] = await gcsFile.getSignedUrl({
+      version: "v4",
+      action: "write",
       expires: Date.now() + 15 * 60 * 1000,
-      conditions: [
-        ["content-length-range", 0, 200 * 1024 * 1024], // max 500 MB
-      ],
-      fields: { "Content-Type": contentType },
+      contentType,
     });
 
     const gcsUri = `gs://${bucketName}/${objectPath}`;
 
     return NextResponse.json({
       ok: true,
-      signedUrl,
+      signedUrl, // plain string URL — client does PUT
       gcsUri,
       objectPath,
       bucket: bucketName,
