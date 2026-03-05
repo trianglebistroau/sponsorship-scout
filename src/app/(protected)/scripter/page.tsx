@@ -1,11 +1,8 @@
 'use client'
 
-import React, { useState, useRef, useCallback, useEffect, use } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import DeckPage from "./pages/CardsDisplay";
-import Blob from "./components/bubble";
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { set } from "date-fns";
 
 
 export default function TestPage() {

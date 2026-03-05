@@ -43,7 +43,6 @@ async function synthesizeProfile(params: {
   creative_goal?: unknown;
 }): Promise<{ username: string; profile: unknown }> {
 
-  console.log("Synthesizing profile with params:", params);
   const res = await fetch("/api/v1/onboarding/profile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -231,11 +230,9 @@ export default function ConversationPage() {
       userName: username.trim(),
     });
 
-    console.log(`[${mode}] Uploaded video URLs:`, gcsUris);
 
     setStatus("analyzing");
     const result = await analyzeVideos(gcsUris, mode);
-    console.log("Analysis result from :", result as AnalysisResult);
     setStatus("done");
     return result.analysis;
   }

@@ -23,12 +23,121 @@ type VideoIdea = {
   tags?: string[];
   script_outline: string;
   estimated_length?: string;
+  music_suggestions?: string;
+  caption?: string;
 };
 
 function stripQuotes(s: string): string {
   return s.trim().replace(/^"|"$/g, "").trim();
 }
+/**
+ * Extracts "Music Suggestions", "Caption" / "Hashtags" from the markdown.
+ * Handles both heading-delimited sections (## Music Suggestions)
+ * and inline label formats (**Music Suggestions:** / Music Suggestions:).
+ * Returns clean strings and a contentMd with those sections stripped out.
+ */
+function extractSectionsFromMd(md: string): {
+  musicSuggestions?: string;
+  caption?: string;
+  cleanedMd: string;
+} {
+  let text = md.replace(/\r\n/g, "\n");
 
+  let musicSuggestions: string | undefined;
+  let caption: string | undefined;
+
+  // ── 1. Heading-delimited sections ───────────────────────────────────────
+  // Split on any line that starts with # (top-level or sub) so we can scan blocks.
+  // We capture the heading line + everything until the next same-or-higher heading.
+  const headingBlockRe =
+    /^(#{1,3}[ \t]+(.+?))[ \t]*\n([\s\S]*?)(?=^#{1,3}[ \t]|(?![\s\S]))/gim;
+
+  const headingBlocks: { heading: string; body: string; raw: string }[] = [];
+  let hm: RegExpExecArray | null;
+  while ((hm = headingBlockRe.exec(text)) !== null) {
+    headingBlocks.push({
+      heading: hm[2].trim().toLowerCase(),
+      body: hm[3].trim(),
+      raw: hm[0],
+    });
+  }
+
+  // ── 2. Bold-label or plain inline sections ───────────────────────────────
+  // Handles: **Music Suggestions:** body  OR  Music Suggestions: body
+  // The (?:\*{1,2})?[ \t]*\n? after the colon consumes any closing ** and the
+  // label-only line break so the body starts on the actual content, not "**".
+  const inlineLabelRe =
+    /^[ \t]*(?:\*{1,2})?(music\s+suggestions?|caption|hashtags?)(?:\*{1,2})?[ \t]*:[ \t]*(?:\*{1,2})?[ \t]*\n?([\s\S]*?)(?=\n[ \t]*\n|\n[ \t]*(?:\*{1,2})?(?:music\s+suggestions?|caption|hashtags?|primary|alternative|hook|script|beats?|tags?)(?:\*{1,2})?[ \t]*:|$)/gim;
+
+  const inlineMatches: { key: string; body: string; raw: string }[] = [];
+  let im: RegExpExecArray | null;
+  while ((im = inlineLabelRe.exec(text)) !== null) {
+    // Strip any stray leading ** left over from bold-label formatting (e.g. "**Music Suggestions:**\n**...")
+    const body = im[2].trim().replace(/^\*{1,2}/, "").trim();
+    inlineMatches.push({
+      key: im[1].trim().toLowerCase(),
+      body,
+      raw: im[0],
+    });
+  }
+
+  // ── 3. Assign values (heading blocks take precedence over inline) ────────
+  const musicHeading = headingBlocks.find((b) => b.heading.includes("music"));
+  const captionHeading = headingBlocks.find((b) => b.heading === "caption");
+  const hashtagHeading = headingBlocks.find((b) =>
+    b.heading.includes("hashtag")
+  );
+
+  if (musicHeading) musicSuggestions = musicHeading.body;
+  if (captionHeading) caption = captionHeading.body;
+  if (hashtagHeading && !caption) caption = hashtagHeading.body;
+
+  for (const im of inlineMatches) {
+    if (im.key.includes("music") && !musicSuggestions && im.body)
+      musicSuggestions = im.body;
+    if (im.key === "caption" && im.body) caption = im.body;
+    if (im.key.includes("hashtag") && !caption && im.body)
+      caption = im.body;
+  }
+
+  // ── 4. Strip the extracted blocks from the markdown ─────────────────────
+  let cleanedMd = text;
+
+  const rawsToStrip = [
+    ...(musicHeading ? [musicHeading.raw] : []),
+    ...(captionHeading ? [captionHeading.raw] : []),
+    ...(hashtagHeading ? [hashtagHeading.raw] : []),
+    ...inlineMatches.map((im) => im.raw),
+  ];
+
+  for (const raw of rawsToStrip) {
+    cleanedMd = cleanedMd.split(raw).join("");
+  }
+
+  // Remove orphaned section headings and tidy whitespace
+  cleanedMd = cleanedMd
+    .replace(
+      /^#{1,3}[ \t]+(music\s+suggestions?|caption|hashtags?)[ \t]*\n?/gim,
+      ""
+    )
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  // ── 5. Fallback: bare "Primary:" / "Alternative:" block after --- separator ─
+  // Handles the case where the music section has no explicit heading label,
+  // just a --- rule followed by bullet lines starting with "Primary:" / "Alternative:".
+  if (!musicSuggestions) {
+    const hrBlockRe = /^---[ \t]*\n((?:[ \t]*[-*][ \t]+(?:Primary|Alternative)[^\n]*\n?)+)/gim;
+    let hrm: RegExpExecArray | null;
+    while ((hrm = hrBlockRe.exec(cleanedMd)) !== null) {
+      musicSuggestions = hrm[1].trim();
+      cleanedMd = cleanedMd.split(hrm[0]).join("").replace(/\n{3,}/g, "\n\n").trim();
+      break;
+    }
+  }
+
+  return { musicSuggestions, caption, cleanedMd };
+}
 function extractBeats(scriptOutline: string): string[] {
   const beats: string[] = [];
   const lines = scriptOutline.split("\n").map((l) => l.trim());
@@ -93,25 +202,21 @@ async function doGenerate(
 ): Promise<GenerateCardResult> {
   const response = await callGenerate(sanitizePayload(payload));
 
-  console.log("[generateNextCard] API response:", {
-    session_id: response.session_id,
-    status: response.status,
-    has_idea: !!response.generated_idea,
-  });
+
 
   if (response.status === "error" || response.error) {
     throw new Error(response.error || "Generation failed with unknown error");
   }
 
   const structuredIdea = findIdeaInState(response.generated_idea);
-  console.log("[generateNextCard] structuredIdea resolved:", structuredIdea);
 
   if (!structuredIdea) {
     throw new Error("Generation finished but generated_idea was not found.");
   }
 
   const beats = extractBeats(structuredIdea.script_outline);
-  console.log("[generateNextCard] Extracted beats:", beats);
+
+  const { musicSuggestions, caption, cleanedMd } = extractSectionsFromMd(structuredIdea.script_outline);
 
   const card: IdeaData = {
     id: nextId,
@@ -119,13 +224,15 @@ async function doGenerate(
     hook: stripQuotes(structuredIdea.hook) || "—",
     beats,
     rationale: `Generated from themes: ${macroThemes.join(", ")}`,
-    contentMd: structuredIdea.script_outline,
+    contentMd: cleanedMd,
     tags: Array.isArray(structuredIdea.tags) ? structuredIdea.tags : [],
     estimatedLength: structuredIdea.estimated_length,
+    // Parsed from markdown first; fall back to top-level JSON fields if present
+    musicSuggestions: musicSuggestions || structuredIdea.music_suggestions,
+    caption: caption || structuredIdea.caption,
     status: "shown",
   };
 
-  console.log("[generateNextCard] Card built:", card);
   return { card, sessionId: response.session_id };
 }
 
@@ -141,15 +248,7 @@ export async function generateNextCard(params: {
   /** Feedback text when resume=true */
   currentFeedback?: string;
 }): Promise<GenerateCardResult> {
-  console.log("[generateNextCard] Calling generate API:", {
-    macro_themes: params.macro_themes,
-    user_prompt: params.user_prompt,
-    nextId: params.nextId,
-    thread_id: params.threadId,
-    resume: params.resume,
-    has_feedback: !!params.currentFeedback,
-  });
-
+ 
   const basePayload = {
     user_profile: params.user_profile,
     macro_themes: params.macro_themes,

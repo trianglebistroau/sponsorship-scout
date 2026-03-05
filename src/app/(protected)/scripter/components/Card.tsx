@@ -89,33 +89,7 @@ const MarkdownWrap = styled.div<{ $isDark: boolean }>`
   & pre { overflow: auto; padding: 0.8rem; border-radius: 10px; }
 `;
 
-const OutlinePreview = styled(MarkdownWrap)`
-  position: relative;
-  max-height: 220px;
-  overflow: hidden;
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 60px;
-    background: linear-gradient(
-      to bottom,
-      rgba(0,0,0,0),
-      ${p => p.$isDark ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.85)"}
-    );
-    pointer-events: none;
-  }
-`;
-
-const OutlineActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 0.5rem;
-`;
-
-const Face = styled.div<{ 
+const Face = styled.div<{
   $variant: "front" | "back"; 
   $ideaStatus: "ready" | "generating" | "shown" | "committed" | "rejected";
   $isDark: boolean;
@@ -127,19 +101,26 @@ const Face = styled.div<{
   min-width: 0;
   backface-visibility: hidden;
   border-radius: 20px;
-  padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-gutter: stable;
   border: 1px solid ${props => getStatusStyles(props.$ideaStatus, props.$isDark).border};
   background: ${props => props.$variant === "back" 
     ? (props.$isDark ? "linear-gradient(145deg, #1a1a1a, #2a2a2a)" : "linear-gradient(145deg, #f5f5f5, #e5e5e5)")
     : getStatusStyles(props.$ideaStatus, props.$isDark).bg};
   color: ${props => props.$isDark ? "#fff" : "#000"};
   transform: ${props => props.$variant === "back" ? "rotateY(180deg)" : "none"};
+  /* front face gets padding + scroll */
+  ${props => props.$variant === "front" && `
+    padding: 2rem;
+    gap: 1.5rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+  `}
+  /* back face uses inner sections for layout */
+  ${props => props.$variant === "back" && `
+    overflow: hidden;
+  `}
 `;
 
 const StatusBadge = styled.div<{ color: string; $isDark: boolean }>`
@@ -289,7 +270,15 @@ const HookBox = styled.div<{ $isDark: boolean }>`
     font-size: 2.4rem;
     opacity: 0.18;
   }
-`;
+  /* markdown resets */
+  & p { margin: 0 0 0.4rem; }
+  & p:last-child { margin-bottom: 0; }
+  & ul, & ol { margin: 0.3rem 0 0.3rem 1.2rem; padding: 0; }
+  & li { margin: 0.15rem 0; }
+  & strong { font-weight: 700; }
+  & em { font-style: italic; }
+  & code { font-size: 0.82em; padding: 0.1em 0.3em; border-radius: 4px;
+    background: ${(p) => (p.$isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)")}; }`;
 
 
 export interface IdeaData {
@@ -302,6 +291,8 @@ export interface IdeaData {
 
   tags?: string[];
   estimatedLength?: string;
+  musicSuggestions?: string;
+  caption?: string;
 
   status: "ready" | "generating" | "shown" | "committed" | "rejected";
   planId?: string;
@@ -322,7 +313,6 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
   const [isFlipped, setisFlipped] = useState(false);
   const [editState, setEditState] = useState(data);
   const [isDark, setIsDark] = useState(true);
-  const [showFullOutline, setShowFullOutline] = useState(false);
   const isPlaceholder = data.status === "ready" || data.id === -1;
 
 
@@ -347,7 +337,6 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
   useEffect(() => {
     setEditState(data);
     setisFlipped(false);
-    setShowFullOutline(false);
   }, [data]);
 
   const handleSave = () => {
@@ -376,10 +365,6 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
 
   const isGenerating = data.status === "generating";
   const styles = getStatusStyles(data.status, isDark);
-  const outlinePreview = (data.contentMd ?? "*No details available.*")
-    .split("\n")
-    .slice(0, 12)
-    .join("\n");
 
   if (isGenerating) {
     return (
@@ -406,7 +391,7 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
         <div>
           <Label color={styles.label}>Concept</Label>
           <h2 style={{ margin: "0.25rem 0 0.35rem", fontSize: "1.55rem", lineHeight: 1.15 }}>
-            {data.title}
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.title}</ReactMarkdown>
           </h2>
 
           <MetaRow>
@@ -420,55 +405,35 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
               <Pill $isDark={isDark}>No tags</Pill>
             )}
           </MetaRow>
-        
+
+          {data.musicSuggestions && (
+            <Section>
+              <Label color={styles.label}>Music Suggestions</Label>
+              <HookBox $isDark={isDark} style={{ fontSize: "0.875rem" }}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.musicSuggestions}</ReactMarkdown>
+              </HookBox>
+            </Section>
+          )}
+
+          {data.caption && (
+            <Section>
+              <Label color={styles.label}>Caption</Label>
+              <HookBox $isDark={isDark} style={{ fontSize: "0.875rem" }}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.caption}</ReactMarkdown>
+              </HookBox>
+            </Section>
+          )}
 
         <Section>
           <Label color={styles.label}>Hook</Label>
-          <HookBox $isDark={isDark}>{data.hook}</HookBox>
+          <HookBox $isDark={isDark}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.hook}</ReactMarkdown>
+          </HookBox>
         </Section>
 
-        {data.beats?.length ? (
-          <Section>
-            <Label color={styles.label}>Beats</Label>
-            <MetaRow>
-              {data.beats.slice(0, 6).map((b, i) => (
-                <Pill key={`${b}-${i}`} $isDark={isDark}>{b}</Pill>
-              ))}
-            </MetaRow>
-          </Section>
-        ) : null}
+      
 
-        <Section>
-          <Label color={styles.label}>Script outline</Label>
-
-          {showFullOutline ? (
-            <>
-              <MarkdownWrap $isDark={isDark}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {data.contentMd ?? "*No details available.*"}
-                </ReactMarkdown>
-              </MarkdownWrap>
-              <OutlineActions>
-                <Button $isDark={isDark} onClick={() => setShowFullOutline(false)}>
-                  Hide full outline
-                </Button>
-              </OutlineActions>
-            </>
-          ) : (
-            <>
-              <OutlinePreview $isDark={isDark}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {outlinePreview}
-                </ReactMarkdown>
-              </OutlinePreview>
-              <OutlineActions>
-                <Button variant="ghost" $isDark={isDark} onClick={() => setShowFullOutline(true)}>
-                  View full outline
-                </Button>
-              </OutlineActions>
-            </>
-          )}
-        </Section>
+       
         </div>
 
         {uiStatus === "active" && (
@@ -487,12 +452,39 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
         )}
       </Face>
 
-      <Face $variant="back" $ideaStatus={data.status} $isDark={isDark} style={{ overflow: 'hidden', gap: 0 }}>
-        <div style={{ flexShrink: 0, paddingBottom: '1rem' }}>
-          <Label>Refine Idea</Label>
+      <Face $variant="back" $ideaStatus={data.status} $isDark={isDark}>
+        {/* ── Sticky header ── */}
+        <div style={{
+          flexShrink: 0,
+          padding: '1.1rem 1.5rem 0.9rem',
+          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.09)'}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <Label style={{ fontSize: '0.8rem', letterSpacing: '0.08em' }}>Refine Idea</Label>
+          <button
+            onClick={() => setisFlipped(false)}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)',
+              fontSize: '1rem', lineHeight: 1, padding: '2px 4px',
+            }}
+            aria-label="Close editor"
+          >✕</button>
         </div>
 
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingRight: '0.25rem' }}>
+        {/* ── Scrollable body ── */}
+        <div style={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          padding: '1rem 1.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.9rem',
+        }}>
           <Section>
             <Label>Title</Label>
             <EditableText
@@ -514,47 +506,62 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
             />
           </Section>
 
-
           <Section>
-            <Label>Tags</Label>
-            <EditableText
-              $isDark={isDark}
-              value={(editState.tags ?? []).join(", ")}
-              onChange={e =>
-                setEditState({
-                  ...editState,
-                  tags: e.target.value
-                    .split(",")
-                    .map((t) => t.trim())
-                    .filter(Boolean),
-                })
-              }
-              placeholder="comma,separated,tags"
-            />
-          </Section>
-
-          <Section>
-            <Label>Estimated length</Label>
-            <EditableText
-              $isDark={isDark}
-              value={editState.estimatedLength || ""}
-              onChange={e => setEditState({ ...editState, estimatedLength: e.target.value })}
-              placeholder="e.g. 60s, 2 min"
-            />
-          </Section>
-
-          <Section>
-            <Label>Full Script (Markdown)</Label>
+            <Label>Music Suggestions</Label>
             <EditableInput
               $isDark={isDark}
-              value={editState.contentMd || ""}
-              onChange={e => setEditState({...editState, contentMd: e.target.value})}
-              style={{ minHeight: "160px", maxHeight: "300px" }}
+              value={editState.musicSuggestions || ""}
+              onChange={e => setEditState({ ...editState, musicSuggestions: e.target.value })}
+              rows={2}
+              placeholder="e.g. trending audio, vibe or specific track"
             />
           </Section>
+
+          <Section>
+            <Label>Caption</Label>
+            <EditableInput
+              $isDark={isDark}
+              value={editState.caption || ""}
+              onChange={e => setEditState({ ...editState, caption: e.target.value })}
+              rows={3}
+              placeholder="Post caption with hashtags"
+            />
+          </Section>
+
+          {/* Tags + Length side by side */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <Section>
+              <Label>Tags</Label>
+              <EditableText
+                $isDark={isDark}
+                value={(editState.tags ?? []).join(", ")}
+                onChange={e =>
+                  setEditState({
+                    ...editState,
+                    tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
+                  })
+                }
+                placeholder="tag1, tag2"
+              />
+            </Section>
+            <Section>
+              <Label>Length</Label>
+              <EditableText
+                $isDark={isDark}
+                value={editState.estimatedLength || ""}
+                onChange={e => setEditState({ ...editState, estimatedLength: e.target.value })}
+                placeholder="e.g. 60s"
+              />
+            </Section>
+          </div>
         </div>
-        
-        <div style={{ flexShrink: 0, paddingTop: '1rem' }}>
+
+        {/* ── Sticky footer ── */}
+        <div style={{
+          flexShrink: 0,
+          padding: '0.9rem 1.5rem 1.1rem',
+          borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.09)'}`,
+        }}>
           <ButtonGroup style={{ marginTop: 0 }}>
             <Button variant="primary" $isDark={isDark} onClick={handleSave}>Apply Changes</Button>
             <Button $isDark={isDark} onClick={() => setisFlipped(false)}>Cancel</Button>

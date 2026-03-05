@@ -14,7 +14,6 @@ export function subscribeOnboardingEvents(params: {
   onInsert: (row: OnboardingEventRow) => void;
   onStatus?: (status: string) => void;
 }) {
-  console.log("subscribeOnboardingEvents", params.sessionId);
   const channel = supabase
     .channel(`onboarding:${params.sessionId}`)
     .on(
@@ -31,7 +30,6 @@ export function subscribeOnboardingEvents(params: {
       }
     )
     .subscribe((status) => {
-      console.log("[realtime]", status, "sessionId=", params.sessionId);
       params.onStatus?.(status);
     });
 

@@ -87,8 +87,8 @@ function normalizeDeck(items: IdeaData[], takeId: () => number): IdeaData[] {
       hook: "Press Next to generate a fresh idea.",
       beats: ["Instant", "Uses your themes", "Costs 1 credit"],
       contentMd:
-        "### Ready when you are\n\n- **Reject/Commit** the current one and I’ll generate a replacement.\n",
-    };
+        "### Ready when you are\n\n- **Reject/Commit** the current one and I’ll generate a replacement.\n",      musicSuggestions: undefined,
+      caption: undefined,    };
   }
 
   // Remove extra trailing placeholders (keep exactly one)
@@ -270,7 +270,6 @@ export default function DeckPage() {
     async function loadUserProfile() {
       try {
         const session = await authClient.getSession();
-        console.log("🔐 User session:", session);
         if (!session?.data?.user?.email) {
           console.error("No user session found");
           setIsLoadingProfile(false);
@@ -278,11 +277,9 @@ export default function DeckPage() {
         }
 
         const userData = await fetchUserByEmail(session.data.user.email);
-        console.log("User data:", userData);
         
         const profileData = userData.recommendation_json?.data ?? userData.recommendation_json;
 
-        console.log("Profile data:", profileData);
 
         if (profileData) {
           // Extract USER_PROFILE: combine creative_dna fields into a string
@@ -326,7 +323,6 @@ export default function DeckPage() {
         // Set fallback values
         setUserProfile("Creative content creator");
         setMacroThemes("General content creation themes");
-        console.log("🔄 Using fallback values");
       } finally {
         setIsLoadingProfile(false);
       }
@@ -339,7 +335,6 @@ export default function DeckPage() {
     reason: "new" | "reject" | "commit" = "new",
     extraFeedback?: string
   ) {
-    console.log("Generating into trailing placeholder with extra feedback:", extraFeedback, "reason:", reason);
     if (loading) return;
     if (quotaReached) return;
     if (isLoadingProfile || !userProfile || !macroThemes) {
@@ -416,7 +411,6 @@ export default function DeckPage() {
     setLoading(true);
     setErrorMsg(null);
 
-    console.log("Generating with params:");
     try {
       // Use the placeholder id as the generator id (so it stays 0..n)
       const { card: generated, sessionId: returnedSessionId } = await generateNextCard({
@@ -431,7 +425,6 @@ export default function DeckPage() {
 
       // Save the session_id for future resume calls
       sessionIdRef.current = returnedSessionId;
-      console.log("[session] Saved session_id:", returnedSessionId);
 
       // 2) Replace that placeholder by id, then append a fresh placeholder (new increasing id)
       setIdeas((prev) => {
@@ -476,10 +469,8 @@ export default function DeckPage() {
     if (isLoadingProfile) return; // profile not ready yet, wait
 
     const hasReal = ideas.some((i) => !isPlaceholder(i));
-    console.log("Deck loaded. Has real idea?", hasReal, "isLoadingProfile:", isLoadingProfile, "Ideas:", ideas);
 
     if (hasReal) return;
-    console.log("No real idea found, auto-generating first card...");
 
     if (quotaReached) {
       setErrorMsg(`Daily limit reached (${DAILY_GEN_LIMIT}/day). Come back tomorrow.`);
@@ -607,6 +598,7 @@ export default function DeckPage() {
               }
               transition={{ type: "spring", stiffness: 260, damping: 20 }}
             >
+
               <Card
                 data={idea}
                 uiStatus={isActive ? "active" : isHistory ? "history" : "future"}

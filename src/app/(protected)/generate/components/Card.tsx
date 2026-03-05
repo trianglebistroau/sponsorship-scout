@@ -424,16 +424,7 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
             <HookBox $isDark={isDark}>{data.hook}</HookBox>
           </Section>
 
-          {data.beats?.length ? (
-            <Section>
-              <Label color={styles.label}>Beats</Label>
-              <MetaRow>
-                {data.beats.slice(0, 6).map((b, i) => (
-                  <Pill key={`${b}-${i}`} $isDark={isDark}>{b}</Pill>
-                ))}
-              </MetaRow>
-            </Section>
-          ) : null}
+       
 
           <Section>
             <Label color={styles.label}>Script outline</Label>
@@ -513,21 +504,7 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
             />
           </Section>
 
-          <Section>
-            <Label>Beats</Label>
-            {(editState.beats ?? []).map((beat, i) => (
-              <BeatRow key={`beat-${i}`}>
-                <EditableText
-                  $isDark={isDark}
-                  value={beat}
-                  onChange={e => handleBeatChange(i, e.target.value)}
-                  placeholder={`Beat ${i + 1}`}
-                />
-                <MiniButton $isDark={isDark} onClick={() => handleRemoveBeat(i)}>Remove</MiniButton>
-              </BeatRow>
-            ))}
-            <MiniButton $isDark={isDark} onClick={handleAddBeat}>Add beat</MiniButton>
-          </Section>
+          
 
           <Section>
             <Label>Tags</Label>

@@ -70,13 +70,11 @@ export async function uploadOneVideoToGCS(params: {
 
   const { signedUrl, contentType, gcsUri } = meta as SignedUrlOk;
 
-  console.log(`[gcsUpload] Uploading "${params.file.name}" → ${gcsUri}`);
 
   // Step 2: PUT the raw file bytes directly to GCS (bypasses Vercel's 4.5 MB limit).
   // Retries up to 3 times with exponential backoff before throwing.
   await putWithRetry(signedUrl, params.file, contentType);
 
-  console.log(`[gcsUpload] Upload complete: ${gcsUri}`);
   return gcsUri;
 }
 
