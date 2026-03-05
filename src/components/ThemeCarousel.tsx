@@ -1,6 +1,6 @@
-import * as React from "react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import * as React from "react";
 
 export function ThemesCarousel({ themes }: { themes: { title: string; summary: string }[]}) {
 const [current, setCurrent] = React.useState(0);
@@ -31,21 +31,6 @@ const onTouchEnd = () => {
     }
     touchStartX.current = null;
     touchEndX.current = null;
-};
-
-const onWheel = (e: React.WheelEvent) => {
-    if (total <= 1) return;
-    const now = Date.now();
-    if (now - wheelLockRef.current < 300) return;
-    const dominant = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    if (Math.abs(dominant) < 8) return;
-    e.preventDefault();
-    wheelLockRef.current = now;
-    if (dominant > 0) {
-    setCurrent((c) => (c + 1) % total);
-    } else {
-    setCurrent((c) => (c - 1 + total) % total);
-    }
 };
 
 React.useEffect(() => {
@@ -80,21 +65,20 @@ return (
     onTouchStart={onTouchStart}
     onTouchMove={onTouchMove}
     onTouchEnd={onTouchEnd}
-    onWheel={onWheel}
-    className="relative max-w-5xl md:max-w-6xl mx-auto flex items-center justify-center py-16 md:py-24 min-h-[260px] md:min-h-[320px]"
+    className="relative max-w-5xl md:max-w-6xl mx-auto flex items-center justify-center"
     style={{ perspective: 1000 }}
     aria-roledescription="carousel"
     aria-label="Theme carousel"
     >
-    {/* <button
+    <button
         aria-label="Previous theme"
         onClick={() => setCurrent((c) => (c - 1 + total) % total)}
         className="z-20 p-2 rounded-md hover:bg-background/60 focus:outline-none focus:ring"
     >
         <ArrowLeft className="h-5 w-5" />
-    </button> */}
+    </button>
 
-    <div ref={stageRef} className="relative mx-4 w-full max-w-2xl h-[250px] md:h-[360px]">
+    <div ref={stageRef} className="relative mx-4 w-full max-w-2xl" style={{ height: 'clamp(160px, 22vw, 280px)' }}>
         {themes.map((t, i) => {
         if (![prevIndex, current, nextIndex].includes(i)) return null;
 
@@ -126,7 +110,7 @@ return (
         }
 
         const transformStyle: React.CSSProperties = {
-            transform: `translateX(-50%) translateX(${translateX}px) rotateY(${rotateY}deg) scale(${scale})`,
+            transform: `translateX(-50%) translateY(-50%) translateX(${translateX}px) rotateY(${rotateY}deg) scale(${scale})`,
             transition: "transform 1000ms cubic-bezier(.2,.9,.2,1), opacity 600ms",
             zIndex,
             opacity,
@@ -138,7 +122,7 @@ return (
 
             <Card
             key={t.title}
-            className="absolute top-8 left-1/2 cursor-pointer"
+            className="absolute top-1/2 left-1/2 cursor-pointer"
             style={transformStyle}
             onClick={() => {
                 if (i !== current) setCurrent(i);
@@ -167,13 +151,13 @@ return (
 
 
     {/* Right arrow */}
-    {/* <button
+    <button
         aria-label="Next theme"
         onClick={() => setCurrent((c) => (c + 1) % total)}
         className="z-20 p-2 rounded-md hover:bg-background/60 focus:outline-none focus:ring"
     >
         <ArrowRight className="h-5 w-5" />
-    </button> */}
+    </button>
     </div>
 );
 }
