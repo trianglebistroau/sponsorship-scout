@@ -16,9 +16,9 @@ type AnalysisResult = {
   analysis: unknown;
 };
 
-type AppStep = "upload" | "analyzing" | "synthesizing" | "done" | "error";
+type AppStep = "upload" | "analysing" | "synthesizing" | "done" | "error";
 
-type CategoryStatus = "idle" | "uploading" | "analyzing" | "done" | "error";
+type CategoryStatus = "idle" | "uploading" | "analysing" | "done" | "error";
 
 // ─── API helpers ──────────────────────────────────────────────────────────────
 
@@ -87,7 +87,7 @@ function StatusBadge({ status }: { status: CategoryStatus }) {
   const map: Record<CategoryStatus, { label: string; color: string }> = {
     idle: { label: "Waiting", color: "text-muted-foreground" },
     uploading: { label: "Uploading…", color: "text-blue-500" },
-    analyzing: { label: "Analyzing…", color: "text-yellow-500" },
+    analysing: { label: "Analyzing…", color: "text-yellow-500" },
     done: { label: "Done ✓", color: "text-green-500" },
     error: { label: "Error", color: "text-red-500" },
   };
@@ -231,7 +231,7 @@ export default function ConversationPage() {
     });
 
 
-    setStatus("analyzing");
+    setStatus("analysing");
     const result = await analyzeVideos(gcsUris, mode);
     setStatus("done");
     return result.analysis;
@@ -241,7 +241,7 @@ export default function ConversationPage() {
 
   async function handleStart() {
     if (!canStart) return;
-    setStep("analyzing");
+    setStep("analysing");
 
     try {
       // Upload + analyse all 3 categories simultaneously
@@ -257,7 +257,7 @@ export default function ConversationPage() {
 
       // ── Synthesize profile ─────────────────────────────────────────────────
       setStep("synthesizing");
-      setSynthStatus("analyzing");
+      setSynthStatus("analysing");
 
       // The videos endpoint returns plain strings; wrap each so the profile
       // endpoint receives the required dicts (it JSON-serialises them internally).
@@ -372,7 +372,7 @@ export default function ConversationPage() {
       )}
 
       {/* ── Step: Analyzing ──────────────────────────────────────── */}
-      {step === "analyzing" && (
+      {step === "analysing" && (
         <div className="w-full space-y-6">
           <div className="text-center space-y-1">
             <h1 className="text-2xl font-bold">Analysing your content…</h1>
@@ -392,7 +392,7 @@ export default function ConversationPage() {
               <div key={label} className="flex items-center justify-between">
                 <span className="text-sm">{label}</span>
                 <div className="flex items-center gap-2">
-                  {(status === "uploading" || status === "analyzing") && <Spinner />}
+                  {(status === "uploading" || status === "analysing") && <Spinner />}
                   <StatusBadge status={status} />
                 </div>
               </div>
