@@ -38,7 +38,7 @@ export default function LandingPage() {
         
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl mb-6">
-            Stop guessing 1:32.
+            Stop guessing.
             <br />
             <span className="bg-gradient-to-r from-violet-600 to-pink-600 bg-clip-text text-transparent">
               Start knowing.
