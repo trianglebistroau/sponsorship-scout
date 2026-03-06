@@ -87,7 +87,7 @@ function StatusBadge({ status }: { status: CategoryStatus }) {
   const map: Record<CategoryStatus, { label: string; color: string }> = {
     idle: { label: "Waiting", color: "text-muted-foreground" },
     uploading: { label: "Uploading…", color: "text-blue-500" },
-    analysing: { label: "Analyzing…", color: "text-yellow-500" },
+    analysing: { label: "Analysing...", color: "text-yellow-500" },
     done: { label: "Done ✓", color: "text-green-500" },
     error: { label: "Error", color: "text-red-500" },
   };
