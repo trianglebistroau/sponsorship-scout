@@ -281,6 +281,32 @@ const HookBox = styled.div<{ $isDark: boolean }>`
     background: ${(p) => (p.$isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)")}; }`;
 
 
+  const OutlinePreview = styled(MarkdownWrap)`
+  position: relative;
+  max-height: 220px;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 60px;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0),
+      ${p => p.$isDark ? "rgba(0,0,0,0.65)" : "rgba(255,255,255,0.85)"}
+    );
+    pointer-events: none;
+  }
+`;
+
+const OutlineActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+`;
+
 export interface IdeaData {
   id: number;
   title: string;
@@ -313,6 +339,7 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
   const [isFlipped, setisFlipped] = useState(false);
   const [editState, setEditState] = useState(data);
   const [isDark, setIsDark] = useState(true);
+  const [showFullOutline, setShowFullOutline] = useState(false);
   const isPlaceholder = data.status === "ready" || data.id === -1;
 
 
@@ -337,6 +364,7 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
   useEffect(() => {
     setEditState(data);
     setisFlipped(false);
+    setShowFullOutline(false);
   }, [data]);
 
   const handleSave = () => {
@@ -365,6 +393,10 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
 
   const isGenerating = data.status === "generating";
   const styles = getStatusStyles(data.status, isDark);
+  const outlinePreview = (data.contentMd ?? "*No details available.*")
+  .split("\n")
+  .slice(0, 12)
+  .join("\n");
 
   if (isGenerating) {
     return (
@@ -424,16 +456,54 @@ const Card: React.FC<CardProps> = ({ data, uiStatus, onUpdate, onCommit, onRejec
             </Section>
           )}
 
-        <Section>
-          <Label color={styles.label}>Hook</Label>
-          <HookBox $isDark={isDark}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.hook}</ReactMarkdown>
-          </HookBox>
+
+          <Section>
+            <Label color={styles.label}>Hook</Label>
+            <HookBox $isDark={isDark}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.hook}</ReactMarkdown>
+            </HookBox>
+          </Section>
+
+
+          {/* <Section>
+            <Label color={styles.label}>Script outline</Label>
+            {
+              show
+            }
+          </Section> */}
+
+          <Section>
+          <Label color={styles.label}>Script outline</Label>
+
+          {showFullOutline ? (
+            <>
+              <MarkdownWrap $isDark={isDark}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {data.contentMd ?? "*No details available.*"}
+                </ReactMarkdown>
+              </MarkdownWrap>
+              <OutlineActions>
+                <Button $isDark={isDark} onClick={() => setShowFullOutline(false)}>
+                  Hide full outline
+                </Button>
+              </OutlineActions>
+            </>
+          ) : (
+            <>
+              <OutlinePreview $isDark={isDark}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {outlinePreview}
+                </ReactMarkdown>
+              </OutlinePreview>
+              <OutlineActions>
+                <Button variant="ghost" $isDark={isDark} onClick={() => setShowFullOutline(true)}>
+                  View full outline
+                </Button>
+              </OutlineActions>
+            </>
+          )}
         </Section>
-
-      
-
-       
+        
         </div>
 
         {uiStatus === "active" && (
